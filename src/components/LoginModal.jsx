@@ -1,9 +1,15 @@
 // src/components/LoginModal.jsx
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 const LoginModal = ({ show, onClose, onSwitchToRegister }) => {
   const emailInputRef = useRef(null);
+  const { login } = useAuth();
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
 
   // Pone el foco en el campo de email cuando se muestra el modal
   useEffect(() => {
@@ -25,10 +31,17 @@ const LoginModal = ({ show, onClose, onSwitchToRegister }) => {
     };
   }, [show, onClose]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    alert("Iniciando sesión...");
-    onClose();
+    setError("");
+
+    const success = await login(email, password);
+    if (success) {
+      alert("✅ Sesión iniciada");
+      onClose();
+    } else {
+      setError("❌ Email o contraseña incorrectos");
+    }
   };
 
   if (!show) return null;
@@ -37,19 +50,13 @@ const LoginModal = ({ show, onClose, onSwitchToRegister }) => {
     <>
       {/* Fondo oscuro */}
       <div
-        className={`fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm z-40 transition-opacity duration-700 ${
-          show ? "opacity-100" : "opacity-0"
-        }`}
+        className="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm z-40 transition-opacity duration-700"
         onClick={onClose}
       ></div>
 
       {/* Contenedor del modal */}
       <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50">
-        <div
-          className={`w-[110%] max-w-md bg-white p-6 rounded-lg shadow-2xl transition-transform transition-opacity duration-700 ${
-            show ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-8"
-          }`}
-        >
+        <div className="w-[110%] max-w-md bg-white p-6 rounded-lg shadow-2xl transition-transform transition-opacity duration-700">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-2xl font-bold text-gray-900 font-mono">
               Iniciar Sesión
@@ -69,6 +76,8 @@ const LoginModal = ({ show, onClose, onSwitchToRegister }) => {
               <input
                 type="email"
                 ref={emailInputRef}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 className="w-full mt-1 p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-800"
                 required
               />
@@ -77,10 +86,15 @@ const LoginModal = ({ show, onClose, onSwitchToRegister }) => {
               Contraseña
               <input
                 type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 className="w-full mt-1 p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-800"
                 required
               />
             </label>
+
+            {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
+
             <button
               type="submit"
               className="w-full bg-gray-900 hover:bg-gray-800 text-white py-2 rounded text-sm mt-2"

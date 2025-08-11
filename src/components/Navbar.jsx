@@ -79,12 +79,11 @@ const Navbar = ({ onCartClick, searchText, setSearchText }) => {
         <div className="flex items-center gap-5 relative">
           {isAuthenticated ? (
             <>
-              <span className="font-semibold mr-4 text-gray-700">
-                Hola, {user.name || user.email}
+              <span className="font-semibold mr-2 text-gray-700">
+                Hola, {user?.name || user?.email}
               </span>
 
-              {/* Botón Panel Admin */}
-              {user.role?.toLowerCase() === "admin" && (
+              {user?.role?.toLowerCase() === "admin" && (
                 <Link
                   to="/admin"
                   className="text-gray-700 hover:text-black font-semibold mr-4"
@@ -93,8 +92,7 @@ const Navbar = ({ onCartClick, searchText, setSearchText }) => {
                 </Link>
               )}
 
-              {/* Botón Mi perfil cliente */}
-              {user.role?.toLowerCase() === "client" && (
+              {user?.role?.toLowerCase() === "client" && (
                 <button
                   onClick={() => navigate("/profile")}
                   className="text-gray-700 hover:text-black font-semibold mr-4"
@@ -148,6 +146,7 @@ const Navbar = ({ onCartClick, searchText, setSearchText }) => {
           setShowLogin(false);
           setShowRegister(true);
         }}
+        onLoginSuccess={() => setShowLogin(false)} // 👈 cerrar modal al loguear
       />
 
       <RegisterModal

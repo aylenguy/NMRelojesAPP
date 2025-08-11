@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 
 const RegisterModal = ({ show, onClose, onSwitchToLogin }) => {
-  const { register } = useAuth();
+  const { register, login } = useAuth();
   const [name, setName] = useState("");
   const [lastName, setLastName] = useState("");
   const [userName, setUserName] = useState("");
@@ -13,10 +13,30 @@ const RegisterModal = ({ show, onClose, onSwitchToLogin }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const success = await register(name, lastName, userName, email, password);
-    if (success) {
+
+    const registered = await register(
+      name,
+      lastName,
+      userName,
+      email,
+      password
+    );
+
+    if (registered) {
       alert("✅ Registro exitoso");
-      onClose();
+
+      // Intentar login automático
+      const loggedIn = await login(email, password);
+
+      if (loggedIn) {
+        onClose(); // Cierra el modal solo si el login fue exitoso
+      } else {
+        alert(
+          "⚠️ Registrado pero no se pudo iniciar sesión automáticamente. Probá iniciar sesión manualmente."
+        );
+        onClose();
+        onSwitchToLogin(); // Abre el modal de login
+      }
     } else {
       alert("❌ Error en el registro");
     }
@@ -24,19 +44,15 @@ const RegisterModal = ({ show, onClose, onSwitchToLogin }) => {
 
   return (
     <>
+      {/* Fondo oscuro */}
       <div
-        className={`fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm z-40 transition-opacity duration-700 ${
-          show ? "opacity-100" : "opacity-0"
-        }`}
+        className="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm z-40 transition-opacity duration-700"
         onClick={onClose}
       ></div>
 
+      {/* Modal */}
       <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50">
-        <div
-          className={`w-[110%] max-w-md bg-white p-6 rounded-lg shadow-2xl transition-transform transition-opacity duration-700 ${
-            show ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-8"
-          }`}
-        >
+        <div className="w-[110%] max-w-md bg-white p-6 rounded-lg shadow-2xl">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-2xl font-bold text-gray-900 font-mono">
               Registrarse
@@ -49,6 +65,7 @@ const RegisterModal = ({ show, onClose, onSwitchToLogin }) => {
             </button>
           </div>
 
+          {/* Formulario */}
           <form onSubmit={handleSubmit}>
             <label className="block mb-3 text-sm font-medium text-gray-700">
               Nombre
@@ -108,6 +125,7 @@ const RegisterModal = ({ show, onClose, onSwitchToLogin }) => {
             </button>
           </form>
 
+          {/* Enlace para cambiar a login */}
           <div className="mt-4 text-center text-sm text-gray-600">
             <p>
               ¿Ya tenés cuenta?{" "}

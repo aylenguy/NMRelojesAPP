@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { jwtDecode } from "jwt-decode";
+import { useNavigate } from "react-router-dom";
 
 const AuthContext = createContext();
 const API_BASE_URL = "https://localhost:7247";
@@ -8,6 +9,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const savedToken = localStorage.getItem("token");
@@ -51,17 +53,32 @@ export const AuthProvider = ({ children }) => {
       const url = isAdmin
         ? `${API_BASE_URL}/api/Auth/AdminLogin`
         : `${API_BASE_URL}/api/Client/login`;
+
       const res = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
 
-      if (!res.ok) return false;
+      const text = await res.text();
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch {
+        console.error("Respuesta no es JSON:", text);
+        return false;
+      }
 
-      const data = await res.json();
+      if (!res.ok) {
+        console.error("Error en login:", data);
+        return false;
+      }
+
       const token = data.token || data.Token;
-      if (!token) return false;
+      if (!token) {
+        console.error("No se recibió token en la respuesta");
+        return false;
+      }
 
       const decoded = jwtDecode(token);
       const normalized = normalizeDecoded(decoded);
@@ -69,6 +86,14 @@ export const AuthProvider = ({ children }) => {
       setUser(normalized);
       setToken(token);
       localStorage.setItem("token", token);
+
+      // Redirección según rol
+      if (normalized.role?.toLowerCase() === "admin") {
+        navigate("/admin");
+      } else {
+        navigate("/home");
+      }
+
       return true;
     } catch (err) {
       console.error("Error login:", err);
@@ -101,6 +126,7 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
     setToken(null);
     localStorage.removeItem("token");
+    navigate("/");
   };
 
   const hasRole = (role) => user?.role?.toLowerCase() === role.toLowerCase();
