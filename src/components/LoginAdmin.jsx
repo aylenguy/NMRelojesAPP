@@ -1,56 +1,64 @@
-// src/pages/LoginAdmin.jsx
-import { useState } from "react";
+import React, { useState } from "react";
+import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
-import { useAdmin } from "../context/AdminContext";
 
-const LoginAdmin = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const { login } = useAdmin();
+export default function LoginAdmin() {
+  const { login } = useAuth();
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState(null);
 
-    // Simulación: más adelante conectarás esto con tu backend
-    if (email === "admin@nmrelojes.com" && password === "admin123") {
-      login({ email });
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      // Hacer llamada API para obtener token
+      const res = await fetch("https://localhost:7247/api/Auth/AdminLogin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      if (!res.ok) throw new Error("Credenciales inválidas");
+
+      const data = await res.json();
+      const token = data.token || data.Token;
+      if (!token) throw new Error("Token no recibido");
+
+      login(token); // guarda user y token en contexto
+
       navigate("/admin");
-    } else {
-      alert("Credenciales incorrectas");
+    } catch (err) {
+      setError(err.message);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white p-8 rounded-xl shadow-md w-full max-w-sm"
+    <form onSubmit={handleSubmit} className="max-w-md mx-auto p-4">
+      <h2 className="text-2xl mb-4">Login Admin</h2>
+      {error && <p className="text-red-600 mb-2">{error}</p>}
+      <input
+        type="email"
+        placeholder="Email"
+        className="border p-2 mb-2 w-full"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        required
+      />
+      <input
+        type="password"
+        placeholder="Contraseña"
+        className="border p-2 mb-2 w-full"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        required
+      />
+      <button
+        type="submit"
+        className="bg-gray-900 text-white py-2 px-4 rounded hover:bg-gray-800"
       >
-        <h2 className="text-2xl font-bold mb-6 text-center">Admin Login</h2>
-        <input
-          type="email"
-          placeholder="Correo electrónico"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="w-full mb-4 p-3 border rounded"
-        />
-        <input
-          type="password"
-          placeholder="Contraseña"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="w-full mb-6 p-3 border rounded"
-        />
-        <button
-          type="submit"
-          className="w-full bg-gray-900 text-white p-3 rounded hover:bg-gray-800"
-        >
-          Iniciar sesión
-        </button>
-      </form>
-    </div>
+        Iniciar sesión
+      </button>
+    </form>
   );
-};
-
-export default LoginAdmin;
+}

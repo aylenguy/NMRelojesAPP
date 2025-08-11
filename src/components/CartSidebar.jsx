@@ -6,9 +6,10 @@ const CartSidebar = ({
   cartItems,
   removeFromCart,
   decreaseQuantity,
+  finalizePurchase,
 }) => {
   const total = cartItems.reduce(
-    (acc, item) => acc + item.price * item.quantity,
+    (acc, item) => acc + (item.price || 0) * item.quantity,
     0
   );
 
@@ -45,7 +46,7 @@ const CartSidebar = ({
                   Cantidad: {item.quantity}
                 </p>
                 <p className="text-sm font-bold">
-                  ${item.price.toLocaleString("es-AR")}
+                  ${item.price?.toLocaleString("es-AR")}
                 </p>
               </div>
               <div className="flex flex-col items-end gap-1">
@@ -73,7 +74,11 @@ const CartSidebar = ({
         <p className="text-lg font-semibold">
           Total: ${total.toLocaleString("es-AR")}
         </p>
-        <button className="mt-2 w-full bg-gray-900 text-white py-2 rounded hover:bg-gray-800 transition">
+        <button
+          onClick={finalizePurchase}
+          className="mt-2 w-full bg-gray-900 text-white py-2 rounded hover:bg-gray-800 transition"
+          disabled={cartItems.length === 0}
+        >
           Finalizar compra
         </button>
       </div>

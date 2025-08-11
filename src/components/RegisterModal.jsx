@@ -1,18 +1,29 @@
-// src/components/RegisterModal.jsx
-import React from "react";
+import React, { useState } from "react";
+import { useAuth } from "../context/AuthContext";
 
 const RegisterModal = ({ show, onClose, onSwitchToLogin }) => {
+  const { register } = useAuth();
+  const [name, setName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [userName, setUserName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
   if (!show) return null;
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    alert("Registrando...");
-    onClose();
+    const success = await register(name, lastName, userName, email, password);
+    if (success) {
+      alert("✅ Registro exitoso");
+      onClose();
+    } else {
+      alert("❌ Error en el registro");
+    }
   };
 
   return (
     <>
-      {/* Fondo oscuro */}
       <div
         className={`fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm z-40 transition-opacity duration-700 ${
           show ? "opacity-100" : "opacity-0"
@@ -20,7 +31,6 @@ const RegisterModal = ({ show, onClose, onSwitchToLogin }) => {
         onClick={onClose}
       ></div>
 
-      {/* Contenedor modal */}
       <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50">
         <div
           className={`w-[110%] max-w-md bg-white p-6 rounded-lg shadow-2xl transition-transform transition-opacity duration-700 ${
@@ -44,6 +54,28 @@ const RegisterModal = ({ show, onClose, onSwitchToLogin }) => {
               Nombre
               <input
                 type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full mt-1 p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-800"
+                required
+              />
+            </label>
+            <label className="block mb-3 text-sm font-medium text-gray-700">
+              Apellido
+              <input
+                type="text"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                className="w-full mt-1 p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-800"
+                required
+              />
+            </label>
+            <label className="block mb-3 text-sm font-medium text-gray-700">
+              Usuario
+              <input
+                type="text"
+                value={userName}
+                onChange={(e) => setUserName(e.target.value)}
                 className="w-full mt-1 p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-800"
                 required
               />
@@ -52,6 +84,8 @@ const RegisterModal = ({ show, onClose, onSwitchToLogin }) => {
               Email
               <input
                 type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 className="w-full mt-1 p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-800"
                 required
               />
@@ -60,6 +94,8 @@ const RegisterModal = ({ show, onClose, onSwitchToLogin }) => {
               Contraseña
               <input
                 type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 className="w-full mt-1 p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-800"
                 required
               />

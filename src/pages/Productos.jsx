@@ -1,41 +1,31 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaShoppingCart } from "react-icons/fa";
-
-const productosMock = [
-  {
-    id: 1,
-    name: "Knock out Aylen",
-    price: 58000,
-    category: "Relojes de Mujer",
-    color: "Plateado",
-    image: "/img/reloj1.jpg",
-    description: "Reloj moderno y cómodo para el uso diario.",
-    specs: ["Digital", "Resistente", "Liviano"],
-  },
-  {
-    id: 2,
-    name: "Kosiuko Mica",
-    price: 88500,
-    category: "Relojes de Mujer",
-    color: "Dorado",
-    image: "/img/reloj2.jpg",
-    description: "Estilo fashion con acabados dorados.",
-    specs: ["Analógico", "Elegante", "Correa metálica"],
-  },
-];
+import api from "../api";
 
 const Productos = ({ onAddToCart, searchText }) => {
   const [productos, setProductos] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [showNotification, setShowNotification] = useState(false);
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    setProductos(productosMock);
+    setLoading(true);
+    api
+      .get("/Product/GetAllProducts")
+      .then((res) => setProductos(res.data))
+      .catch((err) => {
+        console.error("Error al cargar productos:", err);
+        setError("No se pudieron cargar los productos. Intenta nuevamente.");
+      })
+      .finally(() => setLoading(false));
   }, []);
 
   const filtered = productos.filter((producto) =>
-    producto.name.toLowerCase().includes(searchText.toLowerCase())
+    (producto.name || producto.Name || producto.nombre || "")
+      .toLowerCase()
+      .includes(searchText?.toLowerCase() || "")
   );
 
   const handleAddToCart = (producto) => {
@@ -43,6 +33,29 @@ const Productos = ({ onAddToCart, searchText }) => {
     setShowNotification(true);
     setTimeout(() => setShowNotification(false), 2000);
   };
+
+  const getPrecio = (producto) =>
+    producto.price || producto.Price || producto.precio || 0;
+
+  const getNombre = (producto) =>
+    producto.name || producto.Name || producto.nombre || "Producto sin nombre";
+
+  const getImagen = (producto) =>
+    producto.image || producto.Image || producto.imagen || "/placeholder.png";
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-8 text-center text-red-500 font-semibold">{error}</div>
+    );
+  }
 
   return (
     <div className="p-8 bg-gray-50 min-h-screen relative">
@@ -59,31 +72,38 @@ const Productos = ({ onAddToCart, searchText }) => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
         {filtered.map((producto) => (
           <div
-            key={producto.id}
+            key={producto.id || producto.Id}
             className="relative bg-white border rounded-lg shadow hover:shadow-lg transition"
           >
             <div
               onClick={() =>
-                navigate(`/producto/${producto.id}`, { state: producto })
+                navigate(`/producto/${producto.id || producto.Id}`, {
+                  state: producto,
+                })
               }
               className="cursor-pointer"
             >
               <img
-                src={producto.image}
-                alt={producto.name}
+                src={getImagen(producto)}
+                alt={getNombre(producto)}
                 className="w-full h-64 object-cover rounded-t-lg"
               />
             </div>
 
             <div className="p-4 text-gray-800">
-              <h3 className="text-lg font-semibold mb-1">{producto.name}</h3>
+              <h3 className="text-lg font-semibold mb-1">
+                {getNombre(producto)}
+              </h3>
               <p className="text-base font-medium">
-                ${producto.price.toLocaleString("es-AR")}
+                ${getPrecio(producto).toLocaleString("es-AR")}
               </p>
               <p className="text-sm mt-2 text-gray-600">
                 TRANSFERENCIA O EFECTIVO{" "}
                 <span className="font-bold text-gray-800">
-                  ${Math.round(producto.price * 0.8).toLocaleString("es-AR")}
+                  $
+                  {Math.round(getPrecio(producto) * 0.8).toLocaleString(
+                    "es-AR"
+                  )}
                 </span>
               </p>
             </div>

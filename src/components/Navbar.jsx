@@ -1,15 +1,18 @@
 import { useState, useEffect } from "react";
-import { FaShoppingCart, FaUser } from "react-icons/fa";
-import { Link, useLocation } from "react-router-dom";
+import { FaShoppingCart, FaUser, FaSignOutAlt } from "react-icons/fa";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import LogoImg from "../assets/Logo.jpeg";
 import RegisterModal from "./RegisterModal";
 import LoginModal from "./LoginModal";
 
 const Navbar = ({ onCartClick, searchText, setSearchText }) => {
+  const { user, isAuthenticated, logout } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+
   const [showLogin, setShowLogin] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
-
-  const location = useLocation();
 
   useEffect(() => {
     setShowLogin(false);
@@ -26,14 +29,18 @@ const Navbar = ({ onCartClick, searchText, setSearchText }) => {
     if (showLogin || showRegister) {
       window.addEventListener("keydown", onEsc);
     }
-    return () => {
-      window.removeEventListener("keydown", onEsc);
-    };
+    return () => window.removeEventListener("keydown", onEsc);
   }, [showLogin, showRegister]);
+
+  const handleLogout = () => {
+    logout();
+    navigate("/");
+  };
 
   return (
     <nav className="bg-white shadow-md py-5 px-8 border-b border-gray-200 z-50 relative">
       <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center justify-between gap-6">
+        {/* Logo */}
         <Link to="/">
           <img src={LogoImg} alt="Logo" className="h-28 cursor-pointer" />
         </Link>
@@ -68,23 +75,68 @@ const Navbar = ({ onCartClick, searchText, setSearchText }) => {
           ))}
         </div>
 
-        {/* Iconos */}
+        {/* Usuario e íconos */}
         <div className="flex items-center gap-5 relative">
-          <button
-            onClick={() => setShowLogin(true)}
-            className="text-gray-700 hover:text-gray-900"
-            aria-label="Abrir modal de inicio de sesión"
-          >
-            <FaUser className="text-xl" />
-          </button>
+          {isAuthenticated ? (
+            <>
+              <span className="font-semibold mr-4 text-gray-700">
+                Hola, {user.name || user.email}
+              </span>
 
-          <button
-            onClick={onCartClick}
-            className="text-gray-700 hover:text-yellow-500"
-            aria-label="Abrir carrito"
-          >
-            <FaShoppingCart className="text-xl" />
-          </button>
+              {/* Botón Panel Admin */}
+              {user.role?.toLowerCase() === "admin" && (
+                <Link
+                  to="/admin"
+                  className="text-gray-700 hover:text-black font-semibold mr-4"
+                >
+                  Panel Admin
+                </Link>
+              )}
+
+              {/* Botón Mi perfil cliente */}
+              {user.role?.toLowerCase() === "client" && (
+                <button
+                  onClick={() => navigate("/profile")}
+                  className="text-gray-700 hover:text-black font-semibold mr-4"
+                >
+                  Mi perfil
+                </button>
+              )}
+
+              <button
+                onClick={handleLogout}
+                className="text-red-600 hover:text-red-800"
+                aria-label="Cerrar sesión"
+              >
+                <FaSignOutAlt className="text-xl" />
+              </button>
+
+              <button
+                onClick={onCartClick}
+                className="text-gray-700 hover:text-yellow-500"
+                aria-label="Abrir carrito"
+              >
+                <FaShoppingCart className="text-xl" />
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                onClick={() => setShowLogin(true)}
+                className="text-gray-700 hover:text-gray-900"
+                aria-label="Abrir modal de inicio de sesión"
+              >
+                <FaUser className="text-xl" />
+              </button>
+              <button
+                onClick={onCartClick}
+                className="text-gray-700 hover:text-yellow-500"
+                aria-label="Abrir carrito"
+              >
+                <FaShoppingCart className="text-xl" />
+              </button>
+            </>
+          )}
         </div>
       </div>
 

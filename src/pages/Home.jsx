@@ -1,44 +1,20 @@
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
 import NMrelojesImg from "../assets/NMrelojes.png";
 import { FaShoppingCart } from "react-icons/fa";
-
-const products = [
-  {
-    id: 1,
-    name: "Reloj Clásico",
-    price: 120000,
-    oldPrice: 150000,
-    image: "/img/reloj1.jpg",
-    description: "Reloj elegante clásico con correa de cuero.",
-    color: "Negro",
-    specs: ["Analógico", "Malla de cuero", "Resistente al agua", "Clásico"],
-  },
-  {
-    id: 2,
-    name: "Reloj Moderno",
-    price: 145000,
-    oldPrice: 160000,
-    image: "/img/reloj2.jpg",
-    description: "Diseño moderno con materiales resistentes.",
-    color: "Gris",
-    specs: ["Digital", "Silicona", "Sumergible", "Ligero"],
-  },
-  {
-    id: 3,
-    name: "Reloj Elegante",
-    price: 180000,
-    oldPrice: 200000,
-    image: "/img/reloj3.jpg",
-    description: "Estilo elegante ideal para eventos formales.",
-    color: "Dorado",
-    specs: ["Analógico", "Metal", "Impermeable", "Diseño fino"],
-  },
-];
+import api from "../api";
 
 const Home = ({ onAddToCart, onProductClick, searchText }) => {
   const navigate = useNavigate();
+  const [products, setProducts] = useState([]);
   const [showNotification, setShowNotification] = useState(false);
+
+  useEffect(() => {
+    api
+      .get("/Product/GetAllProducts")
+      .then((res) => setProducts(res.data))
+      .catch((err) => console.error("Error al cargar productos:", err));
+  }, []);
 
   const handleAddToCart = (product) => {
     onAddToCart(product);
@@ -47,19 +23,20 @@ const Home = ({ onAddToCart, onProductClick, searchText }) => {
   };
 
   const filteredProducts = products.filter((product) =>
-    product.name.toLowerCase().includes(searchText.toLowerCase())
+    (product.name || product.Name || product.nombre || "")
+      .toLowerCase()
+      .includes(searchText?.toLowerCase() || "")
   );
 
   return (
     <div className="bg-gray-50 min-h-screen relative">
-      {/* ✅ Notificación */}
       {showNotification && (
         <div className="fixed top-6 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-5 py-2 rounded-md shadow-lg z-[9999]">
           ✅ Producto agregado al carrito
         </div>
       )}
 
-      {/* ✅ Hero */}
+      {/* Hero */}
       <section className="relative h-[450px] text-white flex items-center justify-center mb-16">
         <img
           src={NMrelojesImg}
@@ -76,7 +53,7 @@ const Home = ({ onAddToCart, onProductClick, searchText }) => {
         </div>
       </section>
 
-      {/* ✅ Productos */}
+      {/* Productos */}
       <section className="container mx-auto px-6">
         <h2 className="md:text-3xl font-bold text-center tracking-wide mb-6 font-mono">
           Nuestros Productos
@@ -84,32 +61,51 @@ const Home = ({ onAddToCart, onProductClick, searchText }) => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
           {filteredProducts.map((product) => (
             <div
-              key={product.id}
+              key={product.id || product.Id}
               className="relative bg-white border rounded-lg shadow hover:shadow-lg transition"
             >
               <div
                 onClick={() => {
                   onProductClick(product);
-                  navigate(`/producto/${product.id}`, { state: product });
+                  navigate(`/producto/${product.id || product.Id}`, {
+                    state: product,
+                  });
                 }}
                 className="cursor-pointer"
               >
                 <img
-                  src={product.image}
-                  alt={product.name}
+                  src={
+                    product.image ||
+                    product.Image ||
+                    product.imagen ||
+                    "/placeholder.png"
+                  }
+                  alt={product.name || product.Name || product.nombre}
                   className="w-full h-64 object-cover rounded-t-lg"
                 />
               </div>
 
               <div className="p-4 text-gray-800">
-                <h3 className="text-lg font-semibold mb-1">{product.name}</h3>
+                <h3 className="text-lg font-semibold mb-1">
+                  {product.name || product.Name || product.nombre}
+                </h3>
                 <p className="text-base font-medium">
-                  ${product.price.toLocaleString("es-AR")}
+                  $
+                  {(
+                    product.price ||
+                    product.Price ||
+                    product.precio ||
+                    0
+                  ).toLocaleString("es-AR")}
                 </p>
                 <p className="text-sm mt-2 text-gray-600">
                   TRANSFERENCIA O EFECTIVO{" "}
                   <span className="font-bold text-gray-800">
-                    ${Math.round(product.price * 0.8).toLocaleString("es-AR")}
+                    $
+                    {Math.round(
+                      (product.price || product.Price || product.precio || 0) *
+                        0.8
+                    ).toLocaleString("es-AR")}
                   </span>
                 </p>
               </div>
