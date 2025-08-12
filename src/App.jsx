@@ -1,46 +1,34 @@
+// src/App.jsx
 import { useState, useEffect } from "react";
 import { Routes, Route, useNavigate } from "react-router-dom";
+
+// Contexto
 import { useAuth } from "./context/AuthContext";
 
-// 📌 Componentes
+// Componentes
 import Navbar from "./components/Navbar";
 import CartSidebar from "./components/CartSidebar";
 import Footer from "./components/Footer";
 import DetailProduct from "./components/DetailProduct";
+import PrivateRoute from "./components/PrivateRoute";
+import Login from "./components/Login"; // login unificado
 
-// 📌 Páginas
+// Páginas
 import Home from "./pages/Home";
 import ComoComprar from "./pages/ComoComprar";
 import Contacto from "./pages/Contacto";
 import Envio from "./pages/Envio";
 import Productos from "./pages/Productos";
-import LoginClient from "./components/LoginClient";
-import LoginAdmin from "./components/LoginAdmin";
-
-// 🔹 Rutas privadas
-const PrivateRoute = ({ children, role }) => {
-  const { user } = useAuth();
-
-  if (!user) {
-    return <div className="p-8 text-center">⚠️ Debes iniciar sesión</div>;
-  }
-
-  if (role && user.role !== role) {
-    return <div className="p-8 text-center">🚫 No tienes permisos</div>;
-  }
-
-  return children;
-};
+import AdminPanel from "./pages/AdminPanel";
 
 function App() {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [cartItems, setCartItems] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [searchText, setSearchText] = useState("");
-
   const navigate = useNavigate();
 
-  // Cargar carrito desde localStorage
+  // Cargar carrito desde localStorage al iniciar
   useEffect(() => {
     const savedCart = localStorage.getItem("cart");
     if (savedCart) {
@@ -48,7 +36,7 @@ function App() {
     }
   }, []);
 
-  // Guardar carrito en localStorage
+  // Guardar carrito en localStorage cuando cambie
   useEffect(() => {
     localStorage.setItem("cart", JSON.stringify(cartItems));
   }, [cartItems]);
@@ -145,19 +133,19 @@ function App() {
         <Route path="/como-comprar" element={<ComoComprar />} />
         <Route path="/contacto" element={<Contacto />} />
         <Route path="/envio" element={<Envio />} />
-        <Route path="/login-cliente" element={<LoginClient />} />
-        <Route path="/login-admin" element={<LoginAdmin />} />
+
+        {/* Login unificado */}
+        <Route path="/login" element={<Login />} />
 
         {/* Rutas protegidas */}
         <Route
           path="/admin"
           element={
             <PrivateRoute role="admin">
-              <LoginAdmin />
+              <AdminPanel />
             </PrivateRoute>
           }
         />
-
         <Route
           path="/checkout"
           element={

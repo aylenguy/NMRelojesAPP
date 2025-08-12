@@ -14,11 +14,13 @@ const Navbar = ({ onCartClick, searchText, setSearchText }) => {
   const [showLogin, setShowLogin] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
 
+  // Cierra modales al cambiar de ruta
   useEffect(() => {
     setShowLogin(false);
     setShowRegister(false);
   }, [location.pathname]);
 
+  // Cierra modales con Escape
   useEffect(() => {
     const onEsc = (e) => {
       if (e.key === "Escape") {
@@ -36,6 +38,8 @@ const Navbar = ({ onCartClick, searchText, setSearchText }) => {
     logout();
     navigate("/");
   };
+
+  const role = user?.role?.toLowerCase();
 
   return (
     <nav className="bg-white shadow-md py-5 px-8 border-b border-gray-200 z-50 relative">
@@ -56,26 +60,39 @@ const Navbar = ({ onCartClick, searchText, setSearchText }) => {
           />
         </div>
 
-        {/* Navegación */}
+        {/* Menú de navegación */}
         <div className="flex flex-wrap gap-4 justify-center text-base lg:text-lg font-semibold font-mono">
-          {[
-            { to: "/como-comprar", label: "Cómo Comprar" },
-            { to: "/contacto", label: "Contacto" },
-            { to: "/envio", label: "Envío" },
-            { to: "/producto", label: "Productos" },
-          ].map((item, idx) => (
-            <Link
-              key={idx}
-              to={item.to}
-              className="relative inline-block px-4 py-2 rounded-md text-gray-700 hover:text-black transition-all duration-200 group"
-            >
-              <span className="absolute left-0 bottom-0 w-0 h-0.5 bg-black transition-all duration-300 group-hover:w-full"></span>
-              {item.label}
-            </Link>
-          ))}
+          {role === "admin" ? (
+            <>
+              <Link to="/admin" className="hover:text-black">
+                Panel Admin
+              </Link>
+              <Link to="/admin/usuarios" className="hover:text-black">
+                Usuarios
+              </Link>
+              <Link to="/admin/productos" className="hover:text-black">
+                Productos
+              </Link>
+            </>
+          ) : (
+            <>
+              <Link to="/como-comprar" className="hover:text-black">
+                Cómo Comprar
+              </Link>
+              <Link to="/contacto" className="hover:text-black">
+                Contacto
+              </Link>
+              <Link to="/envio" className="hover:text-black">
+                Envío
+              </Link>
+              <Link to="/producto" className="hover:text-black">
+                Productos
+              </Link>
+            </>
+          )}
         </div>
 
-        {/* Usuario e íconos */}
+        {/* Usuario / Carrito */}
         <div className="flex items-center gap-5 relative">
           {isAuthenticated ? (
             <>
@@ -83,16 +100,7 @@ const Navbar = ({ onCartClick, searchText, setSearchText }) => {
                 Hola, {user?.name || user?.email}
               </span>
 
-              {user?.role?.toLowerCase() === "admin" && (
-                <Link
-                  to="/admin"
-                  className="text-gray-700 hover:text-black font-semibold mr-4"
-                >
-                  Panel Admin
-                </Link>
-              )}
-
-              {user?.role?.toLowerCase() === "client" && (
+              {role === "cliente" && (
                 <button
                   onClick={() => navigate("/profile")}
                   className="text-gray-700 hover:text-black font-semibold mr-4"
@@ -109,13 +117,15 @@ const Navbar = ({ onCartClick, searchText, setSearchText }) => {
                 <FaSignOutAlt className="text-xl" />
               </button>
 
-              <button
-                onClick={onCartClick}
-                className="text-gray-700 hover:text-yellow-500"
-                aria-label="Abrir carrito"
-              >
-                <FaShoppingCart className="text-xl" />
-              </button>
+              {role === "cliente" && (
+                <button
+                  onClick={onCartClick}
+                  className="text-gray-700 hover:text-yellow-500"
+                  aria-label="Abrir carrito"
+                >
+                  <FaShoppingCart className="text-xl" />
+                </button>
+              )}
             </>
           ) : (
             <>
@@ -138,25 +148,29 @@ const Navbar = ({ onCartClick, searchText, setSearchText }) => {
         </div>
       </div>
 
-      {/* Modales */}
-      <LoginModal
-        show={showLogin}
-        onClose={() => setShowLogin(false)}
-        onSwitchToRegister={() => {
-          setShowLogin(false);
-          setShowRegister(true);
-        }}
-        onLoginSuccess={() => setShowLogin(false)} // 👈 cerrar modal al loguear
-      />
+      {/* Modales solo si no estamos en login/register */}
+      {location.pathname !== "/login" && location.pathname !== "/register" && (
+        <>
+          <LoginModal
+            show={showLogin}
+            onClose={() => setShowLogin(false)}
+            onSwitchToRegister={() => {
+              setShowLogin(false);
+              setShowRegister(true);
+            }}
+            onLoginSuccess={() => setShowLogin(false)}
+          />
 
-      <RegisterModal
-        show={showRegister}
-        onClose={() => setShowRegister(false)}
-        onSwitchToLogin={() => {
-          setShowRegister(false);
-          setShowLogin(true);
-        }}
-      />
+          <RegisterModal
+            show={showRegister}
+            onClose={() => setShowRegister(false)}
+            onSwitchToLogin={() => {
+              setShowRegister(false);
+              setShowLogin(true);
+            }}
+          />
+        </>
+      )}
     </nav>
   );
 };

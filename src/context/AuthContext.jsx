@@ -1,3 +1,4 @@
+// src/context/AuthContext.js
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { jwtDecode } from "jwt-decode";
 import { useNavigate } from "react-router-dom";
@@ -11,17 +12,43 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
+  // 🔹 Función para normalizar datos del token
+  const normalizeDecoded = (decoded, userTypeFromApi) => {
+    let role =
+      decoded.role ||
+      decoded.Role ||
+      decoded.userType || // 👈 tu caso, usertype en el token
+      decoded["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"] ||
+      decoded["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/role"] ||
+      decoded.roles ||
+      userTypeFromApi ||
+      null;
+
+    if (Array.isArray(role)) role = role[0];
+
+    return {
+      id: decoded.sub || decoded.nameid || decoded.id || null,
+      email: decoded.email || null,
+      name: decoded.username || decoded.name || decoded.unique_name || null,
+      role: role ? role.toLowerCase() : null,
+    };
+  };
+
+  // 🔹 Recuperar sesión al recargar la página
   useEffect(() => {
     const savedToken = localStorage.getItem("token");
+
     if (savedToken) {
       try {
         const decoded = jwtDecode(savedToken);
-        const now = Date.now() / 1000;
-        if (decoded.exp && decoded.exp < now) {
-          localStorage.removeItem("token");
-        } else {
-          setUser(normalizeDecoded(decoded));
+        const notExpired = !decoded.exp || decoded.exp * 1000 > Date.now();
+
+        if (notExpired) {
+          const normalized = normalizeDecoded(decoded);
+          setUser(normalized);
           setToken(savedToken);
+        } else {
+          localStorage.removeItem("token");
         }
       } catch (err) {
         console.error("Token inválido:", err);
@@ -31,76 +58,61 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
-  const normalizeDecoded = (decoded) => {
-    const role =
-      decoded.role ||
-      decoded["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"] ||
-      decoded["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/role"] ||
-      decoded["roles"] ||
-      null;
-
-    return {
-      id: decoded.sub || decoded.nameid || decoded.id,
-      email: decoded.email,
-      name: decoded.username || decoded.name,
-      role,
-      exp: decoded.exp,
-    };
-  };
-
-  const login = async (email, password, isAdmin = false) => {
+  // 🔹 Login (primero intenta admin, luego cliente)
+  const login = async (email, password) => {
     try {
-      const url = isAdmin
-        ? `${API_BASE_URL}/api/Auth/AdminLogin`
-        : `${API_BASE_URL}/api/Client/login`;
+      // 1️⃣ Intentar login admin
+      let res = await fetch(
+        `${API_BASE_URL}/api/Authenticate/authenticate-admin`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
+        }
+      );
+      let data = await res.json();
 
-      const res = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const text = await res.text();
-      let data;
-      try {
-        data = JSON.parse(text);
-      } catch {
-        console.error("Respuesta no es JSON:", text);
-        return false;
+      // 2️⃣ Si no es admin, intentar login cliente
+      if (!res.ok || !data.token) {
+        res = await fetch(`${API_BASE_URL}/api/Authenticate/authenticate`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
+        });
+        data = await res.json();
       }
 
-      if (!res.ok) {
-        console.error("Error en login:", data);
-        return false;
+      // 3️⃣ Si sigue fallando, error
+      if (!res.ok || !data.token) {
+        return {
+          success: false,
+          message: data.message || "Usuario o contraseña incorrectos",
+        };
       }
 
-      const token = data.token || data.Token;
-      if (!token) {
-        console.error("No se recibió token en la respuesta");
-        return false;
-      }
-
-      const decoded = jwtDecode(token);
-      const normalized = normalizeDecoded(decoded);
+      // 4️⃣ Guardar datos y token
+      const decoded = jwtDecode(data.token);
+      const normalized = normalizeDecoded(decoded, data.userType);
 
       setUser(normalized);
-      setToken(token);
-      localStorage.setItem("token", token);
+      setToken(data.token);
+      localStorage.setItem("token", data.token);
 
-      // Redirección según rol
-      if (normalized.role?.toLowerCase() === "admin") {
+      // 5️⃣ Redirigir según rol
+      if (normalized.role === "admin") {
         navigate("/admin");
       } else {
-        navigate("/home");
+        navigate("/");
       }
 
-      return true;
+      return { success: true };
     } catch (err) {
       console.error("Error login:", err);
-      return false;
+      return { success: false, message: "Error de conexión con el servidor" };
     }
   };
 
+  // 🔹 Registro cliente
   const register = async (name, lastName, userName, email, password) => {
     try {
       const res = await fetch(`${API_BASE_URL}/api/Client/register`, {
@@ -115,13 +127,22 @@ export const AuthProvider = ({ children }) => {
         }),
       });
 
-      return res.ok;
+      if (!res.ok) {
+        const errData = await res.json();
+        return {
+          success: false,
+          message: errData.message || "Error en el registro",
+        };
+      }
+
+      return { success: true };
     } catch (err) {
       console.error("Error registro:", err);
-      return false;
+      return { success: false, message: "Error de conexión con el servidor" };
     }
   };
 
+  // 🔹 Logout
   const logout = () => {
     setUser(null);
     setToken(null);
@@ -129,7 +150,8 @@ export const AuthProvider = ({ children }) => {
     navigate("/");
   };
 
-  const hasRole = (role) => user?.role?.toLowerCase() === role.toLowerCase();
+  // 🔹 Verificar rol
+  const hasRole = (role) => user?.role === role.toLowerCase();
 
   return (
     <AuthContext.Provider
