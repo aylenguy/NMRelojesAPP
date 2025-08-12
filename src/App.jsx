@@ -1,6 +1,11 @@
 // src/App.jsx
 import { useState, useEffect } from "react";
-import { Routes, Route, useNavigate } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  useNavigate,
+} from "react-router-dom";
 
 // Contexto
 import { useAuth } from "./context/AuthContext";
@@ -10,8 +15,8 @@ import Navbar from "./components/Navbar";
 import CartSidebar from "./components/CartSidebar";
 import Footer from "./components/Footer";
 import DetailProduct from "./components/DetailProduct";
-import PrivateRoute from "./components/PrivateRoute";
 import Login from "./components/Login"; // login unificado
+import ProtectedRoute from "./components/ProtectedRoute"; // ✅ Este reemplaza PrivateRoute
 
 // Páginas
 import Home from "./pages/Home";
@@ -19,7 +24,13 @@ import ComoComprar from "./pages/ComoComprar";
 import Contacto from "./pages/Contacto";
 import Envio from "./pages/Envio";
 import Productos from "./pages/Productos";
-import AdminPanel from "./pages/AdminPanel";
+
+// Admin
+import AdminLayout from "./pages/admin/AdminLayout";
+import Dashboard from "./pages/admin/AdminDashboard";
+import AdminProducts from "./pages/admin/AdminProducts";
+import AdminUsers from "./pages/admin/AdminUsers";
+import AdminOrders from "./pages/admin/AdminOrders";
 
 function App() {
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -28,7 +39,7 @@ function App() {
   const [searchText, setSearchText] = useState("");
   const navigate = useNavigate();
 
-  // Cargar carrito desde localStorage al iniciar
+  // Cargar carrito desde localStorage
   useEffect(() => {
     const savedCart = localStorage.getItem("cart");
     if (savedCart) {
@@ -36,7 +47,7 @@ function App() {
     }
   }, []);
 
-  // Guardar carrito en localStorage cuando cambie
+  // Guardar carrito en localStorage
   useEffect(() => {
     localStorage.setItem("cart", JSON.stringify(cartItems));
   }, [cartItems]);
@@ -133,27 +144,27 @@ function App() {
         <Route path="/como-comprar" element={<ComoComprar />} />
         <Route path="/contacto" element={<Contacto />} />
         <Route path="/envio" element={<Envio />} />
-
-        {/* Login unificado */}
         <Route path="/login" element={<Login />} />
 
-        {/* Rutas protegidas */}
-        <Route
-          path="/admin"
-          element={
-            <PrivateRoute role="admin">
-              <AdminPanel />
-            </PrivateRoute>
-          }
-        />
+        {/* Ruta protegida: cliente */}
         <Route
           path="/checkout"
           element={
-            <PrivateRoute role="cliente">
+            <ProtectedRoute requiredRole="cliente">
               <div className="p-8">Página de compra (Checkout)</div>
-            </PrivateRoute>
+            </ProtectedRoute>
           }
         />
+
+        {/* Rutas protegidas: admin con layout */}
+        <Route element={<ProtectedRoute requiredRole="admin" />}>
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={<Dashboard />} />
+            <Route path="products" element={<AdminProducts />} />
+            <Route path="users" element={<AdminUsers />} />
+            <Route path="orders" element={<AdminOrders />} />
+          </Route>
+        </Route>
       </Routes>
 
       <CartSidebar
