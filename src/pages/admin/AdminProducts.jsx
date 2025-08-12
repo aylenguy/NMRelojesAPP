@@ -12,7 +12,7 @@ export default function AdminProducts() {
     name: "",
     price: "",
     oldPrice: "",
-    image: "",
+    imageFile: null,
     description: "",
     color: "",
     caracteristicas: [],
@@ -54,6 +54,10 @@ export default function AdminProducts() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleFileChange = (e) => {
+    setFormData((prev) => ({ ...prev, imageFile: e.target.files[0] || null }));
+  };
+
   const handleCaracteristicaChange = (e) => {
     const arr = e.target.value
       .split(",")
@@ -79,21 +83,28 @@ export default function AdminProducts() {
     }
 
     try {
-      const payload = {
-        name: formData.name,
-        price: parseFloat(formData.price),
-        oldPrice: formData.oldPrice ? parseFloat(formData.oldPrice) : null,
-        image: formData.image,
-        description: formData.description,
-        color: formData.color,
-        caracteristicas: formData.caracteristicas,
-        stock: parseInt(formData.stock),
-      };
+      const data = new FormData();
+      data.append("Name", formData.name);
+      data.append("Price", parseFloat(formData.price));
+      if (formData.oldPrice) {
+        data.append("OldPrice", parseFloat(formData.oldPrice));
+      }
+      data.append("Description", formData.description);
+      data.append("Color", formData.color);
+      data.append("Stock", parseInt(formData.stock));
+      data.append("Specs", JSON.stringify(formData.caracteristicas));
 
-      await api.post("/Product/AddProduct", payload, {
+      if (formData.imageFile) {
+        data.append("imageFile", formData.imageFile);
+        data.append("Image", formData.imageFile.name);
+      } else {
+        data.append("Image", "");
+      }
+
+      await api.post("/Product/AddProduct", data, {
         headers: {
           Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
+          "Content-Type": "multipart/form-data",
         },
       });
 
@@ -103,7 +114,7 @@ export default function AdminProducts() {
         name: "",
         price: "",
         oldPrice: "",
-        image: "",
+        imageFile: null,
         description: "",
         color: "",
         caracteristicas: [],
@@ -132,7 +143,7 @@ export default function AdminProducts() {
   const resolveImageUrl = (img) => {
     if (!img) return null;
     if (/^https?:\/\//i.test(img)) return img;
-    return `${baseApiUrl}/${img.replace(/^\/+/, "")}`;
+    return `${baseApiUrl}/uploads/${img.replace(/^\/+/, "")}`;
   };
 
   return (
@@ -142,6 +153,7 @@ export default function AdminProducts() {
       <form
         onSubmit={handleSubmit}
         className="bg-white p-4 rounded shadow mb-6 max-w-lg"
+        encType="multipart/form-data"
       >
         <input
           type="text"
@@ -173,11 +185,10 @@ export default function AdminProducts() {
           step="0.01"
         />
         <input
-          type="text"
-          name="image"
-          placeholder="URL de imagen"
-          value={formData.image}
-          onChange={handleChange}
+          type="file"
+          name="imageFile"
+          accept="image/*"
+          onChange={handleFileChange}
           className="border p-2 w-full mb-2"
         />
         <textarea
@@ -227,7 +238,7 @@ export default function AdminProducts() {
                 name: "",
                 price: "",
                 oldPrice: "",
-                image: "",
+                imageFile: null,
                 description: "",
                 color: "",
                 caracteristicas: [],
