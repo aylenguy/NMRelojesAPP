@@ -8,53 +8,41 @@ export default function AdminUsers() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // 🔹 Obtener lista de usuarios
   const fetchUsers = async () => {
     try {
-      const res = await fetch(`${API_BASE_URL}/api/User`, {
+      const res = await fetch(`${API_BASE_URL}/api/Admin/GetAllUsers`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+      if (!res.ok) throw new Error("Error obteniendo usuarios");
+
       const data = await res.json();
       setUsers(data);
     } catch (err) {
-      console.error(err);
+      console.error("Error cargando usuarios", err);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchUsers();
+    if (token) {
+      fetchUsers();
+    }
   }, [token]);
 
+  // 🔹 Eliminar usuario
   const handleDelete = async (id) => {
     if (!window.confirm("¿Eliminar usuario?")) return;
     try {
-      const res = await fetch(`${API_BASE_URL}/api/User/${id}`, {
+      const res = await fetch(`${API_BASE_URL}/api/Admin/DeleteUser/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) throw new Error("Error eliminando usuario");
       fetchUsers();
     } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const changeRole = async (id, newRole) => {
-    try {
-      // Este endpoint es ejemplo: adaptalo si tu backend usa otro path/body
-      const res = await fetch(`${API_BASE_URL}/api/User/${id}/role`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ userType: newRole }),
-      });
-      if (!res.ok) throw new Error("Error cambiando rol");
-      fetchUsers();
-    } catch (err) {
-      console.error(err);
+      console.error("Error eliminando usuario", err);
     }
   };
 
@@ -74,35 +62,32 @@ export default function AdminUsers() {
           </tr>
         </thead>
         <tbody>
-          {users.map((u) => (
-            <tr key={u.id}>
-              <td className="p-2 border">{u.id}</td>
-              <td className="p-2 border">
-                {u.name || u.userName || u.UserName}
-              </td>
-              <td className="p-2 border">{u.email}</td>
-              <td className="p-2 border">{u.userType || u.role}</td>
-              <td className="p-2 border flex gap-2">
-                <button
-                  onClick={() =>
-                    changeRole(
-                      u.id,
-                      u.userType === "admin" ? "cliente" : "admin"
-                    )
-                  }
-                  className="bg-yellow-500 text-white px-3 py-1 rounded"
-                >
-                  Toggle Rol
-                </button>
-                <button
-                  onClick={() => handleDelete(u.id)}
-                  className="bg-red-600 text-white px-3 py-1 rounded"
-                >
-                  Eliminar
-                </button>
+          {users.length > 0 ? (
+            users.map((u) => (
+              <tr key={u.id}>
+                <td className="p-2 border">{u.id}</td>
+                <td className="p-2 border">{u.userName}</td>
+                <td className="p-2 border">{u.email}</td>
+                <td className="p-2 border">
+                  {u.userType === "Admin" ? "Admin" : "Cliente"}
+                </td>
+                <td className="p-2 border">
+                  <button
+                    onClick={() => handleDelete(u.id)}
+                    className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 transition"
+                  >
+                    Eliminar
+                  </button>
+                </td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td colSpan="5" className="p-4 border text-center text-gray-500">
+                No hay usuarios registrados
               </td>
             </tr>
-          ))}
+          )}
         </tbody>
       </table>
     </div>
