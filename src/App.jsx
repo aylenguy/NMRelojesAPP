@@ -31,6 +31,7 @@ import Dashboard from "./pages/admin/AdminDashboard";
 import AdminProducts from "./pages/admin/AdminProducts";
 import AdminUsers from "./pages/admin/AdminUsers";
 import AdminOrders from "./pages/admin/AdminOrders";
+import EditProduct from "./pages/admin/EditProduct";
 
 function App() {
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -161,6 +162,8 @@ function App() {
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<Dashboard />} />
             <Route path="products" element={<AdminProducts />} />
+            <Route path="products/edit/:id" element={<EditProduct />} />{" "}
+            {/* Nueva ruta */}
             <Route path="users" element={<AdminUsers />} />
             <Route path="orders" element={<AdminOrders />} />
           </Route>

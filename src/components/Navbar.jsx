@@ -67,12 +67,6 @@ const Navbar = ({ onCartClick, searchText, setSearchText }) => {
               <Link to="/admin" className="hover:text-black">
                 Panel Admin
               </Link>
-              <Link to="/admin/usuarios" className="hover:text-black">
-                Usuarios
-              </Link>
-              <Link to="/admin/productos" className="hover:text-black">
-                Productos
-              </Link>
             </>
           ) : (
             <>

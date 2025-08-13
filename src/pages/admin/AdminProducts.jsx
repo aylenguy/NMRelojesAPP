@@ -1,4 +1,3 @@
-// src/pages/admin/Products.jsx
 import { useEffect, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import api from "../../api";
@@ -8,7 +7,8 @@ export default function AdminProducts() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const [formData, setFormData] = useState({
+  const emptyForm = {
+    id: null,
     name: "",
     price: "",
     oldPrice: "",
@@ -17,17 +17,22 @@ export default function AdminProducts() {
     color: "",
     caracteristicas: [],
     stock: "",
-  });
+  };
 
+  const [formData, setFormData] = useState(emptyForm);
+  const [showModal, setShowModal] = useState(false);
   const baseApiUrl = api.defaults.baseURL?.replace(/\/$/, "") ?? "";
 
   const normalizeServerProduct = (p) => ({
     id: p.Id ?? p.id,
-    name: p.Nombre ?? p.nombre ?? p.name ?? p.Name,
-    price: p.Precio ?? p.precio ?? p.price ?? p.Price,
-    image: p.Imagen ?? p.imagen ?? p.image ?? p.Image,
-    description:
-      p.Descripcion ?? p.descripcion ?? p.description ?? p.Description,
+    name: p.Nombre ?? p.nombre ?? p.name,
+    price: p.Precio ?? p.precio ?? p.price,
+    image: p.Imagen ?? p.imagen ?? p.image,
+    description: p.Descripcion ?? p.descripcion ?? p.description,
+    color: p.Color ?? p.color ?? "",
+    oldPrice: p.OldPrice ?? p.oldPrice ?? "",
+    caracteristicas: p.Caracteristicas ?? p.caracteristicas ?? [],
+    stock: p.Stock ?? p.stock ?? 0,
   });
 
   const fetchProducts = async () => {
@@ -40,6 +45,7 @@ export default function AdminProducts() {
       setProducts(normalized);
     } catch (err) {
       console.error("Error al cargar productos:", err);
+      alert("No se pudieron cargar los productos.");
     } finally {
       setLoading(false);
     }
@@ -66,63 +72,82 @@ export default function AdminProducts() {
     setFormData((prev) => ({ ...prev, caracteristicas: arr }));
   };
 
+  const handleEditClick = (product) => {
+    setFormData({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      oldPrice: product.oldPrice || "",
+      imageFile: null,
+      description: product.description,
+      color: product.color || "",
+      caracteristicas: product.caracteristicas || [],
+      stock: product.stock || "",
+    });
+    setShowModal(true);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!formData.name.trim()) {
-      alert("El nombre es obligatorio");
-      return;
-    }
-    if (!formData.price || parseFloat(formData.price) <= 0) {
-      alert("El precio debe ser mayor que 0");
-      return;
-    }
-    if (!formData.stock || parseInt(formData.stock) < 0) {
-      alert("El stock no puede ser negativo");
-      return;
-    }
+    if (!formData.name.trim()) return alert("El nombre es obligatorio");
+    if (!formData.price || parseFloat(formData.price) <= 0)
+      return alert("El precio debe ser mayor que 0");
+    if (!formData.stock || parseInt(formData.stock) < 0)
+      return alert("El stock no puede ser negativo");
 
     try {
-      const data = new FormData();
-      data.append("Name", formData.name);
-      data.append("Price", parseFloat(formData.price));
-      if (formData.oldPrice) {
-        data.append("OldPrice", parseFloat(formData.oldPrice));
-      }
-      data.append("Description", formData.description);
-      data.append("Color", formData.color);
-      data.append("Stock", parseInt(formData.stock));
-      data.append("Specs", JSON.stringify(formData.caracteristicas));
+      if (formData.id) {
+        // EDITAR → enviar JSON
+        const updateData = {
+          name: formData.name,
+          price: parseFloat(formData.price),
+          oldPrice: formData.oldPrice ? parseFloat(formData.oldPrice) : null,
+          description: formData.description,
+          color: formData.color,
+          caracteristicas: formData.caracteristicas,
+          stock: parseInt(formData.stock),
+        };
 
-      if (formData.imageFile) {
-        data.append("imageFile", formData.imageFile);
-        data.append("Image", formData.imageFile.name);
+        await api.put(`/Product/UpdateProduct/${formData.id}`, updateData, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
       } else {
-        data.append("Image", "");
-      }
+        // CREAR → enviar FormData (incluyendo imagen)
+        const data = new FormData();
+        data.append("Name", formData.name);
+        data.append("Price", parseFloat(formData.price));
+        if (formData.oldPrice)
+          data.append("OldPrice", parseFloat(formData.oldPrice));
+        data.append("Description", formData.description);
+        data.append("Color", formData.color);
+        data.append("Stock", parseInt(formData.stock));
+        data.append(
+          "Caracteristicas",
+          JSON.stringify(formData.caracteristicas)
+        );
 
-      await api.post("/Product/AddProduct", data, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "multipart/form-data",
-        },
-      });
+        if (formData.imageFile) {
+          data.append("imageFile", formData.imageFile);
+        }
+
+        await api.post("/Product/AddProduct", data, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        });
+      }
 
       await fetchProducts();
-
-      setFormData({
-        name: "",
-        price: "",
-        oldPrice: "",
-        imageFile: null,
-        description: "",
-        color: "",
-        caracteristicas: [],
-        stock: "",
-      });
+      setShowModal(false);
+      setFormData(emptyForm);
     } catch (err) {
-      console.error("Error al crear producto:", err);
-      alert("Error al crear producto. Revisa consola y backend.");
+      console.error("Error al guardar producto:", err);
+      alert("Error al guardar producto.");
     }
   };
 
@@ -136,7 +161,7 @@ export default function AdminProducts() {
       setProducts((prev) => prev.filter((p) => p.id !== id));
     } catch (err) {
       console.error("Error al eliminar producto:", err);
-      alert("No se pudo eliminar el producto. Revisa consola y backend.");
+      alert("No se pudo eliminar el producto.");
     }
   };
 
@@ -150,109 +175,15 @@ export default function AdminProducts() {
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-4">Gestión de Productos</h1>
 
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white p-4 rounded shadow mb-6 max-w-lg"
-        encType="multipart/form-data"
+      <button
+        onClick={() => {
+          setFormData(emptyForm);
+          setShowModal(true);
+        }}
+        className="mb-4 bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
       >
-        <input
-          type="text"
-          name="name"
-          placeholder="Nombre"
-          value={formData.name}
-          onChange={handleChange}
-          className="border p-2 w-full mb-2"
-          required
-        />
-        <input
-          type="number"
-          name="price"
-          placeholder="Precio"
-          value={formData.price}
-          onChange={handleChange}
-          className="border p-2 w-full mb-2"
-          min="0.01"
-          step="0.01"
-          required
-        />
-        <input
-          type="number"
-          name="oldPrice"
-          placeholder="Precio Anterior"
-          value={formData.oldPrice}
-          onChange={handleChange}
-          className="border p-2 w-full mb-2"
-          step="0.01"
-        />
-        <input
-          type="file"
-          name="imageFile"
-          accept="image/*"
-          onChange={handleFileChange}
-          className="border p-2 w-full mb-2"
-        />
-        <textarea
-          name="description"
-          placeholder="Descripción"
-          value={formData.description}
-          onChange={handleChange}
-          className="border p-2 w-full mb-2"
-        />
-        <input
-          type="text"
-          name="color"
-          placeholder="Color"
-          value={formData.color}
-          onChange={handleChange}
-          className="border p-2 w-full mb-2"
-        />
-        <input
-          type="text"
-          name="caracteristicas"
-          placeholder="Características (separadas por coma)"
-          value={formData.caracteristicas.join(", ")}
-          onChange={handleCaracteristicaChange}
-          className="border p-2 w-full mb-2"
-        />
-        <input
-          type="number"
-          name="stock"
-          placeholder="Stock"
-          value={formData.stock}
-          onChange={handleChange}
-          className="border p-2 w-full mb-2"
-          min="0"
-          required
-        />
-        <div className="flex gap-2">
-          <button
-            type="submit"
-            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-          >
-            Guardar
-          </button>
-          <button
-            type="button"
-            onClick={() =>
-              setFormData({
-                name: "",
-                price: "",
-                oldPrice: "",
-                imageFile: null,
-                description: "",
-                color: "",
-                caracteristicas: [],
-                stock: "",
-              })
-            }
-            className="bg-gray-300 px-4 py-2 rounded"
-          >
-            Limpiar
-          </button>
-        </div>
-      </form>
-
-      <h2 className="text-xl font-semibold mb-2">Lista de productos</h2>
+        Nuevo Producto
+      </button>
 
       {loading ? (
         <div>Cargando productos...</div>
@@ -281,14 +212,125 @@ export default function AdminProducts() {
               <p className="text-sm text-gray-600 flex-grow">
                 {product.description}
               </p>
-              <button
-                onClick={() => handleDelete(product.id)}
-                className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 mt-2"
-              >
-                Eliminar
-              </button>
+              <div className="flex gap-2 mt-2">
+                <button
+                  onClick={() => handleEditClick(product)}
+                  className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600"
+                >
+                  Editar
+                </button>
+                <button
+                  onClick={() => handleDelete(product.id)}
+                  className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+                >
+                  Eliminar
+                </button>
+              </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {showModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+          <div className="bg-white p-6 rounded shadow-lg w-full max-w-lg">
+            <h2 className="text-xl font-bold mb-4">
+              {formData.id ? "Editar Producto" : "Nuevo Producto"}
+            </h2>
+            <form onSubmit={handleSubmit} encType="multipart/form-data">
+              <input
+                type="text"
+                name="name"
+                placeholder="Nombre"
+                value={formData.name}
+                onChange={handleChange}
+                className="border p-2 w-full mb-2"
+                required
+              />
+              <input
+                type="number"
+                name="price"
+                placeholder="Precio"
+                value={formData.price}
+                onChange={handleChange}
+                className="border p-2 w-full mb-2"
+                min="0.01"
+                step="0.01"
+                required
+              />
+              <input
+                type="number"
+                name="oldPrice"
+                placeholder="Precio Anterior"
+                value={formData.oldPrice}
+                onChange={handleChange}
+                className="border p-2 w-full mb-2"
+                step="0.01"
+              />
+
+              {!formData.id && (
+                <input
+                  type="file"
+                  name="imageFile"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  className="border p-2 w-full mb-2"
+                />
+              )}
+
+              <textarea
+                name="description"
+                placeholder="Descripción"
+                value={formData.description}
+                onChange={handleChange}
+                className="border p-2 w-full mb-2"
+              />
+              <input
+                type="text"
+                name="color"
+                placeholder="Color"
+                value={formData.color}
+                onChange={handleChange}
+                className="border p-2 w-full mb-2"
+              />
+              <input
+                type="text"
+                name="caracteristicas"
+                placeholder="Características (separadas por coma)"
+                value={formData.caracteristicas.join(", ")}
+                onChange={handleCaracteristicaChange}
+                className="border p-2 w-full mb-2"
+              />
+              <input
+                type="number"
+                name="stock"
+                placeholder="Stock"
+                value={formData.stock}
+                onChange={handleChange}
+                className="border p-2 w-full mb-2"
+                min="0"
+                required
+              />
+              <div className="flex justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowModal(false);
+                    setFormData(emptyForm);
+                  }}
+                  className="bg-gray-300 px-4 py-2 rounded"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                >
+                  Guardar
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
     </div>
