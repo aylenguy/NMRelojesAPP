@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import api from "../../api";
+import api from "../../api/api";
+
 import { useAuth } from "../../context/AuthContext";
 
 export default function EditProduct() {

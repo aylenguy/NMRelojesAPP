@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
-import api from "../../api";
+import api from "../../api/api";
 
 export default function AdminProducts() {
   const { token } = useAuth();

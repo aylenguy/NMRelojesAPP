@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaShoppingCart } from "react-icons/fa";
-import api from "../api";
+import api from "../api/api";
 
 const Productos = ({ onAddToCart, searchText }) => {
   const [productos, setProductos] = useState([]);

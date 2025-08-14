@@ -1,6 +1,6 @@
 import { useLocation, useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
-import api from "../api";
+import api from "../api/api";
 
 const DetailProduct = ({ addToCart }) => {
   const { state: productFromState } = useLocation();

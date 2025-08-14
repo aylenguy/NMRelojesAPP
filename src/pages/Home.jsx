@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import NMrelojesImg from "../assets/NMrelojes.png";
 import { FaShoppingCart } from "react-icons/fa";
-import api from "../api";
+import api from "../api/api";
 
 const Home = ({ onAddToCart, onProductClick, searchText }) => {
   const navigate = useNavigate();

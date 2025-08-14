@@ -15,8 +15,8 @@ import Navbar from "./components/Navbar";
 import CartSidebar from "./components/CartSidebar";
 import Footer from "./components/Footer";
 import DetailProduct from "./components/DetailProduct";
-import Login from "./components/Login"; // login unificado
-import ProtectedRoute from "./components/ProtectedRoute"; // ✅ Este reemplaza PrivateRoute
+import Login from "./components/Login";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 // Páginas
 import Home from "./pages/Home";
@@ -24,6 +24,10 @@ import ComoComprar from "./pages/ComoComprar";
 import Contacto from "./pages/Contacto";
 import Envio from "./pages/Envio";
 import Productos from "./pages/Productos";
+
+// Nuevo flujo checkout
+import CheckoutStep1 from "./pages/CheckoutStep1";
+import CheckoutStep2 from "./pages/CheckoutStep2";
 
 // Admin
 import AdminLayout from "./pages/admin/AdminLayout";
@@ -102,7 +106,7 @@ function App() {
   };
 
   const finalizePurchase = () => {
-    navigate("/checkout");
+    navigate("/checkout/paso-1");
     setIsCartOpen(false);
   };
 
@@ -147,23 +151,18 @@ function App() {
         <Route path="/envio" element={<Envio />} />
         <Route path="/login" element={<Login />} />
 
-        {/* Ruta protegida: cliente */}
-        <Route
-          path="/checkout"
-          element={
-            <ProtectedRoute requiredRole="cliente">
-              <div className="p-8">Página de compra (Checkout)</div>
-            </ProtectedRoute>
-          }
-        />
+        {/* Rutas protegidas para clientes */}
+        <Route element={<ProtectedRoute requiredRole="client" />}>
+          <Route path="/checkout/paso-1" element={<CheckoutStep1 />} />
+          <Route path="/checkout/paso-2" element={<CheckoutStep2 />} />
+        </Route>
 
-        {/* Rutas protegidas: admin con layout */}
+        {/* Rutas protegidas: admin */}
         <Route element={<ProtectedRoute requiredRole="admin" />}>
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<Dashboard />} />
             <Route path="products" element={<AdminProducts />} />
-            <Route path="products/edit/:id" element={<EditProduct />} />{" "}
-            {/* Nueva ruta */}
+            <Route path="products/edit/:id" element={<EditProduct />} />
             <Route path="users" element={<AdminUsers />} />
             <Route path="orders" element={<AdminOrders />} />
           </Route>

@@ -63,11 +63,9 @@ const Navbar = ({ onCartClick, searchText, setSearchText }) => {
         {/* Menú de navegación */}
         <div className="flex flex-wrap gap-4 justify-center text-base lg:text-lg font-semibold font-mono">
           {role === "admin" ? (
-            <>
-              <Link to="/admin" className="hover:text-black">
-                Panel Admin
-              </Link>
-            </>
+            <Link to="/admin" className="hover:text-black">
+              Panel Admin
+            </Link>
           ) : (
             <>
               <Link to="/como-comprar" className="hover:text-black">
@@ -94,7 +92,7 @@ const Navbar = ({ onCartClick, searchText, setSearchText }) => {
                 Hola, {user?.name || user?.email}
               </span>
 
-              {role === "cliente" && (
+              {role === "client" && (
                 <button
                   onClick={() => navigate("/profile")}
                   className="text-gray-700 hover:text-black font-semibold mr-4"
@@ -111,7 +109,7 @@ const Navbar = ({ onCartClick, searchText, setSearchText }) => {
                 <FaSignOutAlt className="text-xl" />
               </button>
 
-              {role === "cliente" && (
+              {role === "client" && (
                 <button
                   onClick={onCartClick}
                   className="text-gray-700 hover:text-yellow-500"
@@ -142,7 +140,7 @@ const Navbar = ({ onCartClick, searchText, setSearchText }) => {
         </div>
       </div>
 
-      {/* Modales solo si no estamos en login/register */}
+      {/* Modales */}
       {location.pathname !== "/login" && location.pathname !== "/register" && (
         <>
           <LoginModal

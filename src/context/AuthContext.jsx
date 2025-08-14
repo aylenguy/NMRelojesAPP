@@ -17,7 +17,7 @@ export const AuthProvider = ({ children }) => {
     let role =
       decoded.role ||
       decoded.Role ||
-      decoded.userType || // 👈 tu caso, usertype en el token
+      decoded.userType ||
       decoded["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"] ||
       decoded["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/role"] ||
       decoded.roles ||
@@ -58,7 +58,7 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
-  // 🔹 Login (primero intenta admin, luego cliente)
+  // 🔹 Login (admin o cliente)
   const login = async (email, password) => {
     try {
       // 1️⃣ Intentar login admin
@@ -72,7 +72,7 @@ export const AuthProvider = ({ children }) => {
       );
       let data = await res.json();
 
-      // 2️⃣ Si no es admin, intentar login cliente
+      // 2️⃣ Si no es admin, intentar cliente
       if (!res.ok || !data.token) {
         res = await fetch(`${API_BASE_URL}/api/Authenticate/authenticate`, {
           method: "POST",
@@ -82,7 +82,7 @@ export const AuthProvider = ({ children }) => {
         data = await res.json();
       }
 
-      // 3️⃣ Si sigue fallando, error
+      // 3️⃣ Si sigue fallando
       if (!res.ok || !data.token) {
         return {
           success: false,
@@ -90,7 +90,7 @@ export const AuthProvider = ({ children }) => {
         };
       }
 
-      // 4️⃣ Guardar datos y token
+      // 4️⃣ Guardar datos
       const decoded = jwtDecode(data.token);
       const normalized = normalizeDecoded(decoded, data.userType);
 
@@ -98,7 +98,7 @@ export const AuthProvider = ({ children }) => {
       setToken(data.token);
       localStorage.setItem("token", data.token);
 
-      // 5️⃣ Redirigir según rol
+      // 5️⃣ Redirigir
       if (normalized.role === "admin") {
         navigate("/admin");
       } else {
@@ -142,11 +142,22 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // 🔹 Logout
+  // 🔹 Logout (limpia carrito y sesión)
   const logout = () => {
+    // Eliminar carrito del usuario actual
+    if (user?.id) {
+      localStorage.removeItem(`cart_${user.id}`);
+    }
+
+    // Eliminar cualquier carrito genérico
+    localStorage.removeItem("cart");
+
+    // Limpiar sesión
     setUser(null);
     setToken(null);
     localStorage.removeItem("token");
+
+    // Redirigir
     navigate("/");
   };
 

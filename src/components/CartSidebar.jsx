@@ -1,4 +1,6 @@
 import { FaTimes, FaTrash } from "react-icons/fa";
+import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const CartSidebar = ({
   isOpen,
@@ -6,12 +8,46 @@ const CartSidebar = ({
   cartItems,
   removeFromCart,
   decreaseQuantity,
-  finalizePurchase,
 }) => {
+  const { isAuthenticated, user } = useAuth();
+  const navigate = useNavigate();
+
   const total = cartItems.reduce(
     (acc, item) => acc + (item.price || 0) * item.quantity,
     0
   );
+
+  const handleFinalizePurchase = () => {
+    if (!isAuthenticated) {
+      onClose();
+      navigate("/login", { state: { from: "/checkout/paso-1" } });
+      return;
+    }
+
+    if (user?.role?.toLowerCase() === "admin") {
+      alert("Los administradores no pueden realizar compras.");
+      return;
+    }
+
+    // Guardar datos iniciales del cliente
+    localStorage.setItem(
+      "checkoutData",
+      JSON.stringify({
+        clientId: user?.id ?? 0,
+        name: user?.name || "",
+        email: user?.email || "",
+        address: "",
+        phone: "",
+        paymentMethod: "",
+      })
+    );
+
+    // Guardar carrito en localStorage para persistir entre pasos
+    localStorage.setItem("cartItems", JSON.stringify(cartItems));
+
+    onClose();
+    navigate("/checkout/paso-1");
+  };
 
   return (
     <div
@@ -75,7 +111,7 @@ const CartSidebar = ({
           Total: ${total.toLocaleString("es-AR")}
         </p>
         <button
-          onClick={finalizePurchase}
+          onClick={handleFinalizePurchase}
           className="mt-2 w-full bg-gray-900 text-white py-2 rounded hover:bg-gray-800 transition"
           disabled={cartItems.length === 0}
         >
