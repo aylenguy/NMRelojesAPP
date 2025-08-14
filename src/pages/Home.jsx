@@ -62,16 +62,17 @@ const Home = ({ onAddToCart, onProductClick, searchText }) => {
           {filteredProducts.map((product) => (
             <div
               key={product.id || product.Id}
-              className="relative bg-white border rounded-lg shadow hover:shadow-lg transition"
+              className="relative bg-white rounded-lg shadow-md hover:shadow-lg transition overflow-hidden border"
             >
+              {/* Imagen con botón de carrito flotante */}
               <div
+                className="relative cursor-pointer group"
                 onClick={() => {
                   onProductClick(product);
                   navigate(`/producto/${product.id || product.Id}`, {
                     state: product,
                   });
                 }}
-                className="cursor-pointer"
               >
                 <img
                   src={
@@ -81,15 +82,27 @@ const Home = ({ onAddToCart, onProductClick, searchText }) => {
                     "/placeholder.png"
                   }
                   alt={product.name || product.Name || product.nombre}
-                  className="w-full h-64 object-cover rounded-t-lg"
+                  className="w-full h-72 object-cover"
                 />
+                {/* Botón carrito */}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleAddToCart(product);
+                  }}
+                  className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-white p-3 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition"
+                  title="Agregar al carrito"
+                >
+                  <FaShoppingCart className="text-gray-800 text-lg" />
+                </button>
               </div>
 
-              <div className="p-4 text-gray-800">
-                <h3 className="text-lg font-semibold mb-1">
+              {/* Información del producto */}
+              <div className="p-4 text-center">
+                <h3 className="text-lg font-bold mb-1">
                   {product.name || product.Name || product.nombre}
                 </h3>
-                <p className="text-base font-medium">
+                <p className="text-gray-800 font-medium text-lg">
                   $
                   {(
                     product.price ||
@@ -98,9 +111,9 @@ const Home = ({ onAddToCart, onProductClick, searchText }) => {
                     0
                   ).toLocaleString("es-AR")}
                 </p>
-                <p className="text-sm mt-2 text-gray-600">
+                <p className="text-sm text-gray-500 mt-1">
                   TRANSFERENCIA O EFECTIVO{" "}
-                  <span className="font-bold text-gray-800">
+                  <span className="block font-semibold text-green-600 text-base">
                     $
                     {Math.round(
                       (product.price || product.Price || product.precio || 0) *
@@ -108,14 +121,6 @@ const Home = ({ onAddToCart, onProductClick, searchText }) => {
                     ).toLocaleString("es-AR")}
                   </span>
                 </p>
-              </div>
-
-              <div
-                onClick={() => handleAddToCart(product)}
-                className="absolute bottom-3 right-3 bg-gray-200 rounded-full p-2 shadow-md hover:bg-gray-300 cursor-pointer transition"
-                title="Agregar al carrito"
-              >
-                <FaShoppingCart className="text-gray-800 text-lg" />
               </div>
             </div>
           ))}
