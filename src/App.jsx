@@ -1,13 +1,9 @@
 // src/App.jsx
 import { useState, useEffect } from "react";
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  useNavigate,
-} from "react-router-dom";
+import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
 
-// Contexto
+// Contextos
+import { useLoader } from "./context/LoaderContext";
 import { useAuth } from "./context/AuthContext";
 
 // Componentes
@@ -17,6 +13,7 @@ import Footer from "./components/Footer";
 import DetailProduct from "./components/DetailProduct";
 import Login from "./components/Login";
 import ProtectedRoute from "./components/ProtectedRoute";
+import GlobalSpinner from "./components/GlobalSpinner";
 
 // Páginas
 import Home from "./pages/Home";
@@ -43,6 +40,15 @@ function App() {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [searchText, setSearchText] = useState("");
   const navigate = useNavigate();
+  const location = useLocation();
+  const { setIsLoading } = useLoader();
+
+  // Mostrar spinner en cambios de ruta
+  useEffect(() => {
+    setIsLoading(true);
+    const timeout = setTimeout(() => setIsLoading(false), 500);
+    return () => clearTimeout(timeout);
+  }, [location.pathname, setIsLoading]);
 
   // Cargar carrito desde localStorage
   useEffect(() => {
@@ -112,12 +118,12 @@ function App() {
 
   return (
     <div className="font-sans">
+      <GlobalSpinner /> {/* Spinner global siempre disponible */}
       <Navbar
         onCartClick={() => setIsCartOpen(true)}
         searchText={searchText}
         setSearchText={setSearchText}
       />
-
       <Routes>
         {/* Rutas públicas */}
         <Route
@@ -168,7 +174,6 @@ function App() {
           </Route>
         </Route>
       </Routes>
-
       <CartSidebar
         isOpen={isCartOpen}
         onClose={() => setIsCartOpen(false)}
@@ -177,7 +182,6 @@ function App() {
         decreaseQuantity={decreaseQuantity}
         finalizePurchase={finalizePurchase}
       />
-
       <Footer />
     </div>
   );
