@@ -113,7 +113,7 @@ const Home = ({ onAddToCart, onProductClick, searchText }) => {
                 </p>
                 <p className="text-sm text-gray-500 mt-1">
                   TRANSFERENCIA O EFECTIVO{" "}
-                  <span className="block font-semibold text-green-600 text-base">
+                  <span className="block font-semibold text-[#005f73] text-base">
                     $
                     {Math.round(
                       (product.price || product.Price || product.precio || 0) *
