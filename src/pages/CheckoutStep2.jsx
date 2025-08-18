@@ -9,6 +9,8 @@ export default function CheckoutStep2() {
   const { cartItems, clearCart } = useCart();
   const { token } = useAuth();
   const navigate = useNavigate();
+
+  // Los datos del cliente siguen viniendo de localStorage
   const checkoutData = JSON.parse(localStorage.getItem("checkoutData") || "{}");
 
   const [payment, setPayment] = useState("tarjeta");

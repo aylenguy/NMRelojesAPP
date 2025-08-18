@@ -24,7 +24,7 @@ export default function CheckoutStep1() {
       return;
     }
 
-    // Guardar datos del cliente
+    // Guardar datos del cliente en localStorage
     localStorage.setItem(
       "checkoutData",
       JSON.stringify({

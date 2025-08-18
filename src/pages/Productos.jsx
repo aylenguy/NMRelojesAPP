@@ -103,54 +103,83 @@ const Productos = ({ onAddToCart, searchText }) => {
 
         {/* Lista de productos */}
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8">
-          {filtered.map((producto) => (
-            <div
-              key={producto.id || producto.Id}
-              className="relative bg-white rounded-lg shadow-md hover:shadow-lg transition overflow-hidden border"
-            >
+          {filtered.map((producto) => {
+            const stock = producto.stock ?? 0;
+            const sinStock = stock <= 0;
+
+            return (
               <div
-                className="relative cursor-pointer group"
-                onClick={() =>
-                  navigate(`/producto/${producto.id || producto.Id}`, {
-                    state: producto,
-                  })
-                }
+                key={producto.id || producto.Id}
+                className="relative bg-white rounded-lg shadow-md hover:shadow-lg transition overflow-hidden border"
               >
-                <img
-                  src={getImagen(producto)}
-                  alt={getNombre(producto)}
-                  className="w-full h-80 object-cover" // más grande
-                />
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleAddToCart(producto);
-                  }}
-                  className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-white p-3 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition"
-                  title="Agregar al carrito"
+                <div
+                  className="relative cursor-pointer group"
+                  onClick={() =>
+                    navigate(`/producto/${producto.id || producto.Id}`, {
+                      state: producto,
+                    })
+                  }
                 >
-                  <FaShoppingCart className="text-gray-800 text-lg" />
-                </button>
+                  <img
+                    src={getImagen(producto)}
+                    alt={getNombre(producto)}
+                    className="w-full h-80 object-cover"
+                  />
+
+                  {/* Badge de sin stock */}
+                  {sinStock && (
+                    <span className="absolute top-3 left-3 bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-md shadow-md">
+                      SIN STOCK
+                    </span>
+                  )}
+
+                  {/* Botón carrito */}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (!sinStock) handleAddToCart(producto);
+                    }}
+                    disabled={sinStock}
+                    className={`absolute bottom-4 left-1/2 -translate-x-1/2 p-3 rounded-full shadow-lg transition
+                      ${
+                        sinStock
+                          ? "bg-gray-300 cursor-not-allowed opacity-60"
+                          : "bg-white hover:bg-gray-100"
+                      }`}
+                    title={sinStock ? "Producto agotado" : "Agregar al carrito"}
+                  >
+                    <FaShoppingCart
+                      className={`text-lg ${
+                        sinStock ? "text-gray-500" : "text-gray-800"
+                      }`}
+                    />
+                  </button>
+                </div>
+                <div className="p-5 text-center">
+                  <h3 className="text-xl font-bold mb-1">
+                    {getNombre(producto)}
+                  </h3>
+                  <p className="text-gray-800 font-medium text-lg">
+                    ${getPrecio(producto).toLocaleString("es-AR")}
+                  </p>
+                  <p className="text-sm text-gray-500 mt-1">
+                    TRANSFERENCIA O EFECTIVO{" "}
+                    <span className="block font-semibold text-[#005f73] text-base">
+                      $
+                      {Math.round(getPrecio(producto) * 0.8).toLocaleString(
+                        "es-AR"
+                      )}
+                    </span>
+                  </p>
+                  {!sinStock && (
+                    <p className="text-sm text-green-600 mt-2">
+                      Stock disponible: {stock}
+                    </p>
+                  )}
+                </div>
               </div>
-              <div className="p-5 text-center">
-                <h3 className="text-xl font-bold mb-1">
-                  {getNombre(producto)}
-                </h3>
-                <p className="text-gray-800 font-medium text-lg">
-                  ${getPrecio(producto).toLocaleString("es-AR")}
-                </p>
-                <p className="text-sm text-gray-500 mt-1">
-                  TRANSFERENCIA O EFECTIVO{" "}
-                  <span className="block font-semibold text-[#005f73] text-base">
-                    $
-                    {Math.round(getPrecio(producto) * 0.8).toLocaleString(
-                      "es-AR"
-                    )}
-                  </span>
-                </p>
-              </div>
-            </div>
-          ))}
+            );
+          })}
 
           {filtered.length === 0 && (
             <p className="text-center col-span-full text-gray-500">

@@ -42,9 +42,7 @@ const CartSidebar = ({
       })
     );
 
-    // Guardar carrito en localStorage para persistir entre pasos
-    localStorage.setItem("cartItems", JSON.stringify(cartItems));
-
+    // ✅ NO volvemos a guardar cartItems a mano
     onClose();
     navigate("/checkout/paso-1");
   };

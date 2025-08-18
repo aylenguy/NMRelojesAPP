@@ -14,7 +14,7 @@ const DetailProduct = ({ addToCart }) => {
   const [postalCode, setPostalCode] = useState("");
   const [shippingCost, setShippingCost] = useState(null);
   const [relatedProducts, setRelatedProducts] = useState([]);
-  const [showDetails, setShowDetails] = useState(false); // 🔹 Nuevo estado para modal
+  const [showDetails, setShowDetails] = useState(false); // 🔹 Modal medios de pago
 
   // Cargar producto
   useEffect(() => {
@@ -70,8 +70,10 @@ const DetailProduct = ({ addToCart }) => {
     }
   }, [product]);
 
+  // Datos del producto
   const name = product?.name || product?.Name || product?.nombre || "";
   const price = product?.price || product?.Price || product?.precio || 0;
+  const stock = product?.stock || product?.Stock || 0;
   const image =
     product?.image || product?.Image || product?.imagen || "/placeholder.png";
   const description =
@@ -138,9 +140,21 @@ const DetailProduct = ({ addToCart }) => {
         <div className="w-full md:w-1/2">
           <h1 className="text-4xl font-bold text-gray-900 mb-6">{name}</h1>
 
-          <div className="text-4xl font-extrabold text-[#006d77] mb-4">
+          {/* Precio */}
+          <div className="text-4xl font-extrabold text-[#006d77] mb-2">
             ${totalPrice.toLocaleString("es-AR")}
           </div>
+
+          {/* Stock disponible */}
+          {stock > 0 ? (
+            <p className="text-green-600 font-medium mb-4">
+              Stock disponible: {stock} {stock === 1 ? "unidad" : "unidades"}
+            </p>
+          ) : (
+            <p className="text-red-600 font-medium mb-4">
+              Sin stock disponible
+            </p>
+          )}
 
           {/* Cuotas y descuentos */}
           <div className="text-lg text-gray-600 mb-2 space-y-2">
@@ -190,29 +204,44 @@ const DetailProduct = ({ addToCart }) => {
             </p>
           )}
 
-          {/* Cantidad */}
+          {/* Cantidad + Botón */}
           <div className="flex items-center gap-4 mb-8">
-            <div className="flex items-center border rounded-lg overflow-hidden">
+            {stock > 0 ? (
+              <>
+                {/* Selector de cantidad */}
+                <div className="flex items-center border rounded-lg overflow-hidden">
+                  <button
+                    onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                    className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-lg"
+                  >
+                    -
+                  </button>
+                  <span className="px-5 text-lg">{quantity}</span>
+                  <button
+                    onClick={() => setQuantity((q) => q + 1)}
+                    className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-lg"
+                  >
+                    +
+                  </button>
+                </div>
+
+                {/* Botón agregar */}
+                <button
+                  onClick={handleAddToCart}
+                  className="flex-1 bg-[#005f73] text-white px-6 py-3 rounded-lg hover:bg-[#0a9396] transition text-lg"
+                >
+                  Agregar al carrito
+                </button>
+              </>
+            ) : (
+              // 🔹 Si no hay stock
               <button
-                onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-lg"
+                disabled
+                className="flex-1 bg-gray-400 text-white px-6 py-3 rounded-lg cursor-not-allowed text-lg"
               >
-                -
+                SIN STOCK
               </button>
-              <span className="px-5 text-lg">{quantity}</span>
-              <button
-                onClick={() => setQuantity((q) => q + 1)}
-                className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-lg"
-              >
-                +
-              </button>
-            </div>
-            <button
-              onClick={handleAddToCart}
-              className="flex-1 bg-[#005f73] text-white px-6 py-3 rounded-lg hover:bg-[#0a9396] transition text-lg"
-            >
-              Agregar al carrito
-            </button>
+            )}
           </div>
 
           {/* Envío */}
