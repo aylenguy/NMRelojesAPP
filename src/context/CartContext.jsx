@@ -14,10 +14,19 @@ const API_URL = "https://localhost:7247/api/cart"; // Ajusta al puerto de tu bac
 
 export const CartProvider = ({ children }) => {
   const { token } = useAuth();
-  const [cart, setCart] = useState(null);
+  const [cart, setCart] = useState({ items: [], total: 0 });
   const [loading, setLoading] = useState(false);
 
-  // Traer carrito del backend
+  const calculateTotals = (items) => {
+    const total = items.reduce((sum, item) => {
+      const price = item.price || item.Price || item.precio || 0;
+      const discount = item.discount || 0; // porcentaje, ej: 20
+      const finalPrice = price * (1 - discount / 100);
+      return sum + finalPrice * item.cantidad;
+    }, 0);
+    return total;
+  };
+
   const fetchCart = useCallback(async () => {
     if (!token) return;
     try {
@@ -25,7 +34,8 @@ export const CartProvider = ({ children }) => {
       const res = await axios.get(API_URL, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setCart(res.data);
+      const items = res.data.items || [];
+      setCart({ items, total: calculateTotals(items) });
     } catch (err) {
       console.error("Error al obtener carrito:", err);
       toast.error("No se pudo cargar el carrito");
@@ -36,15 +46,19 @@ export const CartProvider = ({ children }) => {
 
   useEffect(() => {
     if (token) fetchCart();
-    else setCart(null);
+    else setCart({ items: [], total: 0 });
   }, [token, fetchCart]);
 
-  // Agregar producto al carrito
-  const addToCart = async (productId, cantidad = 1) => {
+  const addToCart = async (
+    productId,
+    cantidad = 1,
+    price = 0,
+    discount = 0
+  ) => {
     try {
       await axios.post(
         `${API_URL}/add`,
-        { productId, cantidad },
+        { productId, cantidad, price, discount },
         { headers: { Authorization: `Bearer ${token}` } }
       );
       await fetchCart();
@@ -55,12 +69,11 @@ export const CartProvider = ({ children }) => {
     }
   };
 
-  // Actualizar cantidad de un item
-  const updateItem = async (cartItemId, cantidad) => {
+  const updateItem = async (cartItemId, quantity) => {
     try {
       await axios.put(
         `${API_URL}/item/${cartItemId}`,
-        { Cantidad: cantidad }, // ⚡ coincide con backend
+        { quantity },
         { headers: { Authorization: `Bearer ${token}` } }
       );
       await fetchCart();
@@ -71,7 +84,6 @@ export const CartProvider = ({ children }) => {
     }
   };
 
-  // Eliminar item del carrito
   const removeFromCart = async (cartItemId) => {
     try {
       await axios.delete(`${API_URL}/item/${cartItemId}`, {
@@ -85,7 +97,6 @@ export const CartProvider = ({ children }) => {
     }
   };
 
-  // Vaciar carrito completo
   const clearCart = async () => {
     try {
       await axios.post(

@@ -2,14 +2,16 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaShoppingCart } from "react-icons/fa";
 import api from "../api/api";
+import { useCart } from "../context/CartContext"; // <- Importa tu contexto
 
-const Productos = ({ onAddToCart, searchText }) => {
+const Productos = ({ searchText }) => {
   const [productos, setProductos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showNotification, setShowNotification] = useState(false);
   const [error, setError] = useState(null);
   const [categoriasSeleccionadas, setCategoriasSeleccionadas] = useState([]);
   const navigate = useNavigate();
+  const { addToCart } = useCart(); // <- Extrae la función del contexto
 
   // Cargar productos
   useEffect(() => {
@@ -47,10 +49,14 @@ const Productos = ({ onAddToCart, searchText }) => {
     return coincideBusqueda && coincideCategoria;
   });
 
-  const handleAddToCart = (p) => {
-    onAddToCart(p);
-    setShowNotification(true);
-    setTimeout(() => setShowNotification(false), 2000);
+  const handleAddToCart = async (producto) => {
+    try {
+      await addToCart(producto.id || producto.Id); // <- Llama a addToCart del contexto
+      setShowNotification(true);
+      setTimeout(() => setShowNotification(false), 2000);
+    } catch (err) {
+      console.error("No se pudo agregar el producto", err);
+    }
   };
 
   if (loading)
@@ -79,9 +85,7 @@ const Productos = ({ onAddToCart, searchText }) => {
         Todos los Productos
       </h2>
 
-      {/* Layout: sidebar + productos */}
       <div className="grid grid-cols-1 lg:grid-cols-[250px_1fr] gap-8">
-        {/* Sidebar categorías */}
         <aside className="bg-white p-4 rounded-lg shadow-md border">
           <h3 className="text-lg font-semibold mb-4">Categorías</h3>
           <div className="flex flex-col gap-2">
@@ -101,7 +105,6 @@ const Productos = ({ onAddToCart, searchText }) => {
           </div>
         </aside>
 
-        {/* Lista de productos */}
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8">
           {filtered.map((producto) => {
             const stock = producto.stock ?? 0;
@@ -126,14 +129,12 @@ const Productos = ({ onAddToCart, searchText }) => {
                     className="w-full h-80 object-cover"
                   />
 
-                  {/* Badge de sin stock */}
                   {sinStock && (
                     <span className="absolute top-3 left-3 bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-md shadow-md">
                       SIN STOCK
                     </span>
                   )}
 
-                  {/* Botón carrito */}
                   <button
                     onClick={(e) => {
                       e.stopPropagation();

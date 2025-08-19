@@ -10,8 +10,29 @@ const CartSidebar = ({ isOpen, onClose }) => {
 
   const total = cart?.total ?? 0;
 
+  // Funciones de compatibilidad de propiedades
+  const getItemImagen = (item) =>
+    item.image ||
+    item.Image ||
+    item.imagen ||
+    item.Imagen ||
+    "/placeholder.png";
+
+  const getItemNombre = (item) =>
+    item.name ||
+    item.Name ||
+    item.productName ||
+    item.ProductName ||
+    item.nombre ||
+    "Producto";
+
+  const getItemCantidad = (item) => item.cantidad || item.Cantidad || 1;
+
+  const getItemSubtotal = (item) => item.subtotal || item.Subtotal || 0;
+
   const handleDecrease = (item) => {
-    if (item.cantidad > 1) updateItem(item.id, item.cantidad - 1);
+    const cantidad = getItemCantidad(item);
+    if (cantidad > 1) updateItem(item.id, cantidad - 1);
     else removeFromCart(item.id);
   };
 
@@ -68,17 +89,17 @@ const CartSidebar = ({ isOpen, onClose }) => {
               className="flex items-center justify-between gap-2 border-b pb-2"
             >
               <img
-                src={item.imageUrl}
-                alt={item.productName}
+                src={getItemImagen(item)}
+                alt={getItemNombre(item)}
                 className="w-16 h-16 object-cover rounded"
               />
               <div className="flex-1">
-                <h3 className="text-sm font-semibold">{item.productName}</h3>
+                <h3 className="text-sm font-semibold">{getItemNombre(item)}</h3>
                 <p className="text-sm text-gray-700">
-                  Cantidad: {item.cantidad}
+                  Cantidad: {getItemCantidad(item)}
                 </p>
                 <p className="text-sm font-bold">
-                  ${item.subtotal.toLocaleString("es-AR")}
+                  ${getItemSubtotal(item).toLocaleString("es-AR")}
                 </p>
               </div>
               <div className="flex flex-col items-end gap-1">

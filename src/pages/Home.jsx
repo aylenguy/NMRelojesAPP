@@ -3,11 +3,11 @@ import { useNavigate } from "react-router-dom";
 import NMrelojesImg from "../assets/NMrelojes.png";
 import { FaShoppingCart } from "react-icons/fa";
 import api from "../api/api";
-import { useCart } from "../context/CartContext"; // 👈 importa el hook del carrito
+import { useCart } from "../context/CartContext";
 
 const Home = ({ onProductClick, searchText }) => {
   const navigate = useNavigate();
-  const { addToCart } = useCart(); // 👈 trae la función desde el contexto
+  const { addToCart } = useCart(); // <-- Traemos addToCart del contexto
   const [products, setProducts] = useState([]);
   const [showNotification, setShowNotification] = useState(false);
 
@@ -18,8 +18,8 @@ const Home = ({ onProductClick, searchText }) => {
       .catch((err) => console.error("Error al cargar productos:", err));
   }, []);
 
-  const handleAddToCart = (product) => {
-    addToCart(product); // 👈 usa el contexto en vez de prop
+  const handleAddToCart = async (product) => {
+    await addToCart(product.id || product.Id, 1);
     setShowNotification(true);
     setTimeout(() => setShowNotification(false), 2000);
   };
@@ -70,7 +70,7 @@ const Home = ({ onProductClick, searchText }) => {
               <div
                 className="relative cursor-pointer group"
                 onClick={() => {
-                  onProductClick?.(product);
+                  onProductClick(product);
                   navigate(`/producto/${product.id || product.Id}`, {
                     state: product,
                   });
