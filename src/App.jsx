@@ -25,6 +25,7 @@ import Productos from "./pages/Productos";
 // Nuevo flujo checkout
 import CheckoutStep1 from "./pages/CheckoutStep1";
 import CheckoutStep2 from "./pages/CheckoutStep2";
+import CheckoutStep3 from "./pages/CheckoutStep3";
 
 // Admin
 import AdminLayout from "./pages/admin/AdminLayout";
@@ -161,6 +162,7 @@ function App() {
         <Route element={<ProtectedRoute requiredRole="client" />}>
           <Route path="/checkout/paso-1" element={<CheckoutStep1 />} />
           <Route path="/checkout/paso-2" element={<CheckoutStep2 />} />
+          <Route path="/checkout/paso-3" element={<CheckoutStep3 />} />
         </Route>
 
         {/* Rutas protegidas: admin */}

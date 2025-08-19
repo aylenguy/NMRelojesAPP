@@ -9,83 +9,113 @@ export default function CheckoutStep1() {
   const { user, token } = useAuth();
   const navigate = useNavigate();
 
-  const [name, setName] = useState(user?.name || "");
   const [email, setEmail] = useState(user?.email || "");
-  const [phone, setPhone] = useState("");
-  const [address, setAddress] = useState("");
 
-  // 🔄 Al cargar el paso 1, traer carrito actualizado
   useEffect(() => {
-    if (token) {
-      fetchCart();
-    }
+    if (token) fetchCart();
   }, [token, fetchCart]);
 
   const handleNext = () => {
     if (cartLoading) return;
-
-    if (!name.trim() || !email.trim() || !phone.trim() || !address.trim()) {
-      alert("Por favor completa todos los campos");
+    if (!email.trim()) {
+      alert("Por favor ingresa tu email");
       return;
     }
-    if (!cart || !cart.items || cart.items.length === 0) {
+    if (!cart?.items || cart.items.length === 0) {
       alert("El carrito está vacío");
       return;
     }
 
-    localStorage.setItem(
-      "checkoutData",
-      JSON.stringify({ name, email, phone, address })
-    );
-
+    localStorage.setItem("checkoutData", JSON.stringify({ email }));
     navigate("/checkout/paso-2");
   };
+
+  if (cartLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-gray-500 text-lg">Cargando carrito...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-100 py-8">
       <CheckoutProgress step={1} />
-      <h2 className="text-3xl font-bold text-center mb-6">Datos del cliente</h2>
 
-      <div className="max-w-xl mx-auto bg-white p-6 rounded-xl shadow-md">
-        <label className="font-bold block mb-2">Nombre completo:</label>
-        <input
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          className="w-full p-3 border border-gray-300 rounded-lg mb-4"
-        />
+      <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-[1fr_350px] gap-10">
+        {/* Datos de contacto */}
+        <div className="bg-white p-12 rounded-2xl shadow-sm">
+          <h2 className="text-3xl font-bold mb-8 tracking-tight">
+            Datos de contacto
+          </h2>
 
-        <label className="font-bold block mb-2">Email:</label>
-        <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="w-full p-3 border border-gray-300 rounded-lg mb-4"
-        />
+          <div className="mb-8">
+            <label className="block text-base font-semibold text-gray-800 mb-2">
+              Correo electrónico
+            </label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="tuemail@email.com"
+              className="w-full p-4 text-lg border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-black"
+            />
+          </div>
 
-        <label className="font-bold block mb-2">Teléfono:</label>
-        <input
-          type="tel"
-          value={phone}
-          onChange={(e) => setPhone(e.target.value)}
-          className="w-full p-3 border border-gray-300 rounded-lg mb-4"
-        />
+          <button
+            onClick={handleNext}
+            disabled={cartLoading}
+            className="w-full py-4 text-lg bg-black text-white font-semibold rounded-xl hover:bg-gray-800 transition-colors"
+          >
+            Continuar con el envío
+          </button>
 
-        <label className="font-bold block mb-2">Dirección de envío:</label>
-        <input
-          type="text"
-          value={address}
-          onChange={(e) => setAddress(e.target.value)}
-          className="w-full p-3 border border-gray-300 rounded-lg mb-6"
-        />
+          <button
+            onClick={() => navigate("/productos")}
+            className="block mt-4 text-base text-gray-600 hover:underline"
+          >
+            Seguir comprando
+          </button>
+        </div>
 
-        <button
-          onClick={handleNext}
-          disabled={cartLoading}
-          className="w-full py-3 bg-black text-white rounded-lg text-lg font-semibold hover:bg-gray-800 disabled:opacity-50"
-        >
-          {cartLoading ? "Cargando carrito..." : "Continuar al pago"}
-        </button>
+        {/* Resumen de pedido */}
+        <div className="bg-white p-8 rounded-2xl shadow-sm h-fit">
+          <h3 className="text-xl font-bold mb-6 tracking-tight">Mi pedido</h3>
+
+          {cart?.items?.length > 0 ? (
+            cart.items.map((item) => (
+              <div
+                key={item.productId}
+                className="flex justify-between items-center border-b pb-4 mb-4"
+              >
+                <div>
+                  <p className="font-semibold text-gray-900 text-base">
+                    {item.productName}
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    {item.quantity} unidad
+                  </p>
+                </div>
+                <span className="font-semibold text-base text-gray-900">
+                  ${item.subtotal.toLocaleString()}
+                </span>
+              </div>
+            ))
+          ) : (
+            <p className="text-gray-500">El carrito está vacío</p>
+          )}
+
+          <div className="mt-6 flex justify-between font-bold text-xl text-gray-900">
+            <span>Total</span>
+            <span>${cart?.total?.toLocaleString() ?? 0}</span>
+          </div>
+
+          <div className="mt-6">
+            <button className="w-full border border-gray-300 py-3 rounded-xl text-base font-medium text-gray-700 hover:bg-gray-50">
+              ¿Tenés un cupón de descuento?
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -1,11 +1,13 @@
 import { useLocation, useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import api from "../api/api";
+import { useCart } from "../context/CartContext"; // 👈 importamos el contexto
 
-const DetailProduct = ({ addToCart }) => {
+const DetailProduct = () => {
   const { state: productFromState } = useLocation();
   const { id } = useParams();
   const navigate = useNavigate();
+  const { addToCart } = useCart(); // 👈 usamos el contexto
 
   const [product, setProduct] = useState(productFromState || null);
   const [loading, setLoading] = useState(!productFromState);
@@ -14,7 +16,7 @@ const DetailProduct = ({ addToCart }) => {
   const [postalCode, setPostalCode] = useState("");
   const [shippingCost, setShippingCost] = useState(null);
   const [relatedProducts, setRelatedProducts] = useState([]);
-  const [showDetails, setShowDetails] = useState(false); // 🔹 Modal medios de pago
+  const [showDetails, setShowDetails] = useState(false);
 
   // Cargar producto
   useEffect(() => {
@@ -84,15 +86,10 @@ const DetailProduct = ({ addToCart }) => {
   const installmentValue = totalPrice / installmentCount;
   const discountPrice = totalPrice * 0.8;
 
+  // ✅ Unificado con Home: id + quantity
   const handleAddToCart = () => {
     if (!product) return;
-    addToCart({
-      id: product.id || product.Id,
-      name,
-      price,
-      image,
-      quantity,
-    });
+    addToCart(product.id || product.Id, quantity);
     setShowNotification(true);
     setTimeout(() => setShowNotification(false), 2000);
   };
