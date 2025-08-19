@@ -2,17 +2,21 @@ import { useState, useEffect } from "react";
 import { FaShoppingCart, FaUser, FaSignOutAlt } from "react-icons/fa";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useCart } from "../context/CartContext"; // 🔄 Importar el contexto del carrito
 import LogoImg from "../assets/Logo.jpeg";
 import RegisterModal from "./RegisterModal";
 import LoginModal from "./LoginModal";
+import CartSidebar from "./CartSidebar"; // 🔄 Importamos el sidebar
 
-const Navbar = ({ onCartClick, searchText, setSearchText }) => {
+const Navbar = ({ searchText, setSearchText }) => {
   const { user, isAuthenticated, logout } = useAuth();
+  const { cart } = useCart(); // 🔄 obtenemos carrito del contexto
   const navigate = useNavigate();
   const location = useLocation();
 
   const [showLogin, setShowLogin] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
+  const [isCartOpen, setIsCartOpen] = useState(false); // 🔄 controlamos el sidebar
 
   // Cierra modales al cambiar de ruta
   useEffect(() => {
@@ -26,13 +30,14 @@ const Navbar = ({ onCartClick, searchText, setSearchText }) => {
       if (e.key === "Escape") {
         setShowLogin(false);
         setShowRegister(false);
+        setIsCartOpen(false);
       }
     };
-    if (showLogin || showRegister) {
+    if (showLogin || showRegister || isCartOpen) {
       window.addEventListener("keydown", onEsc);
     }
     return () => window.removeEventListener("keydown", onEsc);
-  }, [showLogin, showRegister]);
+  }, [showLogin, showRegister, isCartOpen]);
 
   const handleLogout = () => {
     logout();
@@ -40,6 +45,8 @@ const Navbar = ({ onCartClick, searchText, setSearchText }) => {
   };
 
   const role = user?.role?.toLowerCase();
+  const cartCount =
+    cart?.items?.reduce((acc, item) => acc + item.quantity, 0) ?? 0;
 
   return (
     <nav className="bg-white shadow-md py-5 px-8 border-b border-gray-200 z-50 relative">
@@ -111,11 +118,16 @@ const Navbar = ({ onCartClick, searchText, setSearchText }) => {
 
               {role === "client" && (
                 <button
-                  onClick={onCartClick}
-                  className="text-gray-700 hover:text-yellow-500"
+                  onClick={() => setIsCartOpen(true)}
+                  className="relative text-gray-700 hover:text-yellow-500"
                   aria-label="Abrir carrito"
                 >
                   <FaShoppingCart className="text-xl" />
+                  {cartCount > 0 && (
+                    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                      {cartCount}
+                    </span>
+                  )}
                 </button>
               )}
             </>
@@ -129,11 +141,16 @@ const Navbar = ({ onCartClick, searchText, setSearchText }) => {
                 <FaUser className="text-xl" />
               </button>
               <button
-                onClick={onCartClick}
-                className="text-gray-700 hover:text-yellow-500"
+                onClick={() => setIsCartOpen(true)}
+                className="relative text-gray-700 hover:text-yellow-500"
                 aria-label="Abrir carrito"
               >
                 <FaShoppingCart className="text-xl" />
+                {cartCount > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                    {cartCount}
+                  </span>
+                )}
               </button>
             </>
           )}
@@ -163,6 +180,9 @@ const Navbar = ({ onCartClick, searchText, setSearchText }) => {
           />
         </>
       )}
+
+      {/* 🔄 Sidebar del carrito */}
+      <CartSidebar isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
     </nav>
   );
 };

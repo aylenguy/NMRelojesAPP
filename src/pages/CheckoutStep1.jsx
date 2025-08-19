@@ -1,12 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import CheckoutProgress from "../components/CheckoutProgress";
-import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
+import { useCart } from "../context/CartContext";
 
 export default function CheckoutStep1() {
-  const { cartItems } = useCart();
-  const { user } = useAuth();
+  const { cart, fetchCart, loading: cartLoading } = useCart();
+  const { user, token } = useAuth();
   const navigate = useNavigate();
 
   const [name, setName] = useState(user?.name || "");
@@ -14,26 +14,28 @@ export default function CheckoutStep1() {
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
 
+  // 🔄 Al cargar el paso 1, traer carrito actualizado
+  useEffect(() => {
+    if (token) {
+      fetchCart();
+    }
+  }, [token, fetchCart]);
+
   const handleNext = () => {
+    if (cartLoading) return;
+
     if (!name.trim() || !email.trim() || !phone.trim() || !address.trim()) {
       alert("Por favor completa todos los campos");
       return;
     }
-    if (cartItems.length === 0) {
+    if (!cart || !cart.items || cart.items.length === 0) {
       alert("El carrito está vacío");
       return;
     }
 
-    // Guardar datos del cliente en localStorage
     localStorage.setItem(
       "checkoutData",
-      JSON.stringify({
-        clientId: user?.id ?? 0,
-        name,
-        email,
-        phone,
-        address,
-      })
+      JSON.stringify({ name, email, phone, address })
     );
 
     navigate("/checkout/paso-2");
@@ -79,9 +81,10 @@ export default function CheckoutStep1() {
 
         <button
           onClick={handleNext}
-          className="w-full py-3 bg-black text-white rounded-lg text-lg font-semibold hover:bg-gray-800"
+          disabled={cartLoading}
+          className="w-full py-3 bg-black text-white rounded-lg text-lg font-semibold hover:bg-gray-800 disabled:opacity-50"
         >
-          Continuar al pago
+          {cartLoading ? "Cargando carrito..." : "Continuar al pago"}
         </button>
       </div>
     </div>

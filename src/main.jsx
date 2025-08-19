@@ -5,7 +5,8 @@ import "./index.css";
 import { BrowserRouter } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import { CartProvider } from "./context/CartContext";
-import { LoaderProvider } from "./context/LoaderContext"; // 👈 agregado
+import { LoaderProvider } from "./context/LoaderContext";
+import { Toaster } from "react-hot-toast";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
@@ -13,9 +14,8 @@ ReactDOM.createRoot(document.getElementById("root")).render(
       <AuthProvider>
         <CartProvider>
           <LoaderProvider>
-            {" "}
-            {/* 👈 ahora el loader envuelve todo */}
             <App />
+            <Toaster position="top-right" /> {/* Aquí agregas el Toaster */}
           </LoaderProvider>
         </CartProvider>
       </AuthProvider>

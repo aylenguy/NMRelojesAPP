@@ -3,9 +3,11 @@ import { useNavigate } from "react-router-dom";
 import NMrelojesImg from "../assets/NMrelojes.png";
 import { FaShoppingCart } from "react-icons/fa";
 import api from "../api/api";
+import { useCart } from "../context/CartContext"; // 👈 importa el hook del carrito
 
-const Home = ({ onAddToCart, onProductClick, searchText }) => {
+const Home = ({ onProductClick, searchText }) => {
   const navigate = useNavigate();
+  const { addToCart } = useCart(); // 👈 trae la función desde el contexto
   const [products, setProducts] = useState([]);
   const [showNotification, setShowNotification] = useState(false);
 
@@ -17,7 +19,7 @@ const Home = ({ onAddToCart, onProductClick, searchText }) => {
   }, []);
 
   const handleAddToCart = (product) => {
-    onAddToCart(product);
+    addToCart(product); // 👈 usa el contexto en vez de prop
     setShowNotification(true);
     setTimeout(() => setShowNotification(false), 2000);
   };
@@ -59,101 +61,71 @@ const Home = ({ onAddToCart, onProductClick, searchText }) => {
           Nuestros Productos
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-          {filteredProducts.map((product) => {
-            const stock = product.stock ?? 0;
-            const sinStock = stock <= 0;
-
-            return (
+          {filteredProducts.map((product) => (
+            <div
+              key={product.id || product.Id}
+              className="relative bg-white rounded-lg shadow-md hover:shadow-lg transition overflow-hidden border"
+            >
+              {/* Imagen con botón de carrito flotante */}
               <div
-                key={product.id || product.Id}
-                className="relative bg-white rounded-lg shadow-md hover:shadow-lg transition overflow-hidden border"
+                className="relative cursor-pointer group"
+                onClick={() => {
+                  onProductClick?.(product);
+                  navigate(`/producto/${product.id || product.Id}`, {
+                    state: product,
+                  });
+                }}
               >
-                {/* Imagen con botón de carrito flotante */}
-                <div
-                  className="relative cursor-pointer group"
-                  onClick={() => {
-                    onProductClick(product);
-                    navigate(`/producto/${product.id || product.Id}`, {
-                      state: product,
-                    });
+                <img
+                  src={
+                    product.image ||
+                    product.Image ||
+                    product.imagen ||
+                    "/placeholder.png"
+                  }
+                  alt={product.name || product.Name || product.nombre}
+                  className="w-full h-72 object-cover"
+                />
+                {/* Botón carrito */}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleAddToCart(product);
                   }}
+                  className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-white p-3 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition"
+                  title="Agregar al carrito"
                 >
-                  <img
-                    src={
-                      product.image ||
-                      product.Image ||
-                      product.imagen ||
-                      "/placeholder.png"
-                    }
-                    alt={product.name || product.Name || product.nombre}
-                    className="w-full h-72 object-cover"
-                  />
-
-                  {/* Badge de sin stock */}
-                  {sinStock && (
-                    <span className="absolute top-3 left-3 bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-md shadow-md">
-                      SIN STOCK
-                    </span>
-                  )}
-
-                  {/* Botón carrito */}
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (!sinStock) handleAddToCart(product);
-                    }}
-                    disabled={sinStock}
-                    className={`absolute bottom-4 left-1/2 -translate-x-1/2 p-3 rounded-full shadow-lg transition
-                      ${
-                        sinStock
-                          ? "bg-gray-300 cursor-not-allowed opacity-60"
-                          : "bg-white hover:bg-gray-100"
-                      }`}
-                    title={sinStock ? "Producto agotado" : "Agregar al carrito"}
-                  >
-                    <FaShoppingCart
-                      className={`text-lg ${
-                        sinStock ? "text-gray-500" : "text-gray-800"
-                      }`}
-                    />
-                  </button>
-                </div>
-
-                {/* Información del producto */}
-                <div className="p-4 text-center">
-                  <h3 className="text-lg font-bold mb-1">
-                    {product.name || product.Name || product.nombre}
-                  </h3>
-                  <p className="text-gray-800 font-medium text-lg">
-                    $
-                    {(
-                      product.price ||
-                      product.Price ||
-                      product.precio ||
-                      0
-                    ).toLocaleString("es-AR")}
-                  </p>
-                  <p className="text-sm text-gray-500 mt-1">
-                    TRANSFERENCIA O EFECTIVO{" "}
-                    <span className="block font-semibold text-[#005f73] text-base">
-                      $
-                      {Math.round(
-                        (product.price ||
-                          product.Price ||
-                          product.precio ||
-                          0) * 0.8
-                      ).toLocaleString("es-AR")}
-                    </span>
-                  </p>
-                  {!sinStock && (
-                    <p className="text-sm text-green-600 mt-2">
-                      Stock disponible: {stock}
-                    </p>
-                  )}
-                </div>
+                  <FaShoppingCart className="text-gray-800 text-lg" />
+                </button>
               </div>
-            );
-          })}
+
+              {/* Información del producto */}
+              <div className="p-4 text-center">
+                <h3 className="text-lg font-bold mb-1">
+                  {product.name || product.Name || product.nombre}
+                </h3>
+                <p className="text-gray-800 font-medium text-lg">
+                  $
+                  {(
+                    product.price ||
+                    product.Price ||
+                    product.precio ||
+                    0
+                  ).toLocaleString("es-AR")}
+                </p>
+                <p className="text-sm text-gray-500 mt-1">
+                  TRANSFERENCIA O EFECTIVO{" "}
+                  <span className="block font-semibold text-[#005f73] text-base">
+                    $
+                    {Math.round(
+                      (product.price || product.Price || product.precio || 0) *
+                        0.8
+                    ).toLocaleString("es-AR")}
+                  </span>
+                </p>
+              </div>
+            </div>
+          ))}
 
           {filteredProducts.length === 0 && (
             <p className="text-center col-span-full text-gray-500">

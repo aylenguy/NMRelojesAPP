@@ -1,55 +1,64 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import CheckoutProgress from "../components/CheckoutProgress";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
-import { addVenta } from "../api/orders";
+import axios from "axios";
+
+const API_URL = "https://localhost:7247/api/venta"; // ⚠️ Ajusta puerto real
 
 export default function CheckoutStep2() {
-  const { cartItems, clearCart } = useCart();
+  const { cart, fetchCart, clearCart, loading: cartLoading } = useCart();
   const { token } = useAuth();
   const navigate = useNavigate();
 
-  // Los datos del cliente siguen viniendo de localStorage
   const checkoutData = JSON.parse(localStorage.getItem("checkoutData") || "{}");
-
   const [payment, setPayment] = useState("tarjeta");
+  const [loading, setLoading] = useState(false);
+
+  // 🔄 Cargar carrito actualizado al entrar a este paso
+  useEffect(() => {
+    if (token) {
+      fetchCart();
+    }
+  }, [token, fetchCart]);
 
   const handleConfirm = async () => {
-    if (!checkoutData.clientId || cartItems.length === 0) {
-      alert("No hay datos de compra válidos.");
+    if (!cart || !cart.items || cart.items.length === 0) {
+      alert("El carrito está vacío");
       return;
     }
 
+    setLoading(true);
     try {
-      const venta = {
-        clientId: checkoutData.clientId,
-        address: checkoutData.address,
-        paymentMethod: payment,
-        items: cartItems.map((item) => ({
-          productId: item.id,
-          cantidad: item.quantity,
-        })),
-      };
+      await axios.post(
+        `${API_URL}/CreateFromCart`,
+        { paymentMethod: payment },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
 
-      await addVenta(venta, token);
       alert("Compra realizada con éxito 🎉");
-
-      // Limpiar datos
-      clearCart();
+      await clearCart();
+      await fetchCart(); // 🔄 refrescar para ver carrito vacío
       localStorage.removeItem("checkoutData");
-
       navigate("/");
     } catch (error) {
       console.error("Error al confirmar la compra:", error);
       alert("Hubo un error al procesar la compra. Intenta de nuevo.");
+    } finally {
+      setLoading(false);
     }
   };
 
-  const total = cartItems.reduce(
-    (acc, item) => acc + item.price * item.quantity,
-    0
-  );
+  if (cartLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-gray-500 text-lg">Cargando carrito...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-100 py-8">
@@ -88,27 +97,31 @@ export default function CheckoutStep2() {
         {/* Resumen del pedido */}
         <div className="bg-white p-6 rounded-xl shadow-md h-fit">
           <h3 className="text-lg font-bold mb-4">Resumen del pedido</h3>
-          {cartItems.length > 0 ? (
-            cartItems.map((item) => (
+
+          {cart?.items?.length > 0 ? (
+            cart.items.map((item) => (
               <div
-                key={item.id}
+                key={item.productId}
                 className="flex justify-between border-b pb-2 mb-2"
               >
                 <span>
-                  {item.name} x {item.quantity}
+                  {item.productName} x {item.quantity}
                 </span>
-                <span>${item.price * item.quantity}</span>
+                <span>${item.subtotal}</span>
               </div>
             ))
           ) : (
             <p className="text-gray-500">El carrito está vacío</p>
           )}
-          <h4 className="mt-4 text-xl font-bold">Total: ${total}</h4>
+
+          <h4 className="mt-4 text-xl font-bold">Total: ${cart?.total ?? 0}</h4>
+
           <button
             onClick={handleConfirm}
-            className="w-full mt-4 py-3 bg-green-600 text-white rounded-lg text-lg font-semibold hover:bg-green-700"
+            disabled={loading}
+            className="w-full mt-4 py-3 bg-green-600 text-white rounded-lg text-lg font-semibold hover:bg-green-700 disabled:opacity-50"
           >
-            Pagar ahora
+            {loading ? "Procesando..." : "Pagar ahora"}
           </button>
         </div>
       </div>
