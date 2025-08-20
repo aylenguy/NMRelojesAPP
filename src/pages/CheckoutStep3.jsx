@@ -7,7 +7,7 @@ import { addVenta } from "../api/orders";
 
 export default function CheckoutStep3() {
   const { cart, fetchCart, clearCart, loading: cartLoading } = useCart();
-  const { token } = useAuth();
+  const { token, user } = useAuth();
   const navigate = useNavigate();
 
   const checkoutData = JSON.parse(localStorage.getItem("checkoutData") || "{}");
@@ -22,14 +22,30 @@ export default function CheckoutStep3() {
   const handleConfirmOrder = async () => {
     try {
       setLoading(true);
-      await addVenta(token, {
-        customer: checkoutData,
-        shipping: checkoutData.shipping,
-        paymentMethod,
-        notes: orderNotes,
-        items: cart.items,
-        total: cart.total,
-      });
+
+      // Items al formato que espera el back
+      const ventaItems = cart.items.map((item) => ({
+        productId: item.productId,
+        quantity: item.quantity,
+      }));
+
+      // DTO correcto según tu back
+      const ventaDto = {
+        ClienteId: user?.id || 0, // <-- con mayúscula inicial
+        ShippingAddress: checkoutData.street,
+        PostalCode: checkoutData.postalCode,
+        PaymentMethod: paymentMethod,
+        DeliveryMethod: checkoutData.deliveryMethod,
+        Notes: orderNotes || "",
+        Items: cart.items.map((item) => ({
+          ProductId: item.productId, // <-- PascalCase
+          Quantity: item.quantity, // <-- PascalCase
+        })),
+      };
+
+      console.log("DTO que se envía al backend:", ventaDto);
+
+      await addVenta(ventaDto, token);
 
       clearCart();
       localStorage.removeItem("checkoutData");
@@ -37,7 +53,7 @@ export default function CheckoutStep3() {
       navigate("/checkout/success");
     } catch (err) {
       console.error("Error al confirmar la venta:", err);
-      alert("Hubo un error al procesar tu pago.");
+      alert("Hubo un error al procesar tu pedido.");
     } finally {
       setLoading(false);
     }
@@ -56,7 +72,7 @@ export default function CheckoutStep3() {
     {
       id: "mercadopago",
       title: "Mercado Pago",
-      logo: "/img/mercadopago.png", // guardalo en public/img/
+      logo: "/img/mercadopago.png",
       badge: "Hasta 6 cuotas sin interés con tarjetas seleccionadas",
     },
     {
@@ -64,11 +80,7 @@ export default function CheckoutStep3() {
       title: "Transferencia o depósito bancario",
       badge: "20% de descuento",
     },
-    {
-      id: "efectivo",
-      title: "Efectivo",
-      badge: "20% de descuento",
-    },
+    { id: "efectivo", title: "Efectivo", badge: "20% de descuento" },
   ];
 
   return (
@@ -79,7 +91,6 @@ export default function CheckoutStep3() {
       <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-[1fr_350px] gap-8">
         {/* IZQUIERDA */}
         <div className="bg-white p-6 rounded-xl shadow-md">
-          {/* Métodos de pago */}
           <h3 className="text-xl font-bold mb-4">Método de pago</h3>
           <div className="space-y-4">
             {paymentOptions.map((option) => (
@@ -120,7 +131,6 @@ export default function CheckoutStep3() {
             ))}
           </div>
 
-          {/* Notas del pedido */}
           <h3 className="text-xl font-bold mt-8 mb-2">Notas del pedido</h3>
           <textarea
             rows="3"
@@ -138,13 +148,18 @@ export default function CheckoutStep3() {
           {cart?.items?.length > 0 ? (
             cart.items.map((item) => (
               <div
-                key={item.productId}
+                key={item.productId || item.id}
                 className="flex justify-between border-b pb-2 mb-2 text-lg"
               >
                 <span>
-                  {item.productName} x {item.quantity}
+                  {item.productName || item.name} x {item.quantity}
                 </span>
-                <span>${item.subtotal}</span>
+                <span>
+                  $
+                  {(
+                    item.subtotal ?? item.quantity * item.unitPrice
+                  ).toLocaleString("es-AR")}
+                </span>
               </div>
             ))
           ) : (
@@ -152,10 +167,9 @@ export default function CheckoutStep3() {
           )}
 
           <h4 className="mt-4 text-2xl font-bold">
-            Total: ${cart?.total ?? 0}
+            Total: ${(cart?.total ?? 0).toLocaleString("es-AR")}
           </h4>
 
-          {/* Botón pagar */}
           <button
             onClick={handleConfirmOrder}
             disabled={loading}

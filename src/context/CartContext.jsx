@@ -17,16 +17,7 @@ export const CartProvider = ({ children }) => {
   const [cart, setCart] = useState({ items: [], total: 0 });
   const [loading, setLoading] = useState(false);
 
-  const calculateTotals = (items) => {
-    const total = items.reduce((sum, item) => {
-      const price = item.price || item.Price || item.precio || 0;
-      const discount = item.discount || 0; // porcentaje, ej: 20
-      const finalPrice = price * (1 - discount / 100);
-      return sum + finalPrice * item.cantidad;
-    }, 0);
-    return total;
-  };
-
+  // 🔹 Ahora usamos directamente el total que manda el back
   const fetchCart = useCallback(async () => {
     if (!token) return;
     try {
@@ -34,8 +25,7 @@ export const CartProvider = ({ children }) => {
       const res = await axios.get(API_URL, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      const items = res.data.items || [];
-      setCart({ items, total: calculateTotals(items) });
+      setCart(res.data || { items: [], total: 0 }); // ✅ usamos el objeto del back
     } catch (err) {
       console.error("Error al obtener carrito:", err);
       toast.error("No se pudo cargar el carrito");
@@ -49,16 +39,12 @@ export const CartProvider = ({ children }) => {
     else setCart({ items: [], total: 0 });
   }, [token, fetchCart]);
 
-  const addToCart = async (
-    productId,
-    cantidad = 1,
-    price = 0,
-    discount = 0
-  ) => {
+  // 🔹 Solo mandamos productId y cantidad
+  const addToCart = async (productId, cantidad = 1) => {
     try {
       await axios.post(
         `${API_URL}/add`,
-        { productId, cantidad, price, discount },
+        { productId, cantidad },
         { headers: { Authorization: `Bearer ${token}` } }
       );
       await fetchCart();
@@ -69,11 +55,11 @@ export const CartProvider = ({ children }) => {
     }
   };
 
-  const updateItem = async (cartItemId, quantity) => {
+  const updateItem = async (cartItemId, cantidad) => {
     try {
       await axios.put(
         `${API_URL}/item/${cartItemId}`,
-        { quantity },
+        { cantidad },
         { headers: { Authorization: `Bearer ${token}` } }
       );
       await fetchCart();
