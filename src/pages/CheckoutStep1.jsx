@@ -9,7 +9,14 @@ export default function CheckoutStep1() {
   const { user, token } = useAuth();
   const navigate = useNavigate();
 
-  const [email, setEmail] = useState(user?.email || "");
+  const savedCheckout = JSON.parse(localStorage.getItem("checkoutData")) || {};
+  const savedShipping = JSON.parse(localStorage.getItem("shippingData")) || {};
+
+  const [email, setEmail] = useState(user?.email || savedCheckout.email || "");
+  const [postalCode, setPostalCode] = useState(
+    savedCheckout.postalCode || savedShipping.postalCode || ""
+  );
+  const [shippingOption] = useState(savedShipping.shippingOption || null);
 
   useEffect(() => {
     if (token) fetchCart();
@@ -21,12 +28,19 @@ export default function CheckoutStep1() {
       alert("Por favor ingresa tu email");
       return;
     }
+    if (!postalCode.trim()) {
+      alert("Por favor ingresa tu código postal");
+      return;
+    }
     if (!cart?.items || cart.items.length === 0) {
       alert("El carrito está vacío");
       return;
     }
 
-    localStorage.setItem("checkoutData", JSON.stringify({ email }));
+    localStorage.setItem(
+      "checkoutData",
+      JSON.stringify({ email, postalCode, shippingOption })
+    );
     navigate("/checkout/paso-2");
   };
 
@@ -49,7 +63,8 @@ export default function CheckoutStep1() {
             Datos de contacto
           </h2>
 
-          <div className="mb-8">
+          {/* Email */}
+          <div className="mb-6">
             <label className="block text-base font-semibold text-gray-800 mb-2">
               Correo electrónico
             </label>
@@ -61,6 +76,38 @@ export default function CheckoutStep1() {
               className="w-full p-4 text-lg border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-black"
             />
           </div>
+
+          {/* Mostrar postalCode solo si no existe */}
+          {!postalCode ? (
+            <div className="mb-8">
+              <label className="block text-base font-semibold text-gray-800 mb-2">
+                Código postal
+              </label>
+              <input
+                type="text"
+                value={postalCode}
+                onChange={(e) => setPostalCode(e.target.value)}
+                placeholder="Ingrese su código postal"
+                className="w-full p-4 text-lg border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-black"
+              />
+            </div>
+          ) : (
+            <div className="mb-8">
+              <p className="text-base text-gray-700">
+                Código postal seleccionado:{" "}
+                <span className="font-bold">{postalCode}</span>
+              </p>
+              {shippingOption && (
+                <p className="text-sm text-gray-600">
+                  Envío:{" "}
+                  <span className="font-semibold">{shippingOption.name}</span> –{" "}
+                  {shippingOption.cost === 0
+                    ? "Gratis"
+                    : `$${shippingOption.cost.toLocaleString("es-AR")}`}
+                </p>
+              )}
+            </div>
+          )}
 
           <button
             onClick={handleNext}

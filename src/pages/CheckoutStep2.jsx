@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import CheckoutProgress from "../components/CheckoutProgress";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
+import axios from "axios";
 
 export default function CheckoutStep2() {
   const { cart, fetchCart, loading: cartLoading } = useCart();
@@ -11,7 +12,7 @@ export default function CheckoutStep2() {
 
   const checkoutData = JSON.parse(localStorage.getItem("checkoutData") || "{}");
 
-  const [shipping, setShipping] = useState(""); // 👈 arranca vacío
+  const [shipping, setShipping] = useState(checkoutData.shipping || "");
   const [formData, setFormData] = useState({
     name: checkoutData.name || "",
     lastname: checkoutData.lastname || "",
@@ -26,20 +27,89 @@ export default function CheckoutStep2() {
     province: checkoutData.province || "",
   });
 
+  const [shippingOptions, setShippingOptions] = useState([]);
+  const [error, setError] = useState("");
+
   useEffect(() => {
     if (token) fetchCart();
-  }, [token, fetchCart]);
+    if (formData.postalCode) fetchShippingOptions(formData.postalCode);
+  }, [token]);
+
+  const fetchShippingOptions = async (cp) => {
+    if (!cp.match(/^\d{4}$/)) {
+      setError("Código postal inválido.");
+      setShippingOptions([]);
+      return;
+    }
+    try {
+      let res;
+      try {
+        res = await axios.post(
+          "https://localhost:7247/api/shipping/calculate",
+          { postalCode: cp },
+          { headers: { "Content-Type": "application/json" } }
+        );
+      } catch {
+        res = await axios.get(
+          `https://localhost:7247/api/shipping/calculate/${cp}`
+        );
+      }
+
+      const data = Array.isArray(res.data) ? res.data : [res.data];
+      if (data.length > 0) {
+        setShippingOptions(data);
+        setShipping(data[0].name); // seteo el primero por defecto
+        setError("");
+      } else {
+        setShippingOptions([]);
+        setShipping("");
+        setError("No hay opciones de envío para este código postal.");
+      }
+    } catch (err) {
+      console.error(err);
+      setError("Error al consultar métodos de envío.");
+      setShippingOptions([]);
+      setShipping("");
+    }
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    if (name === "postalCode") {
+      setError("");
+    }
   };
 
   const handleContinue = () => {
+    if (!shipping) {
+      alert("Por favor selecciona un método de envío");
+      return;
+    }
+
+    const prevData = JSON.parse(localStorage.getItem("checkoutData") || "{}");
+    const selectedOption = shippingOptions.find((opt) => opt.name === shipping);
+
+    // 🔹 Guardar en checkoutData
     localStorage.setItem(
       "checkoutData",
-      JSON.stringify({ ...formData, shipping })
+      JSON.stringify({
+        ...prevData,
+        ...formData,
+        shipping,
+        shippingOption: selectedOption || null,
+      })
     );
+
+    // 🔹 Guardar también en shippingData para el sidebar
+    localStorage.setItem(
+      "shippingData",
+      JSON.stringify({
+        postalCode: formData.postalCode,
+        shippingOption: selectedOption || null,
+      })
+    );
+
     navigate("/checkout/paso-3");
   };
 
@@ -59,53 +129,61 @@ export default function CheckoutStep2() {
       <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-[1fr_350px] gap-8">
         {/* IZQUIERDA */}
         <div className="bg-white p-6 rounded-xl shadow-md">
-          {/* 🚚 Método de envío */}
           <h3 className="text-xl font-bold mb-4">Elegí tu método de envío</h3>
-          <div className="space-y-4">
-            {[
-              {
-                id: "sucursal",
-                title: "Correo Argentino - Retiro por sucursal",
-                desc: "Entrega de 3 a 6 días hábiles luego de despachado.",
-              },
-              {
-                id: "cadeteria",
-                title: "Envío por cadetería",
-                desc: "Solo válido para Rosario y alrededores.",
-              },
-              {
-                id: "pichincha",
-                title: "Retiro barrio Pichincha",
-                desc: "Ov Lagos 574 - Día y horario a coordinar.",
-              },
-            ].map((option) => (
-              <label
-                key={option.id}
-                className={`block border rounded-xl p-4 cursor-pointer shadow-sm transition-all ${
-                  shipping === option.id
-                    ? "border-green-600 bg-green-50"
-                    : "border-gray-200 bg-white hover:shadow-md"
-                }`}
-              >
-                <div className="flex items-start gap-3">
-                  <input
-                    type="radio"
-                    name="shipping"
-                    value={option.id}
-                    checked={shipping === option.id}
-                    onChange={(e) => setShipping(e.target.value)}
-                    className="mt-1 w-5 h-5 text-green-600 focus:ring-green-500"
-                  />
-                  <div>
-                    <p className="font-semibold text-lg">{option.title}</p>
-                    <p className="text-gray-500 text-sm">{option.desc}</p>
-                  </div>
-                </div>
-              </label>
-            ))}
+
+          {/* Código Postal */}
+          <div className="mb-4">
+            <input
+              type="text"
+              name="postalCode"
+              value={formData.postalCode}
+              onChange={handleChange}
+              onBlur={() => fetchShippingOptions(formData.postalCode)}
+              placeholder="Ingresá tu código postal"
+              className="w-full p-3 border rounded-lg"
+            />
+            {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
           </div>
 
-          {/* 👤 Solo muestro el formulario si eligió un método */}
+          {/* Opciones dinámicas */}
+          {shippingOptions.length > 0 && (
+            <div className="space-y-4 mb-6">
+              {shippingOptions.map((option, idx) => (
+                <label
+                  key={idx}
+                  className={`block border rounded-xl p-4 cursor-pointer shadow-sm transition-all ${
+                    shipping === option.name
+                      ? "border-green-600 bg-green-50"
+                      : "border-gray-200 bg-white hover:shadow-md"
+                  }`}
+                >
+                  <div className="flex items-start gap-3">
+                    <input
+                      type="radio"
+                      name="shipping"
+                      value={option.name}
+                      checked={shipping === option.name}
+                      onChange={(e) => setShipping(e.target.value)}
+                      className="mt-1 w-5 h-5 text-green-600 focus:ring-green-500"
+                    />
+                    <div>
+                      <p className="font-semibold text-lg">{option.name}</p>
+                      <p className="text-gray-500 text-sm">
+                        {option.description}
+                      </p>
+                      <p className="font-bold text-gray-900">
+                        {option.cost === 0
+                          ? "Gratis"
+                          : `$${option.cost.toLocaleString("es-AR")}`}
+                      </p>
+                    </div>
+                  </div>
+                </label>
+              ))}
+            </div>
+          )}
+
+          {/* Formulario cliente */}
           {shipping && (
             <>
               <h3 className="text-xl font-bold mt-8 mb-4">Datos del cliente</h3>
@@ -196,14 +274,6 @@ export default function CheckoutStep2() {
                 />
                 <input
                   type="text"
-                  name="postalCode"
-                  value={formData.postalCode}
-                  onChange={handleChange}
-                  placeholder="Código Postal"
-                  className="w-full p-3 border rounded-lg"
-                />
-                <input
-                  type="text"
                   name="province"
                   value={formData.province}
                   onChange={handleChange}
@@ -239,7 +309,6 @@ export default function CheckoutStep2() {
             Total: ${cart?.total ?? 0}
           </h4>
 
-          {/* Botón solo aparece si eligió método de envío */}
           {shipping && (
             <button
               onClick={handleContinue}

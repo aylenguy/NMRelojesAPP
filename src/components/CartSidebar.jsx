@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FaTimes, FaTrash } from "react-icons/fa";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
@@ -16,6 +16,13 @@ const CartSidebar = ({ isOpen, onClose }) => {
   const [selectedShipping, setSelectedShipping] = useState(null);
 
   const total = cart?.total ?? 0;
+
+  // 👉 Cargar valores guardados al inicio
+  useEffect(() => {
+    const saved = JSON.parse(localStorage.getItem("shippingData") || "{}");
+    if (saved.postalCode) setPostalCode(saved.postalCode);
+    if (saved.shippingOption) setSelectedShipping(saved.shippingOption);
+  }, []);
 
   const getItemImagen = (item) =>
     item.image ||
@@ -69,6 +76,15 @@ const CartSidebar = ({ isOpen, onClose }) => {
       if (data.length > 0) {
         setShippingOptions(data);
         setSelectedShipping(data[0]);
+
+        // 👉 Persistir valores
+        localStorage.setItem(
+          "shippingData",
+          JSON.stringify({
+            postalCode,
+            shippingOption: data[0],
+          })
+        );
       } else {
         setShippingOptions([]);
         setSelectedShipping(null);
@@ -78,6 +94,19 @@ const CartSidebar = ({ isOpen, onClose }) => {
       setError("Error al calcular envío. Intenta de nuevo.");
       console.error(err);
     }
+  };
+
+  const handleSelectShipping = (option) => {
+    setSelectedShipping(option);
+
+    // 👉 Persistir selección en localStorage
+    localStorage.setItem(
+      "shippingData",
+      JSON.stringify({
+        postalCode,
+        shippingOption: option,
+      })
+    );
   };
 
   const handleFinalizePurchase = () => {
@@ -92,16 +121,7 @@ const CartSidebar = ({ isOpen, onClose }) => {
       return;
     }
 
-    if (!postalCode.match(/^\d{4}$/)) {
-      setError("Ingresá un código postal válido (4 dígitos).");
-      return;
-    }
-
-    if (!selectedShipping) {
-      setError("Seleccioná una opción de envío antes de continuar.");
-      return;
-    }
-
+    // 👉 Guardamos checkoutData con lo que haya hasta ahora
     localStorage.setItem(
       "checkoutData",
       JSON.stringify({
@@ -110,11 +130,22 @@ const CartSidebar = ({ isOpen, onClose }) => {
         email: user?.email || "",
         address: "",
         phone: "",
-        postalCode,
-        shippingOption: selectedShipping,
+        postalCode: postalCode || "", // puede estar vacío
+        shippingOption: selectedShipping || null, // puede estar vacío
         paymentMethod: "",
       })
     );
+
+    // 👉 Si hay algo de envío, también lo guardamos en shippingData
+    if (postalCode && selectedShipping) {
+      localStorage.setItem(
+        "shippingData",
+        JSON.stringify({
+          postalCode,
+          shippingOption: selectedShipping,
+        })
+      );
+    }
 
     onClose();
     navigate("/checkout/paso-1");
@@ -233,7 +264,7 @@ const CartSidebar = ({ isOpen, onClose }) => {
                         type="radio"
                         name="shipping"
                         checked={selectedShipping?.name === option.name}
-                        onChange={() => setSelectedShipping(option)}
+                        onChange={() => handleSelectShipping(option)}
                       />
                       <div className="flex flex-col text-sm">
                         <span className="font-semibold">{option.name}</span>
