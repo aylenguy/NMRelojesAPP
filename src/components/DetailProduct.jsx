@@ -1,20 +1,25 @@
 import { useLocation, useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
+import axios from "axios";
 import api from "../api/api";
-import { useCart } from "../context/CartContext"; // 👈 importamos el contexto
+import { useCart } from "../context/CartContext";
 
 const DetailProduct = () => {
   const { state: productFromState } = useLocation();
   const { id } = useParams();
   const navigate = useNavigate();
-  const { addToCart } = useCart(); // 👈 usamos el contexto
+  const { addToCart } = useCart();
 
   const [product, setProduct] = useState(productFromState || null);
   const [loading, setLoading] = useState(!productFromState);
   const [showNotification, setShowNotification] = useState(false);
   const [quantity, setQuantity] = useState(1);
+
   const [postalCode, setPostalCode] = useState("");
-  const [shippingCost, setShippingCost] = useState(null);
+  const [shippingOptions, setShippingOptions] = useState([]);
+  const [selectedShipping, setSelectedShipping] = useState(null);
+  const [error, setError] = useState("");
+
   const [relatedProducts, setRelatedProducts] = useState([]);
   const [showDetails, setShowDetails] = useState(false);
 
@@ -86,7 +91,7 @@ const DetailProduct = () => {
   const installmentValue = totalPrice / installmentCount;
   const discountPrice = totalPrice * 0.8;
 
-  // ✅ Unificado con Home: id + quantity
+  // Agregar al carrito
   const handleAddToCart = () => {
     if (!product) return;
     addToCart(product.id || product.Id, quantity);
@@ -94,9 +99,44 @@ const DetailProduct = () => {
     setTimeout(() => setShowNotification(false), 2000);
   };
 
-  const handleCalculateShipping = () => {
-    if (!postalCode) return;
-    setShippingCost(totalPrice >= 50000 ? 0 : 2000);
+  // Cálculo de envío real
+  const handleCalculateShipping = async () => {
+    if (!postalCode.match(/^\d{4}$/)) {
+      setError("Ingresá un código postal válido (4 dígitos).");
+      setShippingOptions([]);
+      setSelectedShipping(null);
+      return;
+    }
+    setError("");
+
+    try {
+      let res;
+      try {
+        res = await axios.post(
+          "https://localhost:7247/api/shipping/calculate",
+          { postalCode },
+          { headers: { "Content-Type": "application/json" } }
+        );
+      } catch {
+        res = await axios.get(
+          `https://localhost:7247/api/shipping/calculate/${postalCode}`
+        );
+      }
+
+      const data = Array.isArray(res.data) ? res.data : [res.data];
+
+      if (data.length > 0) {
+        setShippingOptions(data);
+        setSelectedShipping(data[0]);
+      } else {
+        setShippingOptions([]);
+        setSelectedShipping(null);
+        setError("No hay opciones de envío para este código postal.");
+      }
+    } catch (err) {
+      setError("Error al calcular envío. Intenta de nuevo.");
+      console.error(err);
+    }
   };
 
   if (loading) {
@@ -178,7 +218,7 @@ const DetailProduct = () => {
           {/* Botón ver más detalles */}
           <p
             onClick={() => setShowDetails(true)}
-            className="text-[#c77d00] cursor-pointer underline hover:text-[#a56600] mb-6"
+            className="text-[#005f73] cursor-pointer underline hover:text-[#003f4a] mb-6"
           >
             Ver más detalles
           </p>
@@ -195,6 +235,7 @@ const DetailProduct = () => {
             </div>
           )}
 
+          {/* Descripción */}
           {description && (
             <p className="text-lg text-gray-700 mb-8 leading-relaxed">
               {description}
@@ -205,7 +246,6 @@ const DetailProduct = () => {
           <div className="flex items-center gap-4 mb-8">
             {stock > 0 ? (
               <>
-                {/* Selector de cantidad */}
                 <div className="flex items-center border rounded-lg overflow-hidden">
                   <button
                     onClick={() => setQuantity((q) => Math.max(1, q - 1))}
@@ -222,7 +262,6 @@ const DetailProduct = () => {
                   </button>
                 </div>
 
-                {/* Botón agregar */}
                 <button
                   onClick={handleAddToCart}
                   className="flex-1 bg-[#005f73] text-white px-6 py-3 rounded-lg hover:bg-[#0a9396] transition text-lg"
@@ -231,7 +270,6 @@ const DetailProduct = () => {
                 </button>
               </>
             ) : (
-              // 🔹 Si no hay stock
               <button
                 disabled
                 className="flex-1 bg-gray-400 text-white px-6 py-3 rounded-lg cursor-not-allowed text-lg"
@@ -249,7 +287,10 @@ const DetailProduct = () => {
                 type="text"
                 placeholder="Código postal"
                 value={postalCode}
-                onChange={(e) => setPostalCode(e.target.value)}
+                onChange={(e) => {
+                  setPostalCode(e.target.value);
+                  setError("");
+                }}
                 className="border rounded px-3 py-2 flex-1 text-lg"
               />
               <button
@@ -259,18 +300,62 @@ const DetailProduct = () => {
                 Calcular
               </button>
             </div>
-            {shippingCost !== null && (
+
+            {error && <p className="text-red-500 mt-2">{error}</p>}
+
+            {shippingOptions.length > 0 && (
+              <div className="mt-3 space-y-2">
+                <p className="text-gray-700">
+                  Opciones de envío para CP <b>{postalCode}</b>:
+                </p>
+                {shippingOptions.map((option, idx) => (
+                  <label
+                    key={idx}
+                    className="flex items-center gap-2 border rounded p-2 cursor-pointer hover:bg-gray-50"
+                  >
+                    <input
+                      type="radio"
+                      name="shipping"
+                      checked={selectedShipping?.name === option.name}
+                      onChange={() => setSelectedShipping(option)}
+                    />
+                    <div className="flex flex-col text-sm">
+                      <span className="font-semibold">{option.name}</span>
+                      <span className="text-gray-600">
+                        {option.description}
+                      </span>
+                      <span className="text-gray-900 font-bold">
+                        {option.cost === 0
+                          ? "Gratis"
+                          : `$${option.cost.toLocaleString("es-AR")}`}
+                      </span>
+                    </div>
+                  </label>
+                ))}
+              </div>
+            )}
+
+            {selectedShipping && (
               <p className="mt-3 text-gray-700 text-lg">
-                {shippingCost === 0
-                  ? "🚚 Envío gratis"
-                  : `Costo de envío: $${shippingCost.toLocaleString("es-AR")}`}
+                Costo de envío:{" "}
+                {selectedShipping.cost === 0
+                  ? "🚚 Gratis"
+                  : `$${selectedShipping.cost.toLocaleString("es-AR")}`}
+              </p>
+            )}
+
+            {/* Total con envío */}
+            {selectedShipping && (
+              <p className="mt-3 text-2xl font-bold text-gray-900">
+                Total: $
+                {(totalPrice + selectedShipping.cost).toLocaleString("es-AR")}
               </p>
             )}
           </div>
         </div>
       </div>
 
-      {/* También te puede interesar */}
+      {/* Productos relacionados */}
       <div className="max-w-6xl mx-auto mt-16">
         <h2 className="text-2xl font-bold mb-6">También te puede interesar</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
@@ -305,7 +390,7 @@ const DetailProduct = () => {
         </div>
       </div>
 
-      {/* Modal de medios de pago */}
+      {/* Modal de detalles de pago */}
       {showDetails && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-lg w-full relative">
