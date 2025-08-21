@@ -1,5 +1,5 @@
 export async function addVenta(venta, token) {
-  const res = await fetch("http://localhost:7247/api/Venta/AddVenta", {
+  const res = await fetch("https://localhost:7247/api/Venta/AddVenta", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

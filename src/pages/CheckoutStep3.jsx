@@ -23,37 +23,36 @@ export default function CheckoutStep3() {
     try {
       setLoading(true);
 
-      // Items al formato que espera el back
-      const ventaItems = cart.items.map((item) => ({
-        productId: item.productId,
-        quantity: item.quantity,
-      }));
-
-      // DTO correcto según tu back
+      // Construimos el DTO que espera el backend
       const ventaDto = {
-        ClienteId: user?.id || 0, // <-- con mayúscula inicial
-        ShippingAddress: checkoutData.street,
-        PostalCode: checkoutData.postalCode,
-        PaymentMethod: paymentMethod,
-        DeliveryMethod: checkoutData.deliveryMethod,
-        Notes: orderNotes || "",
-        Items: cart.items.map((item) => ({
-          ProductId: item.productId, // <-- PascalCase
-          Quantity: item.quantity, // <-- PascalCase
+        clientId: user?.id || 0,
+        shippingAddress: checkoutData.street,
+        postalCode: checkoutData.postalCode,
+        paymentMethod: paymentMethod,
+        deliveryMethod: checkoutData.deliveryMethod,
+        notes: orderNotes || "",
+        items: cart.items.map((item) => ({
+          productId: item.productId,
+          quantity: item.quantity,
         })),
       };
 
-      console.log("DTO que se envía al backend:", ventaDto);
+      console.log("DTO enviado al backend:", ventaDto);
+      console.log("Token usado:", token);
 
-      await addVenta(ventaDto, token);
+      // Llamamos al backend
+      const newVenta = await addVenta(ventaDto, token);
+      console.log("Venta creada en backend:", newVenta);
 
+      // Limpiamos carrito y checkoutData
       clearCart();
       localStorage.removeItem("checkoutData");
 
-      navigate("/checkout/success");
+      // Navegamos al success pasando la venta
+      navigate("/checkout/success", { state: { venta: newVenta } });
     } catch (err) {
       console.error("Error al confirmar la venta:", err);
-      alert("Hubo un error al procesar tu pedido.");
+      alert(err.message || "Hubo un error al procesar tu pedido.");
     } finally {
       setLoading(false);
     }

@@ -26,6 +26,7 @@ import Productos from "./pages/Productos";
 import CheckoutStep1 from "./pages/CheckoutStep1";
 import CheckoutStep2 from "./pages/CheckoutStep2";
 import CheckoutStep3 from "./pages/CheckoutStep3";
+import CheckoutSuccess from "./pages/CheckoutSuccess";
 
 // Admin
 import AdminLayout from "./pages/admin/AdminLayout";
@@ -163,6 +164,7 @@ function App() {
           <Route path="/checkout/paso-1" element={<CheckoutStep1 />} />
           <Route path="/checkout/paso-2" element={<CheckoutStep2 />} />
           <Route path="/checkout/paso-3" element={<CheckoutStep3 />} />
+          <Route path="/checkout/success" element={<CheckoutSuccess />} />
         </Route>
 
         {/* Rutas protegidas: admin */}
