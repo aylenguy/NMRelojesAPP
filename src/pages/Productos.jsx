@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaShoppingCart } from "react-icons/fa";
 import api from "../api/api";
-import { useCart } from "../context/CartContext"; // <- Importa tu contexto
+import { useCart } from "../context/CartContext"; // Contexto del carrito
 
 const Productos = ({ searchText }) => {
   const [productos, setProductos] = useState([]);
@@ -11,20 +11,26 @@ const Productos = ({ searchText }) => {
   const [error, setError] = useState(null);
   const [categoriasSeleccionadas, setCategoriasSeleccionadas] = useState([]);
   const navigate = useNavigate();
-  const { addToCart } = useCart(); // <- Extrae la función del contexto
+  const { addToCart } = useCart(); // Función del contexto
 
-  // Cargar productos
+  // Cargar productos desde el backend
   useEffect(() => {
-    setLoading(true);
-    api
-      .get("/Product/GetAllProducts")
-      .then((res) => setProductos(res.data))
-      .catch(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        const res = await api.get("/Product/GetAllProducts");
+        setProductos(res.data);
+      } catch {
         setError("No se pudieron cargar los productos. Intenta nuevamente.");
-      })
-      .finally(() => setLoading(false));
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
   }, []);
 
+  // Alternar selección de categorías
   const toggleCategoria = (categoria) => {
     setCategoriasSeleccionadas((prev) =>
       prev.includes(categoria)
@@ -33,13 +39,15 @@ const Productos = ({ searchText }) => {
     );
   };
 
-  const getPrecio = (p) => p.price || p.Price || p.precio || 0;
+  // Funciones auxiliares para normalizar datos del producto
+  const getPrecio = (p) => p.price ?? p.Price ?? p.precio ?? 0;
   const getNombre = (p) =>
-    p.name || p.Name || p.nombre || "Producto sin nombre";
-  const getImagen = (p) => p.image || p.Image || p.imagen || "/placeholder.png";
+    p.name ?? p.Name ?? p.nombre ?? "Producto sin nombre";
+  const getImagen = (p) => p.image ?? p.Image ?? p.imagen ?? "/placeholder.png";
   const getCategoria = (p) =>
-    p.category || p.Category || p.categoria || "Sin categoría";
+    p.category ?? p.Category ?? p.categoria ?? "Sin categoría";
 
+  // Filtrar productos según búsqueda y categorías
   const filtered = productos.filter((p) => {
     const nombre = getNombre(p).toLowerCase();
     const coincideBusqueda = nombre.includes(searchText?.toLowerCase() || "");
@@ -49,9 +57,10 @@ const Productos = ({ searchText }) => {
     return coincideBusqueda && coincideCategoria;
   });
 
+  // Agregar producto al carrito (logueado o invitado)
   const handleAddToCart = async (producto) => {
     try {
-      await addToCart(producto.id || producto.Id); // <- Llama a addToCart del contexto
+      await addToCart(producto.id ?? producto.Id);
       setShowNotification(true);
       setTimeout(() => setShowNotification(false), 2000);
     } catch (err) {
@@ -86,6 +95,7 @@ const Productos = ({ searchText }) => {
       </h2>
 
       <div className="grid grid-cols-1 lg:grid-cols-[250px_1fr] gap-8">
+        {/* Sidebar de categorías */}
         <aside className="bg-white p-4 rounded-lg shadow-md border">
           <h3 className="text-lg font-semibold mb-4">Categorías</h3>
           <div className="flex flex-col gap-2">
@@ -105,6 +115,7 @@ const Productos = ({ searchText }) => {
           </div>
         </aside>
 
+        {/* Grid de productos */}
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8">
           {filtered.map((producto) => {
             const stock = producto.stock ?? 0;
@@ -112,13 +123,13 @@ const Productos = ({ searchText }) => {
 
             return (
               <div
-                key={producto.id || producto.Id}
+                key={producto.id ?? producto.Id}
                 className="relative bg-white rounded-lg shadow-md hover:shadow-lg transition overflow-hidden border"
               >
                 <div
                   className="relative cursor-pointer group"
                   onClick={() =>
-                    navigate(`/producto/${producto.id || producto.Id}`, {
+                    navigate(`/producto/${producto.id ?? producto.Id}`, {
                       state: producto,
                     })
                   }

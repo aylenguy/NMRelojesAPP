@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import CheckoutProgress from "../components/CheckoutProgress";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
-import { addVenta } from "../api/orders";
+import { addVenta, createFromCart } from "../api/orders";
 
 export default function CheckoutStep3() {
   const { cart, fetchCart, clearCart, loading: cartLoading } = useCart();
@@ -23,32 +23,38 @@ export default function CheckoutStep3() {
     try {
       setLoading(true);
 
-      // Construimos el DTO que espera el backend
-      const ventaDto = {
-        clientId: user?.id || 0,
-        shippingAddress: checkoutData.street,
-        postalCode: checkoutData.postalCode,
-        paymentMethod: paymentMethod,
-        deliveryMethod: checkoutData.deliveryMethod,
-        notes: orderNotes || "",
-        items: cart.items.map((item) => ({
-          productId: item.productId,
-          quantity: item.quantity,
-        })),
-      };
+      let newVenta;
 
-      console.log("DTO enviado al backend:", ventaDto);
-      console.log("Token usado:", token);
+      if (token) {
+        // ✅ Usuario logueado → crear venta desde carrito del backend
+        newVenta = await createFromCart(token);
+      } else {
+        // ✅ Invitado → armar DTO y enviar sin token
+        const ventaDto = {
+          clientId: 0, // o null → backend decide
+          shippingAddress: checkoutData.street,
+          postalCode: checkoutData.postalCode,
+          paymentMethod: paymentMethod,
+          shippingMethod: checkoutData.shipping,
+          shippingCost: checkoutData.shippingOption?.cost || 0,
+          notes: orderNotes || "",
+          items: cart.items.map((item) => ({
+            productId: item.productId,
+            quantity: item.quantity,
+          })),
+        };
 
-      // Llamamos al backend
-      const newVenta = await addVenta(ventaDto, token);
+        console.log("DTO enviado al backend:", ventaDto);
+        newVenta = await addVenta(ventaDto);
+      }
+
       console.log("Venta creada en backend:", newVenta);
 
-      // Limpiamos carrito y checkoutData
+      // Limpiar carrito y datos locales
       clearCart();
       localStorage.removeItem("checkoutData");
 
-      // Navegamos al success pasando la venta
+      // Redirigir a la pantalla de éxito
       navigate("/checkout/success", { state: { venta: newVenta } });
     } catch (err) {
       console.error("Error al confirmar la venta:", err);
