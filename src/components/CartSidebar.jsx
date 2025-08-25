@@ -6,7 +6,7 @@ import { useCart } from "../context/CartContext";
 import axios from "axios";
 
 const CartSidebar = ({ isOpen, onClose }) => {
-  const { isAuthenticated, user } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const { cart, removeFromCart, updateItem } = useCart();
 
@@ -17,7 +17,7 @@ const CartSidebar = ({ isOpen, onClose }) => {
 
   const total = cart?.total ?? 0;
 
-  // 👉 Cargar valores guardados al inicio
+  // Cargar valores guardados al inicio
   useEffect(() => {
     const saved = JSON.parse(localStorage.getItem("shippingData") || "{}");
     if (saved.postalCode) setPostalCode(saved.postalCode);
@@ -39,8 +39,10 @@ const CartSidebar = ({ isOpen, onClose }) => {
     item.nombre ||
     "Producto";
 
-  const getItemCantidad = (item) => item.cantidad || item.Cantidad || 1;
-  const getItemSubtotal = (item) => item.subtotal || item.Subtotal || 0;
+  const getItemCantidad = (item) =>
+    item.cantidad || item.Cantidad || item.quantity || 1;
+  const getItemSubtotal = (item) =>
+    item.subtotal || item.Subtotal || item.quantity * item.unitPrice || 0;
 
   const handleDecrease = (item) => {
     const cantidad = getItemCantidad(item);
@@ -76,14 +78,9 @@ const CartSidebar = ({ isOpen, onClose }) => {
       if (data.length > 0) {
         setShippingOptions(data);
         setSelectedShipping(data[0]);
-
-        // 👉 Persistir valores
         localStorage.setItem(
           "shippingData",
-          JSON.stringify({
-            postalCode,
-            shippingOption: data[0],
-          })
+          JSON.stringify({ postalCode, shippingOption: data[0] })
         );
       } else {
         setShippingOptions([]);
@@ -98,54 +95,44 @@ const CartSidebar = ({ isOpen, onClose }) => {
 
   const handleSelectShipping = (option) => {
     setSelectedShipping(option);
-
-    // 👉 Persistir selección en localStorage
     localStorage.setItem(
       "shippingData",
-      JSON.stringify({
-        postalCode,
-        shippingOption: option,
-      })
+      JSON.stringify({ postalCode, shippingOption: option })
     );
   };
 
   const handleFinalizePurchase = () => {
-    if (!isAuthenticated) {
-      onClose();
-      navigate("/login", { state: { from: "/checkout/paso-1" } });
-      return;
-    }
-
     if (user?.role?.toLowerCase() === "admin") {
       alert("Los administradores no pueden realizar compras.");
       return;
     }
 
-    // 👉 Guardamos checkoutData con lo que haya hasta ahora
-    localStorage.setItem(
-      "checkoutData",
-      JSON.stringify({
-        clientId: user?.id ?? 0,
-        name: user?.name || "",
-        email: user?.email || "",
-        address: "",
-        phone: "",
-        postalCode: postalCode || "", // puede estar vacío
-        shippingOption: selectedShipping || null, // puede estar vacío
-        paymentMethod: "",
-      })
-    );
+    // Guardar carrito de invitado
+    const guestCart = cart || { items: [], total: 0 };
+    localStorage.setItem("guestCart", JSON.stringify(guestCart));
 
-    // 👉 Si hay algo de envío, también lo guardamos en shippingData
-    if (postalCode && selectedShipping) {
-      localStorage.setItem(
-        "shippingData",
-        JSON.stringify({
-          postalCode,
-          shippingOption: selectedShipping,
-        })
-      );
-    }
+    // Guardar checkoutData completo
+    const checkoutPayload = {
+      clientId: user?.id ?? 0,
+      name: user?.name || "",
+      lastname: user?.lastname || "",
+      email: user?.email || "",
+      phone: "",
+      dni: "",
+      street: "",
+      number: "",
+      department: "",
+      description: "",
+      city: "",
+      province: "",
+      postalCode: postalCode || "",
+      shipping: selectedShipping?.name || "",
+      shippingOption: selectedShipping || null,
+      paymentMethod: "",
+      items: guestCart.items || [],
+    };
+
+    localStorage.setItem("checkoutData", JSON.stringify(checkoutPayload));
 
     onClose();
     navigate("/checkout/paso-1");
@@ -173,7 +160,6 @@ const CartSidebar = ({ isOpen, onClose }) => {
           </p>
         ) : (
           <>
-            {/* Items del carrito */}
             {cart.items.map((item) => (
               <div
                 key={item.id}
@@ -219,7 +205,6 @@ const CartSidebar = ({ isOpen, onClose }) => {
               <p className="text-sm text-gray-600 font-semibold">
                 Medios de envío:
               </p>
-
               <div className="flex gap-2">
                 <input
                   type="text"
@@ -238,23 +223,9 @@ const CartSidebar = ({ isOpen, onClose }) => {
                   Calcular
                 </button>
               </div>
-
-              <a
-                href="https://www.correoargentino.com.ar/formularios/cpa"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-xs text-blue-600 hover:underline"
-              >
-                No sé mi código postal
-              </a>
-
               {error && <p className="text-red-500 text-sm">{error}</p>}
-
               {shippingOptions.length > 0 && (
                 <div className="space-y-2">
-                  <p className="text-sm text-gray-700">
-                    Entregas para el CP: <b>{postalCode}</b>
-                  </p>
                   {shippingOptions.map((option, idx) => (
                     <label
                       key={idx}
@@ -286,7 +257,7 @@ const CartSidebar = ({ isOpen, onClose }) => {
             {/* Total + Botón */}
             <div className="pt-4 border-t">
               <p className="text-lg font-semibold">
-                Total: ${" "}
+                Total: $
                 {(total + (selectedShipping?.cost ?? 0)).toLocaleString(
                   "es-AR"
                 )}

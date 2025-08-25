@@ -67,7 +67,13 @@ export default function AdminOrders() {
             <tr key={o.orderId}>
               <td className="p-2 border">{o.orderId}</td>
               <td className="p-2 border">
-                {o.clienteNombre} {o.clienteApellido}
+                {o.customerName} {o.customerLastname}
+                <br />
+                {o.clientId ? (
+                  <span className="text-xs text-green-600">(Registrado)</span>
+                ) : (
+                  <span className="text-xs text-gray-500">(Invitado)</span>
+                )}
               </td>
               <td className="p-2 border">{o.customerEmail}</td>
               <td className="p-2 border">

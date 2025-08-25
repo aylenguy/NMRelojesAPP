@@ -9,18 +9,28 @@ export default function CheckoutStep1() {
   const { user, token } = useAuth();
   const navigate = useNavigate();
 
+  // Traer del localStorage checkoutData y carrito invitado
   const savedCheckout = JSON.parse(localStorage.getItem("checkoutData")) || {};
   const savedShipping = JSON.parse(localStorage.getItem("shippingData")) || {};
+  const guestCart = JSON.parse(localStorage.getItem("guestCart")) || {
+    items: [],
+    total: 0,
+  };
 
+  // Estados de los campos
   const [email, setEmail] = useState(user?.email || savedCheckout.email || "");
   const [postalCode, setPostalCode] = useState(
     savedCheckout.postalCode || savedShipping.postalCode || ""
   );
   const [shippingOption] = useState(savedShipping.shippingOption || null);
 
+  // Si está logueado → cargar carrito desde API
   useEffect(() => {
     if (token) fetchCart();
   }, [token, fetchCart]);
+
+  // Determinar carrito según contexto
+  const currentCart = token ? cart : guestCart;
 
   const handleNext = () => {
     if (cartLoading) return;
@@ -32,19 +42,32 @@ export default function CheckoutStep1() {
       alert("Por favor ingresa tu código postal");
       return;
     }
-    if (!cart?.items || cart.items.length === 0) {
+    if (!currentCart?.items || currentCart.items.length === 0) {
       alert("El carrito está vacío");
       return;
     }
 
-    localStorage.setItem(
-      "checkoutData",
-      JSON.stringify({ email, postalCode, shippingOption })
-    );
+    // Guardar carrito invitado
+    if (!token) {
+      localStorage.setItem("guestCart", JSON.stringify(currentCart));
+    }
+
+    // Guardar checkoutData completo
+    const checkoutPayload = {
+      email,
+      name: savedCheckout.name || "", // 👈 aseguramos nombre
+      lastname: savedCheckout.lastname || "", // 👈 aseguramos apellido
+      postalCode,
+      shippingOption,
+      clientId: user?.id ?? 0, // 0 si es invitado
+      items: currentCart.items,
+    };
+    localStorage.setItem("checkoutData", JSON.stringify(checkoutPayload));
+
     navigate("/checkout/paso-2");
   };
 
-  if (cartLoading) {
+  if (token && cartLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <p className="text-gray-500 text-lg">Cargando carrito...</p>
@@ -77,7 +100,7 @@ export default function CheckoutStep1() {
             />
           </div>
 
-          {/* Mostrar postalCode solo si no existe */}
+          {/* Código postal */}
           {!postalCode ? (
             <div className="mb-8">
               <label className="block text-base font-semibold text-gray-800 mb-2">
@@ -129,22 +152,22 @@ export default function CheckoutStep1() {
         <div className="bg-white p-8 rounded-2xl shadow-sm h-fit">
           <h3 className="text-xl font-bold mb-6 tracking-tight">Mi pedido</h3>
 
-          {cart?.items?.length > 0 ? (
-            cart.items.map((item) => (
+          {currentCart?.items?.length > 0 ? (
+            currentCart.items.map((item) => (
               <div
-                key={item.productId}
+                key={item.productId || item.id}
                 className="flex justify-between items-center border-b pb-4 mb-4"
               >
                 <div>
                   <p className="font-semibold text-gray-900 text-base">
-                    {item.productName}
+                    {item.productName || item.name}
                   </p>
                   <p className="text-sm text-gray-500">
-                    {item.quantity} unidad
+                    {item.quantity || item.cantidad} unidad
                   </p>
                 </div>
                 <span className="font-semibold text-base text-gray-900">
-                  ${item.subtotal.toLocaleString()}
+                  ${item.subtotal?.toLocaleString() || 0}
                 </span>
               </div>
             ))
@@ -154,7 +177,7 @@ export default function CheckoutStep1() {
 
           <div className="mt-6 flex justify-between font-bold text-xl text-gray-900">
             <span>Total</span>
-            <span>${cart?.total?.toLocaleString() ?? 0}</span>
+            <span>${currentCart?.total?.toLocaleString() || 0}</span>
           </div>
 
           <div className="mt-6">

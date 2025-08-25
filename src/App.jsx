@@ -160,7 +160,7 @@ function App() {
         <Route path="/login" element={<Login />} />
 
         {/* Rutas protegidas para clientes */}
-        <Route element={<ProtectedRoute requiredRole="client" />}>
+        <Route element={<ProtectedRoute allowGuest={true} />}>
           <Route path="/checkout/paso-1" element={<CheckoutStep1 />} />
           <Route path="/checkout/paso-2" element={<CheckoutStep2 />} />
           <Route path="/checkout/paso-3" element={<CheckoutStep3 />} />

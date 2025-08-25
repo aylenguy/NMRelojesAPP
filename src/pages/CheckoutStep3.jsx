@@ -7,13 +7,21 @@ import { addVenta, createFromCart } from "../api/orders";
 
 export default function CheckoutStep3() {
   const { cart, fetchCart, clearCart, loading: cartLoading } = useCart();
-  const { token, user } = useAuth();
+  const { token } = useAuth();
   const navigate = useNavigate();
 
   const checkoutData = JSON.parse(localStorage.getItem("checkoutData") || "{}");
+  const guestCart = JSON.parse(localStorage.getItem("guestCart")) || {
+    items: [],
+    total: 0,
+  };
+
   const [paymentMethod, setPaymentMethod] = useState("vendedor");
   const [loading, setLoading] = useState(false);
   const [orderNotes, setOrderNotes] = useState("");
+
+  // 🔹 Usar carrito según token/invitado
+  const currentCart = token ? cart : guestCart;
 
   useEffect(() => {
     if (token) fetchCart();
@@ -22,49 +30,67 @@ export default function CheckoutStep3() {
   const handleConfirmOrder = async () => {
     try {
       setLoading(true);
-
       let newVenta;
 
       if (token) {
-        // ✅ Usuario logueado → crear venta desde carrito del backend
+        // Usuario logueado → backend crea venta desde carrito
         newVenta = await createFromCart(token);
       } else {
-        // ✅ Invitado → armar DTO y enviar sin token
-        const ventaDto = {
-          clientId: 0, // o null → backend decide
-          shippingAddress: checkoutData.street,
-          postalCode: checkoutData.postalCode,
-          paymentMethod: paymentMethod,
-          shippingMethod: checkoutData.shipping,
-          shippingCost: checkoutData.shippingOption?.cost || 0,
-          notes: orderNotes || "",
-          items: cart.items.map((item) => ({
-            productId: item.productId,
-            quantity: item.quantity,
-          })),
-        };
+        // Invitado → armar DTO en el formato que espera el backend
+        if (!currentCart.items || currentCart.items.length === 0) {
+          alert("El carrito está vacío");
+          setLoading(false);
+          return;
+        }
 
-        console.log("DTO enviado al backend:", ventaDto);
-        newVenta = await addVenta(ventaDto);
+        const orderPayload = {
+          customerName: checkoutData.name,
+          customerLastname: checkoutData.lastname,
+          customerEmail: checkoutData.email,
+          street: checkoutData.street,
+          number: checkoutData.number,
+          department: checkoutData.department,
+          city: checkoutData.city,
+          province: checkoutData.province,
+          postalCode: checkoutData.postalCode,
+          shippingMethod: checkoutData.shippingOption?.name ?? "",
+          shippingCost: checkoutData.shippingOption?.cost ?? 0,
+
+          paymentMethod,
+          notes: orderNotes || "",
+          items: currentCart.items.map((item) => ({
+            productId: item.productId || item.id,
+            quantity: item.quantity,
+            unitPrice: item.unitPrice,
+            subtotal: item.subtotal ?? item.quantity * item.unitPrice,
+          })),
+          total:
+            (currentCart.items?.reduce(
+              (acc, it) => acc + (it.subtotal || it.quantity * it.unitPrice),
+              0
+            ) || 0) + (checkoutData.shippingOption?.cost || 0),
+        };
+        console.log("DTO invitado:", orderPayload);
+        newVenta = await addVenta(orderPayload);
       }
 
-      console.log("Venta creada en backend:", newVenta);
+      console.log("Venta creada:", newVenta);
 
-      // Limpiar carrito y datos locales
+      // Limpiar carrito y checkoutData
       clearCart();
       localStorage.removeItem("checkoutData");
+      if (!token) localStorage.removeItem("guestCart");
 
-      // Redirigir a la pantalla de éxito
       navigate("/checkout/success", { state: { venta: newVenta } });
     } catch (err) {
-      console.error("Error al confirmar la venta:", err);
+      console.error("Error al confirmar venta:", err);
       alert(err.message || "Hubo un error al procesar tu pedido.");
     } finally {
       setLoading(false);
     }
   };
 
-  if (cartLoading) {
+  if (token && cartLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <p className="text-gray-500 text-lg">Cargando carrito...</p>
@@ -115,7 +141,6 @@ export default function CheckoutStep3() {
                   onChange={(e) => setPaymentMethod(e.target.value)}
                   className="w-5 h-5 text-green-600 focus:ring-green-500"
                 />
-
                 {option.logo && (
                   <img
                     src={option.logo}
@@ -123,7 +148,6 @@ export default function CheckoutStep3() {
                     className="h-8 object-contain"
                   />
                 )}
-
                 <div className="flex-1">
                   <p className="font-semibold text-lg">{option.title}</p>
                   {option.badge && (
@@ -150,8 +174,8 @@ export default function CheckoutStep3() {
         <div className="bg-white p-6 rounded-xl shadow-md h-fit">
           <h3 className="text-xl font-bold mb-4">Mi pedido</h3>
 
-          {cart?.items?.length > 0 ? (
-            cart.items.map((item) => (
+          {currentCart?.items?.length > 0 ? (
+            currentCart.items.map((item) => (
               <div
                 key={item.productId || item.id}
                 className="flex justify-between border-b pb-2 mb-2 text-lg"
@@ -172,7 +196,7 @@ export default function CheckoutStep3() {
           )}
 
           <h4 className="mt-4 text-2xl font-bold">
-            Total: ${(cart?.total ?? 0).toLocaleString("es-AR")}
+            Total: ${(currentCart?.total ?? 0).toLocaleString("es-AR")}
           </h4>
 
           <button

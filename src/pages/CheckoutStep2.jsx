@@ -7,28 +7,37 @@ import axios from "axios";
 
 export default function CheckoutStep2() {
   const { cart, fetchCart, loading: cartLoading } = useCart();
-  const { token } = useAuth();
+  const { token, user } = useAuth(); // 👈 ahora también traigo user
   const navigate = useNavigate();
 
-  const checkoutData = JSON.parse(localStorage.getItem("checkoutData") || "{}");
+  // 🔹 Cargar datos previos
+  const savedCheckout = JSON.parse(localStorage.getItem("checkoutData")) || {};
+  const guestCart = JSON.parse(localStorage.getItem("guestCart")) || {
+    items: [],
+    total: 0,
+  };
 
-  const [shipping, setShipping] = useState(checkoutData.shipping || "");
+  const [shipping, setShipping] = useState(savedCheckout.shipping || "");
   const [formData, setFormData] = useState({
-    name: checkoutData.name || "",
-    lastname: checkoutData.lastname || "",
-    phone: checkoutData.phone || "",
-    dni: checkoutData.dni || "",
-    street: checkoutData.street || "",
-    number: checkoutData.number || "",
-    department: checkoutData.department || "",
-    description: checkoutData.description || "",
-    city: checkoutData.city || "",
-    postalCode: checkoutData.postalCode || "",
-    province: checkoutData.province || "",
+    name: savedCheckout.name || user?.name || "",
+    lastname: savedCheckout.lastname || user?.lastname || "",
+    email: savedCheckout.customerEmail || user?.email || "",
+    phone: savedCheckout.phone || "",
+    dni: savedCheckout.dni || "",
+    street: savedCheckout.street || user?.street || "",
+    number: savedCheckout.number || user?.number || "",
+    department: savedCheckout.department || user?.department || "",
+    description: savedCheckout.description || "",
+    city: savedCheckout.city || user?.city || "",
+    postalCode: savedCheckout.postalCode || user?.postalCode || "",
+    province: savedCheckout.province || user?.province || "",
   });
 
   const [shippingOptions, setShippingOptions] = useState([]);
   const [error, setError] = useState("");
+
+  // 🔹 Usar carrito según token/invitado
+  const currentCart = token ? cart : guestCart;
 
   useEffect(() => {
     if (token) fetchCart();
@@ -58,7 +67,7 @@ export default function CheckoutStep2() {
       const data = Array.isArray(res.data) ? res.data : [res.data];
       if (data.length > 0) {
         setShippingOptions(data);
-        setShipping(data[0].name); // seteo el primero por defecto
+        setShipping(data[0].name);
         setError("");
       } else {
         setShippingOptions([]);
@@ -76,9 +85,7 @@ export default function CheckoutStep2() {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    if (name === "postalCode") {
-      setError("");
-    }
+    if (name === "postalCode") setError("");
   };
 
   const handleContinue = () => {
@@ -87,21 +94,27 @@ export default function CheckoutStep2() {
       return;
     }
 
-    const prevData = JSON.parse(localStorage.getItem("checkoutData") || "{}");
+    if (!formData.name || !formData.lastname || (!token && !formData.email)) {
+      alert("Por favor completa nombre, apellido y email.");
+      return;
+    }
+
     const selectedOption = shippingOptions.find((opt) => opt.name === shipping);
 
-    // 🔹 Guardar en checkoutData
+    // 🔹 Guardar en checkoutData (invitado o logueado)
     localStorage.setItem(
       "checkoutData",
       JSON.stringify({
-        ...prevData,
+        ...savedCheckout,
         ...formData,
-        shipping,
-        shippingOption: selectedOption || null,
+        customerName: formData.name,
+        customerLastname: formData.lastname,
+        customerEmail: token ? formData.email || user?.email : formData.email,
+        shippingOption:
+          shippingOptions.find((opt) => opt.name === shipping) || null,
       })
     );
 
-    // 🔹 Guardar también en shippingData para el sidebar
     localStorage.setItem(
       "shippingData",
       JSON.stringify({
@@ -113,7 +126,7 @@ export default function CheckoutStep2() {
     navigate("/checkout/paso-3");
   };
 
-  if (cartLoading) {
+  if (token && cartLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <p className="text-gray-500 text-lg">Cargando carrito...</p>
@@ -205,6 +218,18 @@ export default function CheckoutStep2() {
                   className="w-full p-3 border rounded-lg"
                 />
               </div>
+              {!token && (
+                <div className="mt-4">
+                  <input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    placeholder="Email"
+                    className="w-full p-3 border rounded-lg"
+                  />
+                </div>
+              )}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                 <input
                   type="tel"
@@ -235,7 +260,6 @@ export default function CheckoutStep2() {
                 placeholder="Calle"
                 className="w-full p-3 border rounded-lg mb-4"
               />
-
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <input
                   type="text"
@@ -262,7 +286,6 @@ export default function CheckoutStep2() {
                   className="w-full p-3 border rounded-lg"
                 />
               </div>
-
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
                 <input
                   type="text"
@@ -289,8 +312,8 @@ export default function CheckoutStep2() {
         <div className="bg-white p-6 rounded-xl shadow-md h-fit">
           <h3 className="text-xl font-bold mb-4">Resumen del pedido</h3>
 
-          {cart?.items?.length > 0 ? (
-            cart.items.map((item) => (
+          {currentCart?.items?.length > 0 ? (
+            currentCart.items.map((item) => (
               <div
                 key={item.productId}
                 className="flex justify-between border-b pb-2 mb-2 text-lg"
@@ -306,7 +329,7 @@ export default function CheckoutStep2() {
           )}
 
           <h4 className="mt-4 text-2xl font-bold">
-            Total: ${cart?.total ?? 0}
+            Total: ${currentCart?.total ?? 0}
           </h4>
 
           {shipping && (
