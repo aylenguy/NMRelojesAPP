@@ -6,7 +6,9 @@ const API_BASE_URL = "https://localhost:7247";
 export default function AdminOrders() {
   const { token } = useAuth();
   const [orders, setOrders] = useState([]);
+  const [products, setProducts] = useState([]);
 
+  // 📦 Obtener pedidos
   const fetchOrders = async () => {
     try {
       const res = await fetch(`${API_BASE_URL}/api/Venta/GetAll/all`, {
@@ -20,10 +22,28 @@ export default function AdminOrders() {
     }
   };
 
+  // 📦 Obtener productos (con endpoint correcto)
+  const fetchProducts = async () => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/Product/GetAllProducts`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error("Error al cargar productos");
+      const data = await res.json();
+      setProducts(data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   useEffect(() => {
-    if (token) fetchOrders();
+    if (token) {
+      fetchOrders();
+      fetchProducts();
+    }
   }, [token]);
 
+  // ✅ Cambiar estado de pedido
   const updateStatus = async (orderId, status) => {
     try {
       const res = await fetch(`${API_BASE_URL}/api/Venta/${orderId}/status`, {
@@ -41,8 +61,34 @@ export default function AdminOrders() {
     }
   };
 
+  // ❌ Cancelar pedido
+  const cancelOrder = async (orderId) => {
+    if (!window.confirm("¿Estás seguro de cancelar esta venta?")) return;
+    try {
+      const res = await fetch(
+        `${API_BASE_URL}/api/Venta/CancelVenta/${orderId}/cancel`,
+        {
+          method: "PUT",
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData?.error || "Error cancelando la venta");
+      }
+
+      // 🔄 Refrescar ventas y productos después de cancelar
+      fetchOrders();
+      fetchProducts();
+    } catch (err) {
+      console.error(err);
+      alert(err.message || "Hubo un error al cancelar la venta");
+    }
+  };
+
   return (
     <div>
+      {/* Tabla de pedidos */}
       <h1 className="text-2xl font-bold mb-4">Pedidos</h1>
       <table className="w-full bg-white rounded shadow overflow-hidden text-sm">
         <thead className="bg-gray-50">
@@ -64,7 +110,10 @@ export default function AdminOrders() {
         </thead>
         <tbody>
           {orders.map((o) => (
-            <tr key={o.orderId}>
+            <tr
+              key={o.orderId}
+              className={o.status === "Cancelled" ? "bg-red-100" : ""}
+            >
               <td className="p-2 border">{o.orderId}</td>
               <td className="p-2 border">
                 {o.customerName} {o.customerLastname}
@@ -96,7 +145,10 @@ export default function AdminOrders() {
                   <ul className="list-disc pl-4">
                     {o.items.map((item) => (
                       <li key={item.productId}>
-                        {item.productName} (x{item.quantity}) - ${item.subtotal}
+                        {item.productName} (x{item.quantity}) - ${item.subtotal}{" "}
+                        <span className="text-xs text-gray-500">
+                          (Stock actual: {item.currentStock})
+                        </span>
                       </li>
                     ))}
                   </ul>
@@ -106,18 +158,31 @@ export default function AdminOrders() {
               </td>
               <td className="p-2 border">${o.total}</td>
               <td className="p-2 border">{o.status}</td>
-              <td className="p-2 border flex gap-2">
+              <td className="p-2 border flex gap-2 flex-wrap">
                 <button
                   onClick={() => updateStatus(o.orderId, "Enviado")}
-                  className="bg-blue-600 text-white px-3 py-1 rounded"
+                  disabled={o.status === "Cancelled"}
+                  className={`px-3 py-1 rounded text-white ${
+                    o.status === "Cancelled" ? "bg-gray-400" : "bg-blue-600"
+                  }`}
                 >
                   Marcar Enviado
                 </button>
                 <button
                   onClick={() => updateStatus(o.orderId, "Entregado")}
-                  className="bg-green-600 text-white px-3 py-1 rounded"
+                  disabled={o.status === "Cancelled"}
+                  className={`px-3 py-1 rounded text-white ${
+                    o.status === "Cancelled" ? "bg-gray-400" : "bg-green-600"
+                  }`}
                 >
                   Marcar Entregado
+                </button>
+                <button
+                  onClick={() => cancelOrder(o.orderId)}
+                  disabled={o.status === "Cancelled"}
+                  className="bg-red-600 text-white px-3 py-1 rounded"
+                >
+                  Cancelar
                 </button>
               </td>
             </tr>

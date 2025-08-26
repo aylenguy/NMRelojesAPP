@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import CheckoutProgress from "../components/CheckoutProgress";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
-import { addVenta } from "../api/orders"; // 👈 solo usamos addVenta
+import { addVenta, createFromCart } from "../api/orders";
 
 export default function CheckoutStep3() {
   const { cart, fetchCart, clearCart, loading: cartLoading } = useCart();
@@ -20,7 +20,6 @@ export default function CheckoutStep3() {
   const [loading, setLoading] = useState(false);
   const [orderNotes, setOrderNotes] = useState("");
 
-  // 🔹 Usar carrito según token/invitado
   const currentCart = token ? cart : guestCart;
 
   useEffect(() => {
@@ -32,11 +31,34 @@ export default function CheckoutStep3() {
       setLoading(true);
       let newVenta;
 
-      // 🔹 Para usuarios logueados mandamos sólo token (el backend arma desde carrito)
       if (token) {
-        newVenta = await addVenta({}, token);
+        // 🔹 Logueado: armar DTO con datos del checkout y enviar al backend
+        if (!currentCart.items || currentCart.items.length === 0) {
+          alert("El carrito está vacío");
+          setLoading(false);
+          return;
+        }
+
+        const dto = {
+          customerEmail: checkoutData.email,
+          customerName: checkoutData.name,
+          customerLastname: checkoutData.lastname,
+          shippingAddress: checkoutData.street + " " + checkoutData.number,
+          postalCode: checkoutData.postalCode,
+          province: checkoutData.province,
+          city: checkoutData.city,
+          department: checkoutData.department,
+          street: checkoutData.street,
+          number: checkoutData.number,
+          paymentMethod,
+          shippingMethod: checkoutData.shippingOption?.name ?? "",
+          shippingCost: checkoutData.shippingOption?.cost ?? 0,
+          notes: orderNotes,
+        };
+
+        newVenta = await createFromCart(dto, token);
       } else {
-        // 🔹 Invitado → armar DTO
+        // 🔹 Invitado: armar DTO completo con items
         if (!currentCart.items || currentCart.items.length === 0) {
           alert("El carrito está vacío");
           setLoading(false);
@@ -55,7 +77,6 @@ export default function CheckoutStep3() {
           postalCode: checkoutData.postalCode,
           shippingMethod: checkoutData.shippingOption?.name ?? "",
           shippingCost: checkoutData.shippingOption?.cost ?? 0,
-
           paymentMethod,
           notes: orderNotes || "",
           items: currentCart.items.map((item) => ({

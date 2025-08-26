@@ -30,7 +30,7 @@ import CheckoutSuccess from "./pages/CheckoutSuccess";
 
 // Admin
 import AdminLayout from "./pages/admin/AdminLayout";
-import Dashboard from "./pages/admin/AdminDashboard";
+
 import AdminProducts from "./pages/admin/AdminProducts";
 import AdminUsers from "./pages/admin/AdminUsers";
 import AdminOrders from "./pages/admin/AdminOrders";
@@ -170,7 +170,6 @@ function App() {
         {/* Rutas protegidas: admin */}
         <Route element={<ProtectedRoute requiredRole="admin" />}>
           <Route path="/admin" element={<AdminLayout />}>
-            <Route index element={<Dashboard />} />
             <Route path="products" element={<AdminProducts />} />
             <Route path="products/edit/:id" element={<EditProduct />} />
             <Route path="users" element={<AdminUsers />} />

@@ -10,9 +10,6 @@ export default function AdminLayout() {
       <aside className="w-64 bg-gray-900 text-white p-6 flex flex-col">
         <h2 className="text-2xl font-bold mb-6">Panel Admin</h2>
         <nav className="flex flex-col gap-2">
-          <Link to="/admin" className="px-3 py-2 rounded hover:bg-gray-800">
-            📊 Dashboard
-          </Link>
           <Link
             to="/admin/products"
             className="px-3 py-2 rounded hover:bg-gray-800"
