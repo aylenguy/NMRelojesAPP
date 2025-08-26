@@ -101,7 +101,7 @@ const Navbar = ({ searchText, setSearchText }) => {
 
               {role === "client" && (
                 <button
-                  onClick={() => navigate("/profile")}
+                  onClick={() => navigate("/profilepage")}
                   className="text-gray-700 hover:text-black font-semibold mr-4"
                 >
                   Mi perfil

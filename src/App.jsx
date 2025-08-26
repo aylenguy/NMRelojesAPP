@@ -35,6 +35,7 @@ import AdminProducts from "./pages/admin/AdminProducts";
 import AdminUsers from "./pages/admin/AdminUsers";
 import AdminOrders from "./pages/admin/AdminOrders";
 import EditProduct from "./pages/admin/EditProduct";
+import ProfilePage from "./components/ProfilePage";
 
 function App() {
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -158,6 +159,7 @@ function App() {
         <Route path="/contacto" element={<Contacto />} />
         <Route path="/envio" element={<Envio />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/profilepage" element={<ProfilePage />} />
 
         {/* Rutas protegidas para clientes */}
         <Route element={<ProtectedRoute allowGuest={true} />}>

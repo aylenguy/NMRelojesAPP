@@ -22,7 +22,7 @@ export default function AdminOrders() {
     }
   };
 
-  // 📦 Obtener productos (con endpoint correcto)
+  // 📦 Obtener productos
   const fetchProducts = async () => {
     try {
       const res = await fetch(`${API_BASE_URL}/api/Product/GetAllProducts`, {
@@ -43,7 +43,7 @@ export default function AdminOrders() {
     }
   }, [token]);
 
-  // ✅ Cambiar estado de pedido
+  // 🔹 Cambiar estado de pedido
   const updateStatus = async (orderId, status) => {
     try {
       const res = await fetch(`${API_BASE_URL}/api/Venta/${orderId}/status`, {
@@ -58,10 +58,11 @@ export default function AdminOrders() {
       fetchOrders();
     } catch (err) {
       console.error(err);
+      alert(err.message || "Error al actualizar el estado");
     }
   };
 
-  // ❌ Cancelar pedido
+  // 🔹 Cancelar pedido
   const cancelOrder = async (orderId) => {
     if (!window.confirm("¿Estás seguro de cancelar esta venta?")) return;
     try {
@@ -76,8 +77,6 @@ export default function AdminOrders() {
         const errorData = await res.json().catch(() => ({}));
         throw new Error(errorData?.error || "Error cancelando la venta");
       }
-
-      // 🔄 Refrescar ventas y productos después de cancelar
       fetchOrders();
       fetchProducts();
     } catch (err) {
@@ -86,9 +85,16 @@ export default function AdminOrders() {
     }
   };
 
+  // 🔹 Colores según estado
+  const statusColors = {
+    Pendiente: "bg-yellow-200",
+    Enviado: "bg-blue-200",
+    Entregado: "bg-green-200",
+    Cancelado: "bg-red-100",
+  };
+
   return (
     <div>
-      {/* Tabla de pedidos */}
       <h1 className="text-2xl font-bold mb-4">Pedidos</h1>
       <table className="w-full bg-white rounded shadow overflow-hidden text-sm">
         <thead className="bg-gray-50">
@@ -110,10 +116,7 @@ export default function AdminOrders() {
         </thead>
         <tbody>
           {orders.map((o) => (
-            <tr
-              key={o.orderId}
-              className={o.status === "Cancelled" ? "bg-red-100" : ""}
-            >
+            <tr key={o.orderId} className={statusColors[o.status] || ""}>
               <td className="p-2 border">{o.orderId}</td>
               <td className="p-2 border">
                 {o.customerName} {o.customerLastname}
@@ -157,29 +160,29 @@ export default function AdminOrders() {
                 )}
               </td>
               <td className="p-2 border">${o.total}</td>
-              <td className="p-2 border">{o.status}</td>
+              <td className="p-2 border font-bold">{o.status}</td>
               <td className="p-2 border flex gap-2 flex-wrap">
                 <button
                   onClick={() => updateStatus(o.orderId, "Enviado")}
-                  disabled={o.status === "Cancelled"}
+                  disabled={o.status === "Cancelado"}
                   className={`px-3 py-1 rounded text-white ${
-                    o.status === "Cancelled" ? "bg-gray-400" : "bg-blue-600"
+                    o.status === "Cancelado" ? "bg-gray-400" : "bg-blue-600"
                   }`}
                 >
                   Marcar Enviado
                 </button>
                 <button
                   onClick={() => updateStatus(o.orderId, "Entregado")}
-                  disabled={o.status === "Cancelled"}
+                  disabled={o.status === "Cancelado"}
                   className={`px-3 py-1 rounded text-white ${
-                    o.status === "Cancelled" ? "bg-gray-400" : "bg-green-600"
+                    o.status === "Cancelado" ? "bg-gray-400" : "bg-green-600"
                   }`}
                 >
                   Marcar Entregado
                 </button>
                 <button
                   onClick={() => cancelOrder(o.orderId)}
-                  disabled={o.status === "Cancelled"}
+                  disabled={o.status === "Cancelado"}
                   className="bg-red-600 text-white px-3 py-1 rounded"
                 >
                   Cancelar
