@@ -6,9 +6,7 @@ const API_BASE_URL = "https://localhost:7247";
 export default function AdminOrders() {
   const { token } = useAuth();
   const [orders, setOrders] = useState([]);
-  const [products, setProducts] = useState([]);
 
-  // 📦 Obtener pedidos
   const fetchOrders = async () => {
     try {
       const res = await fetch(`${API_BASE_URL}/api/Venta/GetAll/all`, {
@@ -22,38 +20,26 @@ export default function AdminOrders() {
     }
   };
 
-  // 📦 Obtener productos
-  const fetchProducts = async () => {
-    try {
-      const res = await fetch(`${API_BASE_URL}/api/Product/GetAllProducts`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!res.ok) throw new Error("Error al cargar productos");
-      const data = await res.json();
-      setProducts(data);
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
   useEffect(() => {
-    if (token) {
-      fetchOrders();
-      fetchProducts();
-    }
+    if (token) fetchOrders();
   }, [token]);
 
-  // 🔹 Cambiar estado de pedido
   const updateStatus = async (orderId, status) => {
+    const confirmMsg = `¿Estás seguro que querés cambiar el estado del pedido #${orderId} a "${status}"?`;
+    if (!window.confirm(confirmMsg)) return;
+
     try {
-      const res = await fetch(`${API_BASE_URL}/api/Venta/${orderId}/status`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ status }),
-      });
+      const res = await fetch(
+        `${API_BASE_URL}/api/Venta/UpdateStatus/${orderId}/status`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ status }),
+        }
+      );
       if (!res.ok) throw new Error("Error actualizando estado");
       fetchOrders();
     } catch (err) {
@@ -62,9 +48,8 @@ export default function AdminOrders() {
     }
   };
 
-  // 🔹 Cancelar pedido
   const cancelOrder = async (orderId) => {
-    if (!window.confirm("¿Estás seguro de cancelar esta venta?")) return;
+    if (!window.confirm("¿Seguro querés cancelar esta venta?")) return;
     try {
       const res = await fetch(
         `${API_BASE_URL}/api/Venta/CancelVenta/${orderId}/cancel`,
@@ -73,125 +58,152 @@ export default function AdminOrders() {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData?.error || "Error cancelando la venta");
-      }
+      if (!res.ok) throw new Error("Error cancelando venta");
       fetchOrders();
-      fetchProducts();
     } catch (err) {
       console.error(err);
       alert(err.message || "Hubo un error al cancelar la venta");
     }
   };
 
-  // 🔹 Colores según estado
   const statusColors = {
-    Pendiente: "bg-yellow-200",
-    Enviado: "bg-blue-200",
-    Entregado: "bg-green-200",
-    Cancelado: "bg-red-100",
+    Pendiente: "bg-yellow-100 text-yellow-800 border border-yellow-300",
+    Enviado: "bg-blue-100 text-blue-800 border border-blue-300",
+    Entregado: "bg-green-100 text-green-800 border border-green-300",
+    Cancelado: "bg-red-100 text-red-800 border border-red-300",
   };
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold mb-4">Pedidos</h1>
-      <table className="w-full bg-white rounded shadow overflow-hidden text-sm">
-        <thead className="bg-gray-50">
-          <tr>
-            <th className="p-2 border">ID</th>
-            <th className="p-2 border">Cliente</th>
-            <th className="p-2 border">Email</th>
-            <th className="p-2 border">Dirección</th>
-            <th className="p-2 border">Método Envío</th>
-            <th className="p-2 border">Costo Envío</th>
-            <th className="p-2 border">Método Pago</th>
-            <th className="p-2 border">Notas</th>
-            <th className="p-2 border">Fecha</th>
-            <th className="p-2 border">Productos</th>
-            <th className="p-2 border">Total</th>
-            <th className="p-2 border">Estado</th>
-            <th className="p-2 border">Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
+    <div className="p-6">
+      <h1 className="text-3xl font-bold mb-6">📦 Pedidos</h1>
+
+      {orders.length === 0 ? (
+        <p className="text-gray-500">No hay pedidos aún.</p>
+      ) : (
+        <div className="space-y-6">
           {orders.map((o) => (
-            <tr key={o.orderId} className={statusColors[o.status] || ""}>
-              <td className="p-2 border">{o.orderId}</td>
-              <td className="p-2 border">
-                {o.customerName} {o.customerLastname}
-                <br />
-                {o.clientId ? (
-                  <span className="text-xs text-green-600">(Registrado)</span>
-                ) : (
-                  <span className="text-xs text-gray-500">(Invitado)</span>
-                )}
-              </td>
-              <td className="p-2 border">{o.customerEmail}</td>
-              <td className="p-2 border">
-                {o.street} {o.number} {o.department}, {o.city}, {o.province},{" "}
-                {o.postalCode}
-              </td>
-              <td className="p-2 border">{o.shippingMethod}</td>
-              <td className="p-2 border">${o.shippingCost}</td>
-              <td className="p-2 border">{o.paymentMethod}</td>
-              <td className="p-2 border">{o.notes}</td>
-              <td className="p-2 border">
-                {new Date(o.date).toLocaleString("es-AR", {
-                  timeZone: "America/Argentina/Buenos_Aires",
-                  dateStyle: "short",
-                  timeStyle: "short",
-                })}
-              </td>
-              <td className="p-2 border">
+            <div
+              key={o.orderId}
+              className="bg-white shadow-md rounded-2xl p-6 border border-gray-200 hover:shadow-lg transition"
+            >
+              {/* Header */}
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-bold">Pedido #{o.orderId}</h2>
+                <span
+                  className={`px-3 py-1 rounded-full text-sm font-medium ${
+                    statusColors[o.status]
+                  }`}
+                >
+                  {o.status}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Cliente */}
+                <div>
+                  <h3 className="font-semibold text-gray-700 mb-2">Cliente</h3>
+                  <p className="text-gray-800">
+                    {o.customerName} {o.customerLastname}
+                  </p>
+                  <p className="text-gray-600 text-sm">{o.customerEmail}</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {o.clientId ? "Cliente registrado ✅" : "Invitado "}
+                  </p>
+                </div>
+
+                {/* Dirección */}
+                <div>
+                  <h3 className="font-semibold text-gray-700 mb-2">
+                    📍 Dirección de envío
+                  </h3>
+                  <p className="text-gray-700 text-sm leading-relaxed">
+                    {o.street} {o.number} {o.department}, {o.city}, {o.province}
+                    , CP {o.postalCode}
+                  </p>
+                </div>
+              </div>
+
+              {/* Productos */}
+              <div className="mt-6">
+                <h3 className="font-semibold text-gray-700 mb-2">
+                  🛒 Productos
+                </h3>
                 {o.items && o.items.length > 0 ? (
-                  <ul className="list-disc pl-4">
+                  <div className="divide-y divide-gray-200 text-sm">
                     {o.items.map((item) => (
-                      <li key={item.productId}>
-                        {item.productName} (x{item.quantity}) - ${item.subtotal}{" "}
-                        <span className="text-xs text-gray-500">
-                          (Stock actual: {item.currentStock})
+                      <div
+                        key={item.productId}
+                        className="flex justify-between py-2"
+                      >
+                        <span>
+                          {item.productName}{" "}
+                          <span className="text-gray-500">
+                            x{item.quantity}
+                          </span>
                         </span>
-                      </li>
+                        <span className="font-medium">${item.subtotal}</span>
+                      </div>
                     ))}
-                  </ul>
+                  </div>
                 ) : (
-                  "Sin productos"
+                  <p className="text-gray-500 text-sm">Sin productos</p>
                 )}
-              </td>
-              <td className="p-2 border">${o.total}</td>
-              <td className="p-2 border font-bold">{o.status}</td>
-              <td className="p-2 border flex gap-2 flex-wrap">
+              </div>
+
+              {/* Totales */}
+              <div className="mt-6 border-t pt-4 text-sm space-y-2">
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Método de Envío:</span>
+                  <span>
+                    {o.shippingMethod} (${o.shippingCost})
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Método de Pago:</span>
+                  <span>{o.paymentMethod}</span>
+                </div>
+                <div className="flex justify-between text-lg font-bold">
+                  <span>Total:</span>
+                  <span>${o.total}</span>
+                </div>
+              </div>
+
+              {/* Acciones */}
+              <div className="mt-6 flex flex-wrap gap-3">
                 <button
                   onClick={() => updateStatus(o.orderId, "Enviado")}
                   disabled={o.status === "Cancelado"}
-                  className={`px-3 py-1 rounded text-white ${
-                    o.status === "Cancelado" ? "bg-gray-400" : "bg-blue-600"
+                  className={`px-4 py-2 rounded-lg text-white text-sm ${
+                    o.status === "Cancelado"
+                      ? "bg-gray-400"
+                      : "bg-blue-600 hover:bg-blue-700"
                   }`}
                 >
-                  Marcar Enviado
+                  🚚 Marcar Enviado
                 </button>
                 <button
                   onClick={() => updateStatus(o.orderId, "Entregado")}
                   disabled={o.status === "Cancelado"}
-                  className={`px-3 py-1 rounded text-white ${
-                    o.status === "Cancelado" ? "bg-gray-400" : "bg-green-600"
+                  className={`px-4 py-2 rounded-lg text-white text-sm ${
+                    o.status === "Cancelado"
+                      ? "bg-gray-400"
+                      : "bg-green-600 hover:bg-green-700"
                   }`}
                 >
-                  Marcar Entregado
+                  📦 Marcar Entregado
                 </button>
                 <button
                   onClick={() => cancelOrder(o.orderId)}
                   disabled={o.status === "Cancelado"}
-                  className="bg-red-600 text-white px-3 py-1 rounded"
+                  className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm"
                 >
                   Cancelar
                 </button>
-              </td>
-            </tr>
+              </div>
+            </div>
           ))}
-        </tbody>
-      </table>
+        </div>
+      )}
     </div>
   );
 }

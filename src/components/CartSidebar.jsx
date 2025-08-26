@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { FaTimes, FaTrash } from "react-icons/fa";
+import { FaTimes, FaTrash, FaShoppingCart } from "react-icons/fa";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
@@ -24,12 +24,14 @@ const CartSidebar = ({ isOpen, onClose }) => {
     if (saved.shippingOption) setSelectedShipping(saved.shippingOption);
   }, []);
 
-  const getItemImagen = (item) =>
-    item.image ||
-    item.Image ||
-    item.imagen ||
-    item.Imagen ||
-    "/placeholder.png";
+  const getItemImagen = (item) => {
+    const img = item.image || item.Image || item.imagen || item.Imagen;
+    return img
+      ? img.startsWith("/")
+        ? img
+        : `/images/${img}`
+      : "/placeholder.png";
+  };
 
   const getItemNombre = (item) =>
     item.name ||
@@ -48,6 +50,11 @@ const CartSidebar = ({ isOpen, onClose }) => {
     const cantidad = getItemCantidad(item);
     if (cantidad > 1) updateItem(item.id, cantidad - 1);
     else removeFromCart(item.id);
+  };
+
+  const handleIncrease = (item) => {
+    const cantidad = getItemCantidad(item);
+    updateItem(item.id, cantidad + 1);
   };
 
   const handleCalculateShipping = async () => {
@@ -107,11 +114,9 @@ const CartSidebar = ({ isOpen, onClose }) => {
       return;
     }
 
-    // Guardar carrito de invitado
     const guestCart = cart || { items: [], total: 0 };
     localStorage.setItem("guestCart", JSON.stringify(guestCart));
 
-    // Guardar checkoutData completo
     const checkoutPayload = {
       clientId: user?.id ?? 0,
       name: user?.name || "",
@@ -139,105 +144,129 @@ const CartSidebar = ({ isOpen, onClose }) => {
   };
 
   return (
-    <div
-      className={`fixed top-0 right-0 h-full w-80 bg-white shadow-lg transform transition-transform z-50 flex flex-col ${
-        isOpen ? "translate-x-0" : "translate-x-full"
-      }`}
-    >
-      {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b bg-white">
-        <h2 className="text-xl font-bold">Mi carrito</h2>
-        <button onClick={onClose} aria-label="Cerrar">
-          <FaTimes />
-        </button>
-      </div>
+    <>
+      {/* Overlay */}
+      {isOpen && (
+        <div
+          onClick={onClose}
+          className="fixed inset-0 bg-black bg-opacity-40 z-40 transition-opacity"
+        />
+      )}
 
-      {/* Contenido scrolleable */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {!cart?.items?.length ? (
-          <p className="text-center text-gray-500 italic">
-            Tenés tu carrito vacío. Agregá productos y realizá tu compra.
-          </p>
-        ) : (
-          <>
-            {cart.items.map((item) => (
-              <div
-                key={item.id}
-                className="flex items-center justify-between gap-2 border-b pb-2"
-              >
-                <img
-                  src={getItemImagen(item)}
-                  alt={getItemNombre(item)}
-                  className="w-16 h-16 object-cover rounded"
-                />
-                <div className="flex-1">
-                  <h3 className="text-sm font-semibold">
-                    {getItemNombre(item)}
-                  </h3>
-                  <p className="text-sm text-gray-700">
-                    Cantidad: {getItemCantidad(item)}
-                  </p>
-                  <p className="text-sm font-bold">
-                    ${getItemSubtotal(item).toLocaleString("es-AR")}
-                  </p>
-                </div>
-                <div className="flex flex-col items-end gap-1">
-                  <button
-                    onClick={() => handleDecrease(item)}
-                    className="text-yellow-600 hover:text-yellow-800 text-xs"
-                    title="Disminuir"
-                  >
-                    -1
-                  </button>
-                  <button
-                    onClick={() => removeFromCart(item.id)}
-                    className="text-red-500 hover:text-red-700"
-                    title="Eliminar"
-                  >
-                    <FaTrash />
-                  </button>
-                </div>
-              </div>
-            ))}
+      {/* Sidebar */}
+      <div
+        className={`fixed top-0 right-0 h-full w-96 bg-white shadow-2xl transform transition-transform duration-300 ease-in-out z-50 flex flex-col ${
+          isOpen ? "translate-x-0" : "translate-x-full"
+        }`}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between p-4 border-b bg-white">
+          <h2 className="text-xl font-bold flex items-center gap-2">
+            <FaShoppingCart /> Mi carrito
+          </h2>
+          <button
+            onClick={onClose}
+            aria-label="Cerrar"
+            className="text-gray-600 hover:text-gray-900 transition"
+          >
+            <FaTimes size={20} />
+          </button>
+        </div>
 
-            {/* Medios de envío */}
-            <div className="space-y-3">
-              <p className="text-sm text-gray-600 font-semibold">
-                Medios de envío:
-              </p>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  placeholder="Código postal"
-                  value={postalCode}
-                  onChange={(e) => {
-                    setPostalCode(e.target.value);
-                    setError("");
-                  }}
-                  className="flex-1 border rounded px-2 py-1 text-sm"
-                />
-                <button
-                  onClick={handleCalculateShipping}
-                  className="bg-white text-[#005f73] font-semibold px-3 rounded border border-[#005f73] hover:bg-[#005f73] hover:text-white text-sm transition-colors"
+        {/* Contenido scrollable */}
+        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+          {!cart?.items?.length ? (
+            <p className="text-center text-gray-500 italic">
+              Tenés tu carrito vacío. Agregá productos y realizá tu compra.
+            </p>
+          ) : (
+            <>
+              {cart.items.map((item) => (
+                <div
+                  key={item.id}
+                  className="flex items-center justify-between gap-3 p-2 border rounded shadow-sm hover:shadow-md transition"
                 >
-                  Calcular
-                </button>
-              </div>
-              {error && <p className="text-red-500 text-sm">{error}</p>}
-              {shippingOptions.length > 0 && (
-                <div className="space-y-2">
-                  {shippingOptions.map((option, idx) => (
-                    <label
-                      key={idx}
-                      className="flex items-center gap-2 border rounded p-2 cursor-pointer hover:bg-gray-50"
+                  <img
+                    src={getItemImagen(item)}
+                    alt={getItemNombre(item)}
+                    className="w-20 h-20 object-cover rounded"
+                  />
+                  <div className="flex-1 flex flex-col justify-between">
+                    <h3 className="text-sm font-semibold">
+                      {getItemNombre(item)}
+                    </h3>
+                    <div className="flex items-center gap-2 mt-1">
+                      <button
+                        onClick={() => handleDecrease(item)}
+                        className="bg-gray-200 hover:bg-gray-300 text-gray-700 rounded px-2"
+                      >
+                        -
+                      </button>
+                      <span>{getItemCantidad(item)}</span>
+                      <button
+                        onClick={() => handleIncrease(item)}
+                        className="bg-gray-200 hover:bg-gray-300 text-gray-700 rounded px-2"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+                  <div className="flex flex-col items-end gap-1">
+                    <p className="font-bold">
+                      ${getItemSubtotal(item).toLocaleString("es-AR")}
+                    </p>
+                    <button
+                      onClick={() => removeFromCart(item.id)}
+                      className="text-red-500 hover:text-red-700"
                     >
-                      <input
-                        type="radio"
-                        name="shipping"
-                        checked={selectedShipping?.name === option.name}
-                        onChange={() => handleSelectShipping(option)}
-                      />
-                      <div className="flex flex-col text-sm">
+                      <FaTrash />
+                    </button>
+                  </div>
+                </div>
+              ))}
+
+              {/* Medios de envío */}
+              <div className="space-y-3 mt-4">
+                <p className="text-sm text-gray-600 font-semibold">
+                  Medios de envío:
+                </p>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    placeholder="Código postal"
+                    value={postalCode}
+                    onChange={(e) => {
+                      setPostalCode(e.target.value);
+                      setError("");
+                    }}
+                    className="flex-1 border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#005f73]"
+                  />
+                  <button
+                    onClick={handleCalculateShipping}
+                    className="bg-white text-[#005f73] font-semibold px-3 rounded border border-[#005f73] hover:bg-[#005f73] hover:text-white text-sm transition-colors"
+                  >
+                    Calcular
+                  </button>
+                </div>
+                {error && <p className="text-red-500 text-sm">{error}</p>}
+                {shippingOptions.length > 0 && (
+                  <div className="grid grid-cols-1 gap-2 mt-2">
+                    {shippingOptions.map((option, idx) => (
+                      <label
+                        key={idx}
+                        className={`flex flex-col p-3 border rounded cursor-pointer hover:shadow-md transition ${
+                          selectedShipping?.name === option.name
+                            ? "border-[#005f73] bg-[#f0fdfa]"
+                            : ""
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          name="shipping"
+                          className="hidden"
+                          checked={selectedShipping?.name === option.name}
+                          onChange={() => handleSelectShipping(option)}
+                        />
                         <span className="font-semibold">{option.name}</span>
                         <span className="text-gray-600">
                           {option.description}
@@ -247,32 +276,32 @@ const CartSidebar = ({ isOpen, onClose }) => {
                             ? "Gratis"
                             : `$${option.cost.toLocaleString("es-AR")}`}
                         </span>
-                      </div>
-                    </label>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Total + Botón */}
-            <div className="pt-4 border-t">
-              <p className="text-lg font-semibold">
-                Total: $
-                {(total + (selectedShipping?.cost ?? 0)).toLocaleString(
-                  "es-AR"
+                      </label>
+                    ))}
+                  </div>
                 )}
-              </p>
-              <button
-                onClick={handleFinalizePurchase}
-                className="mt-2 w-full bg-gray-900 text-white py-2 rounded hover:bg-gray-800 transition"
-              >
-                Realizar compra
-              </button>
-            </div>
-          </>
-        )}
+              </div>
+
+              {/* Total + Botón */}
+              <div className="pt-4 border-t mt-4">
+                <p className="text-xl font-bold">
+                  Total: $
+                  {(total + (selectedShipping?.cost ?? 0)).toLocaleString(
+                    "es-AR"
+                  )}
+                </p>
+                <button
+                  onClick={handleFinalizePurchase}
+                  className="mt-2 w-full bg-[#005f73] hover:bg-[#0a4a4a] text-white py-3 rounded-lg font-semibold transition-all"
+                >
+                  Finalizar compra
+                </button>
+              </div>
+            </>
+          )}
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 
