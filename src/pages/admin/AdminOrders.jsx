@@ -80,7 +80,7 @@ export default function AdminOrders() {
                 {o.street} {o.number} {o.department}, {o.city}, {o.province},{" "}
                 {o.postalCode}
               </td>
-              <td className="p-2 border">{o.ShippingMethod}</td>
+              <td className="p-2 border">{o.shippingMethod}</td>
               <td className="p-2 border">${o.shippingCost}</td>
               <td className="p-2 border">{o.paymentMethod}</td>
               <td className="p-2 border">{o.notes}</td>

@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import CheckoutProgress from "../components/CheckoutProgress";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
-import { addVenta, createFromCart } from "../api/orders";
+import { addVenta } from "../api/orders"; // 👈 solo usamos addVenta
 
 export default function CheckoutStep3() {
   const { cart, fetchCart, clearCart, loading: cartLoading } = useCart();
@@ -32,11 +32,11 @@ export default function CheckoutStep3() {
       setLoading(true);
       let newVenta;
 
+      // 🔹 Para usuarios logueados mandamos sólo token (el backend arma desde carrito)
       if (token) {
-        // Usuario logueado → backend crea venta desde carrito
-        newVenta = await createFromCart(token);
+        newVenta = await addVenta({}, token);
       } else {
-        // Invitado → armar DTO en el formato que espera el backend
+        // 🔹 Invitado → armar DTO
         if (!currentCart.items || currentCart.items.length === 0) {
           alert("El carrito está vacío");
           setLoading(false);
@@ -70,13 +70,14 @@ export default function CheckoutStep3() {
               0
             ) || 0) + (checkoutData.shippingOption?.cost || 0),
         };
+
         console.log("DTO invitado:", orderPayload);
         newVenta = await addVenta(orderPayload);
       }
 
       console.log("Venta creada:", newVenta);
 
-      // Limpiar carrito y checkoutData
+      // 🔹 Limpiar carrito y checkoutData
       clearCart();
       localStorage.removeItem("checkoutData");
       if (!token) localStorage.removeItem("guestCart");

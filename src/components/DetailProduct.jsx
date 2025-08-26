@@ -359,34 +359,39 @@ const DetailProduct = () => {
       <div className="max-w-6xl mx-auto mt-16">
         <h2 className="text-2xl font-bold mb-6">También te puede interesar</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-          {relatedProducts.map((item) => (
-            <div
-              key={item.id || item.Id}
-              onClick={() =>
-                navigate(`/producto/${item.id || item.Id}`, { state: item })
-              }
-              className="cursor-pointer border rounded-lg overflow-hidden shadow hover:shadow-lg transition"
-            >
-              <img
-                src={
-                  item.image || item.Image || item.imagen || "/placeholder.png"
+          {relatedProducts
+            .filter((item) => (item.stock ?? item.Stock ?? 0) > 0) // 🔹 solo mostrar con stock
+            .map((item) => (
+              <div
+                key={item.id || item.Id}
+                onClick={() =>
+                  navigate(`/producto/${item.id || item.Id}`, { state: item })
                 }
-                alt={item.name || item.Name || item.nombre}
-                className="w-full h-48 object-cover"
-              />
-              <div className="p-4">
-                <h3 className="font-semibold text-lg mb-2">
-                  {item.name || item.Name || item.nombre}
-                </h3>
-                <p className="text-[#005f73] font-bold">
-                  $
-                  {item.price?.toLocaleString("es-AR") ||
-                    item.Price?.toLocaleString("es-AR") ||
-                    item.precio?.toLocaleString("es-AR")}
-                </p>
+                className="cursor-pointer border rounded-lg overflow-hidden shadow hover:shadow-lg transition"
+              >
+                <img
+                  src={
+                    item.image ||
+                    item.Image ||
+                    item.imagen ||
+                    "/placeholder.png"
+                  }
+                  alt={item.name || item.Name || item.nombre}
+                  className="w-full h-48 object-cover"
+                />
+                <div className="p-4">
+                  <h3 className="font-semibold text-lg mb-2">
+                    {item.name || item.Name || item.nombre}
+                  </h3>
+                  <p className="text-[#005f73] font-bold">
+                    $
+                    {item.price?.toLocaleString("es-AR") ||
+                      item.Price?.toLocaleString("es-AR") ||
+                      item.precio?.toLocaleString("es-AR")}
+                  </p>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
         </div>
       </div>
 

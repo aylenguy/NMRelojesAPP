@@ -117,6 +117,7 @@ const Productos = ({ searchText }) => {
 
         {/* Grid de productos */}
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8">
+          // Dentro del map de productos
           {filtered.map((producto) => {
             const stock = producto.stock ?? 0;
             const sinStock = stock <= 0;
@@ -140,33 +141,28 @@ const Productos = ({ searchText }) => {
                     className="w-full h-80 object-cover"
                   />
 
+                  {/* Etiqueta SIN STOCK */}
                   {sinStock && (
                     <span className="absolute top-3 left-3 bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-md shadow-md">
                       SIN STOCK
                     </span>
                   )}
 
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (!sinStock) handleAddToCart(producto);
-                    }}
-                    disabled={sinStock}
-                    className={`absolute bottom-4 left-1/2 -translate-x-1/2 p-3 rounded-full shadow-lg transition
-                      ${
-                        sinStock
-                          ? "bg-gray-300 cursor-not-allowed opacity-60"
-                          : "bg-white hover:bg-gray-100"
-                      }`}
-                    title={sinStock ? "Producto agotado" : "Agregar al carrito"}
-                  >
-                    <FaShoppingCart
-                      className={`text-lg ${
-                        sinStock ? "text-gray-500" : "text-gray-800"
-                      }`}
-                    />
-                  </button>
+                  {/* Botón carrito solo si hay stock */}
+                  {!sinStock && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleAddToCart(producto);
+                      }}
+                      className="absolute bottom-4 left-1/2 -translate-x-1/2 p-3 rounded-full shadow-lg transition bg-white hover:bg-gray-100 opacity-0 group-hover:opacity-100"
+                      title="Agregar al carrito"
+                    >
+                      <FaShoppingCart className="text-gray-800 text-lg" />
+                    </button>
+                  )}
                 </div>
+
                 <div className="p-5 text-center">
                   <h3 className="text-xl font-bold mb-1">
                     {getNombre(producto)}
@@ -183,16 +179,21 @@ const Productos = ({ searchText }) => {
                       )}
                     </span>
                   </p>
-                  {!sinStock && (
+
+                  {/* Mostrar stock o mensaje agotado */}
+                  {!sinStock ? (
                     <p className="text-sm text-green-600 mt-2">
                       Stock disponible: {stock}
+                    </p>
+                  ) : (
+                    <p className="text-sm text-red-600 mt-2 font-bold">
+                      Agotado
                     </p>
                   )}
                 </div>
               </div>
             );
           })}
-
           {filtered.length === 0 && (
             <p className="text-center col-span-full text-gray-500">
               No se encontraron productos.
