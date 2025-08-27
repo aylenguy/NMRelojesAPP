@@ -176,7 +176,7 @@ const CartSidebar = ({ isOpen, onClose }) => {
         {/* Contenido scrollable */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
           {!cart?.items?.length ? (
-            <p className="text-center text-gray-500 italic">
+            <p className="text-center text-gray-500 italic font-sans">
               Tenés tu carrito vacío. Agregá productos y realizá tu compra.
             </p>
           ) : (

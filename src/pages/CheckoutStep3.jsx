@@ -151,7 +151,7 @@ export default function CheckoutStep3() {
                 key={option.id}
                 className={`flex items-center gap-4 border rounded-xl p-4 cursor-pointer shadow-sm transition-all ${
                   paymentMethod === option.id
-                    ? "border-green-600 bg-green-50"
+                    ? "border-gray-400 bg-white"
                     : "border-gray-200 bg-white hover:shadow-md"
                 }`}
               >
@@ -161,7 +161,7 @@ export default function CheckoutStep3() {
                   value={option.id}
                   checked={paymentMethod === option.id}
                   onChange={(e) => setPaymentMethod(e.target.value)}
-                  className="w-5 h-5 text-green-600 focus:ring-green-500"
+                  className="w-5 h-5 text-gray-800 focus:ring-gray-500" // <- antes era green
                 />
                 {option.logo && (
                   <img
@@ -221,13 +221,15 @@ export default function CheckoutStep3() {
             Total: ${(currentCart?.total ?? 0).toLocaleString("es-AR")}
           </h4>
 
-          <button
-            onClick={handleConfirmOrder}
-            disabled={loading}
-            className="w-full mt-6 py-3 bg-green-600 text-white rounded-xl text-lg font-semibold hover:bg-green-700 shadow-md disabled:opacity-50"
-          >
-            {loading ? "Procesando..." : "Pagar ahora"}
-          </button>
+          <div className="flex justify-end mt-4">
+            <button
+              onClick={handleConfirmOrder}
+              disabled={loading}
+              className="py-2 px-6 bg-black text-white rounded-2xl text-sm font-semibold hover:bg-gray-800 focus:outline-none shadow-md disabled:opacity-50"
+            >
+              {loading ? "Procesando..." : "Pagar ahora"}
+            </button>
+          </div>
         </div>
       </div>
     </div>
