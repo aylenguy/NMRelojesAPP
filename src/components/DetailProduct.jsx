@@ -86,7 +86,7 @@ const DetailProduct = () => {
   const description =
     product?.description || product?.Description || product?.descripcion || "";
   const color = product?.color || product?.Color || "";
-  const totalPrice = price * quantity;
+  const totalPrice = price;
   const installmentCount = 6;
   const installmentValue = totalPrice / installmentCount;
   const discountPrice = totalPrice * 0.8;
@@ -243,20 +243,20 @@ const DetailProduct = () => {
           )}
 
           {/* Cantidad + Botón */}
-          <div className="flex items-center gap-4 mb-8">
+          <div className="flex items-center gap-3 mb-6">
             {stock > 0 ? (
               <>
-                <div className="flex items-center border rounded-lg overflow-hidden">
+                <div className="flex items-center border rounded-md overflow-hidden">
                   <button
                     onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                    className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-lg"
+                    className="px-3 py-1.5 bg-gray-200 hover:bg-gray-300 text-base"
                   >
                     -
                   </button>
                   <span className="px-5 text-lg">{quantity}</span>
                   <button
                     onClick={() => setQuantity((q) => q + 1)}
-                    className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-lg"
+                    className="px-3 py-1.5 bg-gray-200 hover:bg-gray-300 text-base"
                   >
                     +
                   </button>
@@ -264,16 +264,13 @@ const DetailProduct = () => {
 
                 <button
                   onClick={handleAddToCart}
-                  className="flex-1 bg-[#005f73] text-white px-6 py-3 rounded-lg hover:bg-[#0a9396] transition text-lg"
+                  className="flex-1 bg-[#005f73] text-white px-4 py-2 rounded-md hover:bg-[#0a9396] transition text-base"
                 >
                   Agregar al carrito
                 </button>
               </>
             ) : (
-              <button
-                disabled
-                className="flex-1 bg-gray-400 text-white px-6 py-3 rounded-lg cursor-not-allowed text-lg"
-              >
+              <button disabled className="text-red-500 font-medium">
                 SIN STOCK
               </button>
             )}
@@ -291,17 +288,15 @@ const DetailProduct = () => {
                   setPostalCode(e.target.value);
                   setError("");
                 }}
-                className="border rounded px-3 py-2 flex-1 text-lg"
+                className="border rounded-lg px-4 py-2 flex-1 text-base focus:outline-none focus:ring-2 focus:ring-black"
               />
               <button
                 onClick={handleCalculateShipping}
-                className="bg-[#005f73] text-white px-4 py-2 rounded-lg hover:bg-[#0a9396] transition"
+                className="w-28 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-all text-sm font-medium"
               >
                 Calcular
               </button>
             </div>
-
-            {error && <p className="text-red-500 mt-2">{error}</p>}
 
             {shippingOptions.length > 0 && (
               <div className="mt-3 space-y-2">
@@ -309,47 +304,20 @@ const DetailProduct = () => {
                   Opciones de envío para CP <b>{postalCode}</b>:
                 </p>
                 {shippingOptions.map((option, idx) => (
-                  <label
+                  <div
                     key={idx}
-                    className="flex items-center gap-2 border rounded p-2 cursor-pointer hover:bg-gray-50"
+                    className="flex flex-col border rounded p-2 bg-gray-50 text-sm"
                   >
-                    <input
-                      type="radio"
-                      name="shipping"
-                      checked={selectedShipping?.name === option.name}
-                      onChange={() => setSelectedShipping(option)}
-                    />
-                    <div className="flex flex-col text-sm">
-                      <span className="font-semibold">{option.name}</span>
-                      <span className="text-gray-600">
-                        {option.description}
-                      </span>
-                      <span className="text-gray-900 font-bold">
-                        {option.cost === 0
-                          ? "Gratis"
-                          : `$${option.cost.toLocaleString("es-AR")}`}
-                      </span>
-                    </div>
-                  </label>
+                    <span className="font-semibold">{option.name}</span>
+                    <span className="text-gray-600">{option.description}</span>
+                    <span className="text-gray-900 font-bold">
+                      {option.cost === 0
+                        ? "Gratis"
+                        : `$${option.cost.toLocaleString("es-AR")}`}
+                    </span>
+                  </div>
                 ))}
               </div>
-            )}
-
-            {selectedShipping && (
-              <p className="mt-3 text-gray-700 text-lg">
-                Costo de envío:{" "}
-                {selectedShipping.cost === 0
-                  ? "🚚 Gratis"
-                  : `$${selectedShipping.cost.toLocaleString("es-AR")}`}
-              </p>
-            )}
-
-            {/* Total con envío */}
-            {selectedShipping && (
-              <p className="mt-3 text-2xl font-bold text-gray-900">
-                Total: $
-                {(totalPrice + selectedShipping.cost).toLocaleString("es-AR")}
-              </p>
             )}
           </div>
         </div>

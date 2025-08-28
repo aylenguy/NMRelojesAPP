@@ -10,7 +10,7 @@ export default function ProtectedRoute({ requiredRole, allowGuest = false }) {
   // 🔑 Caso invitado: si no hay usuario pero se permite guest
   if (!user) {
     if (allowGuest) return <Outlet />;
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/" replace />;
   }
 
   // 🔑 Si se pide un rol específico

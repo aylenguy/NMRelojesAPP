@@ -119,7 +119,7 @@ const Navbar = ({ searchText, setSearchText }) => {
               {role === "client" && (
                 <button
                   onClick={() => setIsCartOpen(true)}
-                  className="relative text-gray-700 hover:text-yellow-500"
+                  className="relative text-gray-700 hover:text-black"
                   aria-label="Abrir carrito"
                 >
                   <FaShoppingCart className="text-xl" />
@@ -142,7 +142,7 @@ const Navbar = ({ searchText, setSearchText }) => {
               </button>
               <button
                 onClick={() => setIsCartOpen(true)}
-                className="relative text-gray-700 hover:text-yellow-500"
+                className="relative text-gray-700 hover:text-black"
                 aria-label="Abrir carrito"
               >
                 <FaShoppingCart className="text-xl" />

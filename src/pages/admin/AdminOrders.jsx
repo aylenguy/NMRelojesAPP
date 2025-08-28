@@ -75,7 +75,7 @@ export default function AdminOrders() {
 
   return (
     <div className="p-6">
-      <h1 className="text-3xl font-bold mb-6">📦 Pedidos</h1>
+      <h1 className="text-3xl font-bold mb-6"> Pedidos</h1>
 
       {orders.length === 0 ? (
         <p className="text-gray-500">No hay pedidos aún.</p>
@@ -125,9 +125,7 @@ export default function AdminOrders() {
 
               {/* Productos */}
               <div className="mt-6">
-                <h3 className="font-semibold text-gray-700 mb-2">
-                  🛒 Productos
-                </h3>
+                <h3 className="font-semibold text-gray-700 mb-2">Productos</h3>
                 {o.items && o.items.length > 0 ? (
                   <div className="divide-y divide-gray-200 text-sm">
                     {o.items.map((item) => (
@@ -179,7 +177,7 @@ export default function AdminOrders() {
                       : "bg-blue-600 hover:bg-blue-700"
                   }`}
                 >
-                  🚚 Marcar Enviado
+                  Marcar Enviado
                 </button>
                 <button
                   onClick={() => updateStatus(o.orderId, "Entregado")}
@@ -190,7 +188,7 @@ export default function AdminOrders() {
                       : "bg-green-600 hover:bg-green-700"
                   }`}
                 >
-                  📦 Marcar Entregado
+                  Marcar Entregado
                 </button>
                 <button
                   onClick={() => cancelOrder(o.orderId)}

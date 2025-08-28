@@ -15,8 +15,11 @@ export default function CheckoutStep2() {
     items: [],
     total: 0,
   };
+  const savedShipping = JSON.parse(localStorage.getItem("shippingData")) || {};
 
-  const [shipping, setShipping] = useState(savedCheckout.shipping || "");
+  const [shipping, setShipping] = useState(
+    savedShipping?.shippingOption?.name || savedCheckout.shipping || ""
+  );
   const [formData, setFormData] = useState({
     name: savedCheckout.name || user?.name || "",
     lastname: savedCheckout.lastname || user?.lastname || "",
@@ -75,7 +78,15 @@ export default function CheckoutStep2() {
       const data = Array.isArray(res.data) ? res.data : [res.data];
       if (data.length > 0) {
         setShippingOptions(data);
-        setShipping(data[0].name);
+
+        const previouslySelected =
+          savedShipping?.shippingOption &&
+          data.find((opt) => opt.name === savedShipping.shippingOption.name);
+
+        setShipping(
+          previouslySelected ? previouslySelected.name : data[0].name
+        );
+
         setErrors((prev) => ({ ...prev, postalCode: null }));
       } else {
         setShippingOptions([]);

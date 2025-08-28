@@ -18,11 +18,13 @@ const CartSidebar = ({ isOpen, onClose }) => {
   const total = cart?.total ?? 0;
 
   // Cargar valores guardados al inicio
-  useEffect(() => {
-    const saved = JSON.parse(localStorage.getItem("shippingData") || "{}");
-    if (saved.postalCode) setPostalCode(saved.postalCode);
-    if (saved.shippingOption) setSelectedShipping(saved.shippingOption);
-  }, []);
+  /*
+useEffect(() => {
+  const saved = JSON.parse(localStorage.getItem("shippingData") || "{}");
+  if (saved.postalCode) setPostalCode(saved.postalCode);
+  if (saved.shippingOption) setSelectedShipping(saved.shippingOption);
+}, []);
+*/
 
   const getItemImagen = (item) => {
     const img = item.image || item.Image || item.imagen || item.Imagen;
@@ -59,7 +61,7 @@ const CartSidebar = ({ isOpen, onClose }) => {
 
   const handleCalculateShipping = async () => {
     if (!postalCode.match(/^\d{4}$/)) {
-      setError("Ingresá un código postal válido (4 dígitos).");
+      //setError("Ingresá un código postal válido (4 dígitos).");
       setShippingOptions([]);
       setSelectedShipping(null);
       return;
@@ -176,7 +178,7 @@ const CartSidebar = ({ isOpen, onClose }) => {
         {/* Contenido scrollable */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
           {!cart?.items?.length ? (
-            <p className="text-center text-gray-500 italic font-sans">
+            <p className="text-center text-gray-500 italic">
               Tenés tu carrito vacío. Agregá productos y realizá tu compra.
             </p>
           ) : (
@@ -226,62 +228,69 @@ const CartSidebar = ({ isOpen, onClose }) => {
               ))}
 
               {/* Medios de envío */}
-              <div className="space-y-3 mt-4">
-                <p className="text-sm text-gray-600 font-semibold">
-                  Medios de envío:
-                </p>
+              <div className="mt-6">
+                <label className="block text-sm font-semibold text-gray-800 mb-2">
+                  Código postal
+                </label>
                 <div className="flex gap-2">
                   <input
                     type="text"
-                    placeholder="Código postal"
+                    placeholder="Ingrese su código postal"
                     value={postalCode}
                     onChange={(e) => {
                       setPostalCode(e.target.value);
                       setError("");
                     }}
-                    className="flex-1 border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#005f73]"
+                    className={`flex-1 px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 ${
+                      error
+                        ? "border-red-500 focus:ring-red-500"
+                        : "border-gray-300 focus:ring-black"
+                    }`}
                   />
                   <button
                     onClick={handleCalculateShipping}
-                    className="bg-white text-[#005f73] font-semibold px-3 rounded border border-[#005f73] hover:bg-[#005f73] hover:text-white text-sm transition-colors"
+                    className="w-28 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-all text-sm font-medium"
                   >
                     Calcular
                   </button>
                 </div>
-                {error && <p className="text-red-500 text-sm">{error}</p>}
+                {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
+
+                {/* Opciones de envío */}
                 {shippingOptions.length > 0 && (
-                  <div className="grid grid-cols-1 gap-2 mt-2">
+                  <div className="space-y-3 mt-4">
                     {shippingOptions.map((option, idx) => (
                       <label
                         key={idx}
-                        className={`flex flex-col p-3 border rounded cursor-pointer hover:shadow-md transition ${
+                        className={`flex items-center p-4 border rounded-xl cursor-pointer ${
                           selectedShipping?.name === option.name
-                            ? "border-[#005f73] bg-[#f0fdfa]"
-                            : ""
+                            ? "border-black bg-gray-50"
+                            : "border-gray-300 bg-white"
                         }`}
                       >
                         <input
                           type="radio"
                           name="shipping"
-                          className="hidden"
+                          className="mr-4"
                           checked={selectedShipping?.name === option.name}
                           onChange={() => handleSelectShipping(option)}
                         />
-                        <span className="font-semibold">{option.name}</span>
-                        <span className="text-gray-600">
-                          {option.description}
-                        </span>
-                        <span className="text-gray-900 font-bold">
-                          {option.cost === 0
-                            ? "Gratis"
-                            : `$${option.cost.toLocaleString("es-AR")}`}
-                        </span>
+                        <div>
+                          <p className="font-semibold">{option.name}</p>
+                          <p className="text-sm text-gray-500">
+                            {option.description}
+                          </p>
+                          <p className="font-bold">
+                            {option.cost === 0
+                              ? "Gratis"
+                              : `$${option.cost.toLocaleString("es-AR")}`}
+                          </p>
+                        </div>
                       </label>
                     ))}
                   </div>
                 )}
               </div>
-
               {/* Total + Botón */}
               <div className="pt-4 border-t mt-4">
                 <p className="text-xl font-bold">
