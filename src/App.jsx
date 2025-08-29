@@ -21,6 +21,7 @@ import ComoComprar from "./pages/ComoComprar";
 import Contacto from "./pages/Contacto";
 import Envio from "./pages/Envio";
 import Productos from "./pages/Productos";
+import ResetPassword from "./pages/ResetPassword";
 
 // Nuevo flujo checkout
 import CheckoutStep1 from "./pages/CheckoutStep1";
@@ -36,6 +37,7 @@ import AdminUsers from "./pages/admin/AdminUsers";
 import AdminOrders from "./pages/admin/AdminOrders";
 import EditProduct from "./pages/admin/EditProduct";
 import ProfilePage from "./components/ProfilePage";
+import Recuperar from "./pages/Recuperar";
 
 function App() {
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -160,6 +162,8 @@ function App() {
         <Route path="/envio" element={<Envio />} />
         <Route path="/login" element={<Login />} />
         <Route path="/profilepage" element={<ProfilePage />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/recuperar" element={<Recuperar />} />
 
         {/* Rutas protegidas para clientes */}
         <Route element={<ProtectedRoute allowGuest={true} />}>
