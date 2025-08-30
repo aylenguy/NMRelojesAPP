@@ -83,7 +83,7 @@ const Productos = ({ searchText }) => {
   const categoriasUnicas = [...new Set(productos.map((p) => getCategoria(p)))];
 
   return (
-    <div className="bg-gray-50 min-h-screen p-8">
+    <div className=" min-h-screen p-8">
       {showNotification && (
         <div className="fixed top-6 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-5 py-2 rounded-md shadow-lg z-[9999]">
           ✅ Producto agregado al carrito
@@ -117,7 +117,6 @@ const Productos = ({ searchText }) => {
 
         {/* Grid de productos */}
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8">
-          // Dentro del map de productos
           {filtered.map((producto) => {
             const stock = producto.stock ?? 0;
             const sinStock = stock <= 0;

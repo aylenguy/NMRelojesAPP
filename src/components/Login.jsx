@@ -10,21 +10,38 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isAdmin, setIsAdmin] = useState(false);
-  const [error, setError] = useState("");
+  const [errors, setErrors] = useState({});
+  const [apiError, setApiError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
+    setApiError("");
+    const newErrors = {};
+
+    // Validaciones
+    if (!email.trim()) newErrors.email = "El correo es obligatorio";
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+      newErrors.email = "Ingresa un correo válido";
+
+    if (!password.trim()) newErrors.password = "La contraseña es obligatoria";
+    else if (password.length < 6)
+      newErrors.password = "Debe tener al menos 6 caracteres";
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
+    setErrors({});
     setLoading(true);
 
     try {
       const userData = await login(email.trim(), password, isAdmin);
 
       if (!userData) {
-        setError("Usuario o contraseña incorrectos");
+        setApiError("Usuario o contraseña incorrectos");
       } else {
-        // Redirección según rol
         if (userData.userType === "Admin") {
           navigate("/admin");
         } else {
@@ -32,7 +49,7 @@ export default function Login() {
         }
       }
     } catch (err) {
-      setError("Error en el servidor. Inténtalo más tarde.");
+      setApiError("Error en el servidor. Inténtalo más tarde.");
     } finally {
       setLoading(false);
     }
@@ -43,12 +60,12 @@ export default function Login() {
       <div className="bg-white p-8 rounded-xl shadow-md w-full max-w-md">
         <h2 className="text-2xl font-bold mb-6 text-center">Iniciar Sesión</h2>
 
-        {error && (
+        {apiError && (
           <div
-            className="bg-red-100 text-red-700 p-2 rounded mb-4 text-sm"
+            className="bg-red-100 text-red-700 p-2 rounded mb-4 text-sm text-center"
             role="alert"
           >
-            {error}
+            {apiError}
           </div>
         )}
 
@@ -63,13 +80,19 @@ export default function Login() {
             </label>
             <input
               id="email"
-              type="email"
-              className="w-full border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+              type="text"
+              className={`w-full border p-2 rounded focus:outline-none focus:ring-2 ${
+                errors.email
+                  ? "border-red-500 focus:ring-red-500"
+                  : "border-gray-300 focus:ring-blue-400"
+              }`}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="ejemplo@correo.com"
-              required
             />
+            {errors.email && (
+              <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+            )}
           </div>
 
           {/* Password */}
@@ -83,12 +106,18 @@ export default function Login() {
             <input
               id="password"
               type="password"
-              className="w-full border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className={`w-full border p-2 rounded focus:outline-none focus:ring-2 ${
+                errors.password
+                  ? "border-red-500 focus:ring-red-500"
+                  : "border-gray-300 focus:ring-blue-400"
+              }`}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="********"
-              required
             />
+            {errors.password && (
+              <p className="text-red-500 text-sm mt-1">{errors.password}</p>
+            )}
           </div>
 
           {/* Checkbox admin */}
@@ -108,7 +137,7 @@ export default function Login() {
           {/* Botón */}
           <button
             type="submit"
-            className={`w-full bg-blue-600 hover:bg-blue-700 text-white p-2 rounded transition disabled:opacity-50`}
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white p-2 rounded transition disabled:opacity-50"
             disabled={loading}
           >
             {loading ? "Cargando..." : "Entrar"}

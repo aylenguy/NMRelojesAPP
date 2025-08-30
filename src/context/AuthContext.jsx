@@ -114,6 +114,7 @@ export const AuthProvider = ({ children }) => {
 
   // 🔹 Registro cliente
   const register = async (name, lastName, userName, email, password) => {
+    setLoading(true); // 🔹 start loading
     try {
       const res = await fetch(`${API_BASE_URL}/api/Client/register`, {
         method: "POST",
@@ -139,6 +140,8 @@ export const AuthProvider = ({ children }) => {
     } catch (err) {
       console.error("Error registro:", err);
       return { success: false, message: "Error de conexión con el servidor" };
+    } finally {
+      setLoading(false); // 🔹 stop loading
     }
   };
 

@@ -1,58 +1,109 @@
 import React, { useState } from "react";
 import { useAuth } from "../context/AuthContext";
+import GlobalSpinner from "./GlobalSpinner";
 
 const RegisterModal = ({ show, onClose, onSwitchToLogin }) => {
-  const { register, login } = useAuth();
-  const [name, setName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [userName, setUserName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const { register, loading } = useAuth();
+  const [formData, setFormData] = useState({
+    name: "",
+    lastName: "",
+    userName: "",
+    email: "",
+    password: "",
+  });
+  const [errors, setErrors] = useState({});
 
-  if (!show) return null;
+  // 🔹 Regex igual al back
+  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+
+  const getPasswordStrength = (pwd) => {
+    if (pwd.length < 8)
+      return { label: "Muy débil", color: "bg-red-500 w-1/4" };
+    if (!/[a-z]/.test(pwd))
+      return { label: "Débil", color: "bg-red-500 w-1/4" };
+    if (!/[A-Z]/.test(pwd))
+      return { label: "Débil", color: "bg-red-500 w-1/4" };
+    if (!/[0-9]/.test(pwd))
+      return { label: "Media", color: "bg-yellow-500 w-2/4" };
+    if (pwd.length >= 8)
+      return { label: "Fuerte", color: "bg-green-500 w-full" };
+    return { label: "Muy débil", color: "bg-red-500 w-1/4" };
+  };
+
+  const validate = () => {
+    const newErrors = {};
+
+    if (!formData.name.trim()) newErrors.name = "El nombre es obligatorio.";
+    if (!formData.lastName.trim())
+      newErrors.lastName = "El apellido es obligatorio.";
+
+    // 🔹 Usuario opcional, no ponemos error
+    if (!formData.userName.trim())
+      newErrors.userName = "El usuario es obligatorio.";
+
+    if (!formData.email.trim()) newErrors.email = "El email es obligatorio.";
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email))
+      newErrors.email = "El email no es válido.";
+
+    if (!formData.password.trim())
+      newErrors.password = "La contraseña es obligatoria.";
+    //else if (!passwordRegex.test(formData.password))
+    // newErrors.password =
+    //"Debe tener al menos 8 caracteres, una mayúscula, una minúscula y un número.";
+
+    return newErrors;
+  };
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const registered = await register(
-      name,
-      lastName,
-      userName,
-      email,
-      password
-    );
+    const validationErrors = validate();
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      return;
+    }
 
-    if (registered) {
-      alert("✅ Registro exitoso");
+    // Generar usuario automáticamente si está vacío
+    let userNameToSend = formData.userName.trim();
+    if (!userNameToSend) {
+      const randomNum = Math.floor(Math.random() * 1000); // 0-999
+      userNameToSend =
+        formData.name.trim().toLowerCase() +
+        "." +
+        formData.lastName.trim().toLowerCase() +
+        randomNum;
+    }
 
-      // Intentar login automático
-      const loggedIn = await login(email, password);
-
-      if (loggedIn) {
-        onClose(); // Cierra el modal solo si el login fue exitoso
-      } else {
-        alert(
-          "⚠️ Registrado pero no se pudo iniciar sesión automáticamente. Probá iniciar sesión manualmente."
-        );
-        onClose();
-        onSwitchToLogin(); // Abre el modal de login
-      }
-    } else {
-      alert("❌ Error en el registro");
+    try {
+      await register(
+        formData.name,
+        formData.lastName,
+        userNameToSend,
+        formData.email,
+        formData.password
+      );
+      onClose();
+    } catch (error) {
+      setErrors({ api: "Error al registrarse. Intente de nuevo." });
     }
   };
 
+  if (!show) return null;
+
+  const strength = getPasswordStrength(formData.password);
+
   return (
     <>
-      {/* Fondo oscuro */}
       <div
-        className="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm z-40 transition-opacity duration-700"
+        className="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm z-40"
         onClick={onClose}
-      ></div>
-
-      {/* Modal */}
+      />
       <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50">
-        <div className="w-[110%] max-w-md bg-white p-6 rounded-lg shadow-2xl">
+        <div className="w-[400px] bg-white p-6 rounded-lg shadow-2xl relative">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-2xl font-bold text-gray-900 font-mono">
               Registrarse
@@ -65,67 +116,159 @@ const RegisterModal = ({ show, onClose, onSwitchToLogin }) => {
             </button>
           </div>
 
-          {/* Formulario */}
-          <form onSubmit={handleSubmit}>
-            <label className="block mb-3 text-sm font-medium text-gray-700">
-              Nombre
+          <form onSubmit={handleSubmit} className="space-y-1">
+            {/* Nombre */}
+            <div>
+              <label className="block text-base font-semibold text-gray-800 mb-1">
+                Nombre
+              </label>
               <input
                 type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="w-full mt-1 p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-800"
-                required
+                name="name"
+                placeholder="Nombre"
+                value={formData.name}
+                onChange={handleChange}
+                className={`w-full border rounded px-3 py-2 min-h-[44px] ${
+                  errors.name ? "border-red-500" : "border-gray-300"
+                }`}
               />
-            </label>
-            <label className="block mb-3 text-sm font-medium text-gray-700">
-              Apellido
+              <div className="h-5 text-sm text-red-500">
+                {errors.name || ""}
+              </div>
+            </div>
+
+            {/* Apellido */}
+            <div>
+              <label className="block text-base font-semibold text-gray-800 mb-1">
+                Apellido
+              </label>
               <input
                 type="text"
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-                className="w-full mt-1 p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-800"
-                required
+                name="lastName"
+                placeholder="Apellido"
+                value={formData.lastName}
+                onChange={handleChange}
+                className={`w-full border rounded px-3 py-2 min-h-[44px] ${
+                  errors.lastName ? "border-red-500" : "border-gray-300"
+                }`}
               />
-            </label>
-            <label className="block mb-3 text-sm font-medium text-gray-700">
-              Usuario
+              <div className="h-5 text-sm text-red-500">
+                {errors.lastName || ""}
+              </div>
+            </div>
+
+            {/* Usuario */}
+            <div>
+              <label className="block text-base font-semibold text-gray-800 mb-1">
+                Usuario
+              </label>
               <input
                 type="text"
-                value={userName}
-                onChange={(e) => setUserName(e.target.value)}
-                className="w-full mt-1 p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-800"
-                required
+                name="userName"
+                placeholder="Usuario"
+                value={formData.userName}
+                onChange={handleChange}
+                className={`w-full border rounded px-3 py-2 min-h-[44px] ${
+                  errors.userName ? "border-red-500" : "border-gray-300"
+                }`}
               />
-            </label>
-            <label className="block mb-3 text-sm font-medium text-gray-700">
-              Email
+              <div className="h-5 text-sm text-red-500">
+                {errors.userName || ""}
+              </div>
+            </div>
+
+            {/* Email */}
+            <div>
+              <label className="block text-base font-semibold text-gray-800 mb-1">
+                Email
+              </label>
               <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full mt-1 p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-800"
-                required
+                type="text"
+                name="email"
+                placeholder="Correo electrónico"
+                value={formData.email}
+                onChange={handleChange}
+                className={`w-full border rounded px-3 py-2 min-h-[44px] ${
+                  errors.email ? "border-red-500" : "border-gray-300"
+                }`}
               />
-            </label>
-            <label className="block mb-3 text-sm font-medium text-gray-700">
-              Contraseña
+              <div className="h-5 text-sm text-red-500">
+                {errors.email || ""}
+              </div>
+            </div>
+
+            {/* Contraseña */}
+            <div>
+              <label className="block text-base font-semibold text-gray-800 mb-1">
+                Contraseña
+              </label>
               <input
                 type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full mt-1 p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-800"
-                required
+                name="password"
+                placeholder="Contraseña"
+                value={formData.password}
+                onChange={handleChange}
+                className={`w-full border rounded px-3 py-2 min-h-[44px] ${
+                  errors.password ? "border-red-500" : "border-gray-300"
+                }`}
               />
-            </label>
+
+              {/* Guía de reglas en vivo */}
+              {formData.password && (
+                <div className="mt-2 text-xs text-gray-600">
+                  <p
+                    className={
+                      formData.password.length >= 8 ? "text-green-600" : ""
+                    }
+                  >
+                    {formData.password.length >= 8 ? "" : ""} Mínimo 8
+                    caracteres
+                  </p>
+                  <p
+                    className={
+                      /[A-Z]/.test(formData.password) ? "text-green-600" : ""
+                    }
+                  >
+                    {/[A-Z]/.test(formData.password) ? "" : ""} Al menos una
+                    mayúscula
+                  </p>
+                  <p
+                    className={
+                      /[a-z]/.test(formData.password) ? "text-green-600" : ""
+                    }
+                  >
+                    {/[a-z]/.test(formData.password) ? "" : ""} Al menos una
+                    minúscula
+                  </p>
+                  <p
+                    className={
+                      /\d/.test(formData.password) ? "text-green-600" : ""
+                    }
+                  >
+                    {/\d/.test(formData.password) ? "" : ""} Al menos un número
+                  </p>
+                </div>
+              )}
+              <div className="h-5 text-sm text-red-500">
+                {errors.password || ""}
+              </div>
+            </div>
+
+            {/* Error general */}
+            {errors.api && (
+              <p className="text-red-500 text-sm text-center">{errors.api}</p>
+            )}
+
+            {/* Botón */}
             <button
               type="submit"
-              className="w-full bg-gray-900 hover:bg-gray-800 text-white py-2 rounded text-sm mt-2"
+              disabled={loading}
+              className="w-full bg-black text-white py-2 rounded-xl hover:bg-gray-800 shadow transition-all text-sm disabled:opacity-50"
             >
-              Registrarse
+              {loading ? "Cargando..." : "Iniciar Sesión"}
             </button>
           </form>
 
-          {/* Enlace para cambiar a login */}
           <div className="mt-4 text-center text-sm text-gray-600">
             <p>
               ¿Ya tenés cuenta?{" "}
