@@ -1,14 +1,20 @@
-import { useState, useEffect } from "react";
-import { FaTimes, FaTrash, FaShoppingCart } from "react-icons/fa";
+import { useState, useEffect, useRef } from "react";
+import { FaTimes, FaTrash } from "react-icons/fa";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import axios from "axios";
 
-const CartSidebar = ({ isOpen, onClose }) => {
+const CartSidebar = ({ onClose: propOnClose }) => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { cart, removeFromCart, updateItem } = useCart();
+  const {
+    cart,
+    removeFromCart,
+    updateItem,
+    cartSidebarOpen,
+    setCartSidebarOpen,
+  } = useCart();
 
   const [postalCode, setPostalCode] = useState("");
   const [error, setError] = useState("");
@@ -16,22 +22,21 @@ const CartSidebar = ({ isOpen, onClose }) => {
   const [selectedShipping, setSelectedShipping] = useState(null);
 
   const total = cart?.total ?? 0;
+  const itemsContainerRef = useRef(null);
 
-  // Cargar valores guardados al inicio
-  /*
-useEffect(() => {
-  const saved = JSON.parse(localStorage.getItem("shippingData") || "{}");
-  if (saved.postalCode) setPostalCode(saved.postalCode);
-  if (saved.shippingOption) setSelectedShipping(saved.shippingOption);
-}, []);
-*/
+  // Scroll automático al agregar item
+  useEffect(() => {
+    if (cartSidebarOpen && itemsContainerRef.current) {
+      itemsContainerRef.current.scrollTo({
+        top: itemsContainerRef.current.scrollHeight,
+        behavior: "smooth",
+      });
+    }
+  }, [cart.items, cartSidebarOpen]);
+
   const getItemImagen = (item) => {
     if (!item) return "https://localhost:7247/uploads/placeholder.png";
-
-    // Si ya viene como URL completa, la usamos tal cual
     if (item.imageUrl?.startsWith("http")) return item.imageUrl;
-
-    // Si viene solo el nombre del archivo, construimos la URL
     const img =
       item.image || item.Image || item.imageUrl || item.imagen || item.Imagen;
     return img
@@ -65,7 +70,6 @@ useEffect(() => {
 
   const handleCalculateShipping = async () => {
     if (!postalCode.match(/^\d{4}$/)) {
-      //setError("Ingresá un código postal válido (4 dígitos).");
       setShippingOptions([]);
       setSelectedShipping(null);
       return;
@@ -145,24 +149,26 @@ useEffect(() => {
 
     localStorage.setItem("checkoutData", JSON.stringify(checkoutPayload));
 
-    onClose();
+    setCartSidebarOpen(false);
+
     navigate("/checkout/paso-1");
   };
 
+  // Renderizado
   return (
     <>
       {/* Overlay */}
-      {isOpen && (
+      {cartSidebarOpen && (
         <div
-          onClick={onClose}
-          className="fixed inset-0 bg-black bg-opacity-40 z-40 transition-opacity"
+          onClick={() => setCartSidebarOpen(false)}
+          className="fixed inset-0 bg-black bg-opacity-40 z-40 transition-opacity duration-300"
         />
       )}
 
       {/* Sidebar */}
       <div
-        className={`fixed top-0 right-0 h-full w-96 bg-white shadow-2xl transform transition-transform duration-300 ease-in-out z-50 flex flex-col ${
-          isOpen ? "translate-x-0" : "translate-x-full"
+        className={`fixed top-0 right-0 h-full w-96 bg-white shadow-2xl transform z-50 flex flex-col transition-transform duration-500 ease-in-out ${
+          cartSidebarOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
         {/* Header */}
@@ -171,7 +177,7 @@ useEffect(() => {
             Mi carrito
           </h2>
           <button
-            onClick={onClose}
+            onClick={() => setCartSidebarOpen(false)}
             aria-label="Cerrar"
             className="text-gray-600 hover:text-gray-900 transition"
           >
@@ -180,7 +186,10 @@ useEffect(() => {
         </div>
 
         {/* Contenido scrollable */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        <div
+          ref={itemsContainerRef}
+          className="flex-1 overflow-y-auto p-4 space-y-4"
+        >
           {!cart?.items?.length ? (
             <p className="text-center text-gray-500 italic">
               Tenés tu carrito vacío. Agregá productos y realizá tu compra.
@@ -260,7 +269,6 @@ useEffect(() => {
                 </div>
                 {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
 
-                {/* Opciones de envío */}
                 {shippingOptions.length > 0 && (
                   <div className="space-y-3 mt-4">
                     {shippingOptions.map((option, idx) => (
@@ -295,7 +303,7 @@ useEffect(() => {
                   </div>
                 )}
               </div>
-              {/* Total + Botón */}
+
               <div className="pt-4 border-t mt-4">
                 <p className="text-xl font-bold">
                   Total: $

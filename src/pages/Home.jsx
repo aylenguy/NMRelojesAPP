@@ -32,12 +32,6 @@ const Home = ({ onProductClick, searchText }) => {
 
   return (
     <div className=" min-h-screen relative">
-      {showNotification && (
-        <div className="fixed top-6 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-5 py-2 rounded-md shadow-lg z-[9999]">
-          ✅ Producto agregado al carrito
-        </div>
-      )}
-
       {/* Hero */}
       <section className="relative h-[450px] text-white flex items-center justify-center mb-16">
         <img

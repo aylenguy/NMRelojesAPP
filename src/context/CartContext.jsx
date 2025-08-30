@@ -10,7 +10,7 @@ import { useAuth } from "./AuthContext";
 import toast from "react-hot-toast";
 
 const CartContext = createContext();
-const API_URL = "https://localhost:7247/api/cart"; // Ajusta al puerto de tu backend
+const API_URL = "https://localhost:7247/api/cart";
 const GUEST_CART_KEY = "guest_cart_id";
 
 // Generar o recuperar guestId
@@ -27,6 +27,7 @@ export const CartProvider = ({ children }) => {
   const { token } = useAuth();
   const [cart, setCart] = useState({ items: [], total: 0 });
   const [loading, setLoading] = useState(false);
+  const [cartSidebarOpen, setCartSidebarOpen] = useState(false); // <- nuevo
 
   // 🔹 Obtener carrito (logueado o invitado)
   const fetchCart = useCallback(async () => {
@@ -59,7 +60,8 @@ export const CartProvider = ({ children }) => {
 
       await axios.post(url, { productId, cantidad }, { headers });
       await fetchCart();
-      toast.success("Producto agregado 🛒");
+
+      setCartSidebarOpen(true); // <- abrir sidebar automáticamente
     } catch (err) {
       console.error("Error al agregar producto:", err);
       toast.error("No se pudo agregar el producto");
@@ -76,7 +78,6 @@ export const CartProvider = ({ children }) => {
 
       await axios.put(url, { cantidad }, { headers });
       await fetchCart();
-      toast.success("Cantidad actualizada ✅");
     } catch (err) {
       console.error("Error al actualizar item:", err);
       toast.error("No se pudo actualizar la cantidad");
@@ -93,7 +94,6 @@ export const CartProvider = ({ children }) => {
 
       await axios.delete(url, { headers });
       await fetchCart();
-      toast.success("Producto eliminado 🗑️");
     } catch (err) {
       console.error("Error al eliminar item:", err);
       toast.error("No se pudo eliminar el producto");
@@ -110,7 +110,6 @@ export const CartProvider = ({ children }) => {
 
       await axios.post(url, {}, { headers });
       await fetchCart();
-      toast.success("Carrito vaciado 🧹");
     } catch (err) {
       console.error("Error al vaciar carrito:", err);
       toast.error("No se pudo vaciar el carrito");
@@ -122,6 +121,8 @@ export const CartProvider = ({ children }) => {
       value={{
         cart,
         loading,
+        cartSidebarOpen, // <- exponer estado
+        setCartSidebarOpen, // <- exponer setter
         fetchCart,
         addToCart,
         updateItem,

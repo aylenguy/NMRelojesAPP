@@ -11,14 +11,13 @@ import GlobalSpinner from "./GlobalSpinner";
 
 const Navbar = ({ searchText, setSearchText }) => {
   const { user, isAuthenticated, logout } = useAuth();
-  const { cart } = useCart();
+  const { cart, cartSidebarOpen, setCartSidebarOpen } = useCart();
   const navigate = useNavigate();
   const location = useLocation();
 
   const [showLogin, setShowLogin] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
-  const [isCartOpen, setIsCartOpen] = useState(false);
-  const [loggingOut, setLoggingOut] = useState(false); // 🔹 overlay spinner
+  const [loggingOut, setLoggingOut] = useState(false); // spinner logout
 
   useEffect(() => {
     setShowLogin(false);
@@ -30,51 +29,38 @@ const Navbar = ({ searchText, setSearchText }) => {
       if (e.key === "Escape") {
         setShowLogin(false);
         setShowRegister(false);
-        setIsCartOpen(false);
+        setCartSidebarOpen(false);
       }
     };
-    if (showLogin || showRegister || isCartOpen) {
+    if (showLogin || showRegister || cartSidebarOpen) {
       window.addEventListener("keydown", onEsc);
     }
     return () => window.removeEventListener("keydown", onEsc);
-  }, [showLogin, showRegister, isCartOpen]);
+  }, [showLogin, showRegister, cartSidebarOpen, setCartSidebarOpen]);
 
   const handleLogout = async () => {
-    setLoggingOut(true); // activa spinner
+    setLoggingOut(true);
     try {
-      await logout(); // cerrar sesión
+      await logout();
       setTimeout(() => {
         setLoggingOut(false);
-        navigate("/"); // redirige al home
-      }, 1000); // delay para que se vea el spinner
+        navigate("/");
+      }, 1000);
     } catch (error) {
-      console.error("Error al cerrar sesión:", error);
+      console.error(error);
       setLoggingOut(false);
     }
   };
 
   const role = user?.role?.toLowerCase();
   const cartCount =
-    cart?.items?.reduce((acc, item) => acc + item.quantity, 0) ?? 0;
+    cart?.items?.reduce((acc, item) => acc + (item.quantity || 1), 0) ?? 0;
 
   return (
     <nav className="bg-white shadow-md py-5 px-8 border-b border-gray-200 z-50 relative">
-      {/* Spinner Logout */}
       {loggingOut && (
         <div className="fixed inset-0 flex items-center justify-center bg-white/40 backdrop-blur-sm z-[9999]">
-          <div
-            className="w-20 h-20 rounded-full border-4 border-t-transparent animate-spin shadow-lg"
-            style={{
-              borderTopColor: "transparent",
-              borderRight: "4px solid white",
-              borderBottom: "4px solid #f0f0f0",
-              borderLeft: "4px solid #e0e0e0",
-              background: "conic-gradient(from 0deg, white, #f9f9f9, #e6e6e6)",
-              WebkitMask:
-                "radial-gradient(farthest-side, transparent calc(100% - 4px), black calc(100% - 4px))",
-              mask: "radial-gradient(farthest-side, transparent calc(100% - 4px), black calc(100% - 4px))",
-            }}
-          ></div>
+          <div className="w-20 h-20 rounded-full border-4 border-t-transparent animate-spin shadow-lg"></div>
         </div>
       )}
 
@@ -146,7 +132,7 @@ const Navbar = ({ searchText, setSearchText }) => {
 
               {role === "client" && (
                 <button
-                  onClick={() => setIsCartOpen(true)}
+                  onClick={() => setCartSidebarOpen(!cartSidebarOpen)}
                   className="relative text-gray-700 hover:text-black"
                   aria-label="Abrir carrito"
                 >
@@ -169,7 +155,7 @@ const Navbar = ({ searchText, setSearchText }) => {
                 <FaUser className="text-xl" />
               </button>
               <button
-                onClick={() => setIsCartOpen(true)}
+                onClick={() => setCartSidebarOpen(true)}
                 className="relative text-gray-700 hover:text-black"
                 aria-label="Abrir carrito"
               >
@@ -210,7 +196,7 @@ const Navbar = ({ searchText, setSearchText }) => {
       )}
 
       {/* Sidebar */}
-      <CartSidebar isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
+      <CartSidebar />
     </nav>
   );
 };

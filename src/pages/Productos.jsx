@@ -89,12 +89,6 @@ const Productos = ({ searchText }) => {
 
   return (
     <div className=" min-h-screen p-8">
-      {showNotification && (
-        <div className="fixed top-6 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-5 py-2 rounded-md shadow-lg z-[9999]">
-          ✅ Producto agregado al carrito
-        </div>
-      )}
-
       <h2 className="text-3xl font-bold mb-8 text-center text-gray-800 font-mono">
         Todos los Productos
       </h2>
