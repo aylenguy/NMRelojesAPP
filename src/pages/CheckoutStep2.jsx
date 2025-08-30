@@ -200,6 +200,36 @@ export default function CheckoutStep2() {
       </div>
     );
   }
+  // Agregar dentro de CheckoutStep2, arriba del return
+  const getItemImagen = (item) => {
+    if (!item) return "https://localhost:7247/uploads/placeholder.png";
+
+    // Si ya viene como URL completa
+    if (item.imageUrl?.startsWith("http")) return item.imageUrl;
+
+    const img =
+      item.image || item.Image || item.imageUrl || item.imagen || item.Imagen;
+    return img
+      ? `https://localhost:7247/uploads/${img}`
+      : "https://localhost:7247/uploads/placeholder.png";
+  };
+
+  const getItemNombre = (item) =>
+    item.name ||
+    item.Name ||
+    item.productName ||
+    item.ProductName ||
+    item.nombre ||
+    "Producto";
+
+  const getItemCantidad = (item) =>
+    item.cantidad || item.Cantidad || item.quantity || 1;
+
+  const getItemSubtotal = (item) =>
+    item.subtotal ||
+    item.Subtotal ||
+    getItemCantidad(item) * item.unitPrice ||
+    0;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -557,6 +587,11 @@ export default function CheckoutStep2() {
                     key={item.productId || item.id}
                     className="flex justify-between border-b pb-1 text-gray-700 text-sm"
                   >
+                    <img
+                      src={getItemImagen(item)}
+                      alt={getItemNombre(item)}
+                      className="w-12 h-12 object-cover rounded"
+                    />
                     <span className="font-medium">
                       {item.productName || item.name} x{" "}
                       {item.quantity || item.cantidad}

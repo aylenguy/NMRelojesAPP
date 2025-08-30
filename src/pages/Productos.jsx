@@ -40,13 +40,18 @@ const Productos = ({ searchText }) => {
   };
 
   // Funciones auxiliares para normalizar datos del producto
+  // Funciones auxiliares para normalizar datos del producto
   const getPrecio = (p) => p.price ?? p.Price ?? p.precio ?? 0;
   const getNombre = (p) =>
     p.name ?? p.Name ?? p.nombre ?? "Producto sin nombre";
-  const getImagen = (p) => p.image ?? p.Image ?? p.imagen ?? "/placeholder.png";
   const getCategoria = (p) =>
     p.category ?? p.Category ?? p.categoria ?? "Sin categoría";
 
+  // Función corregida para las imágenes
+  const getImagen = (p) => {
+    const path = p.image ?? p.Image ?? p.imagen ?? "placeholder.png";
+    return `https://localhost:7247/uploads/${path}`;
+  };
   // Filtrar productos según búsqueda y categorías
   const filtered = productos.filter((p) => {
     const nombre = getNombre(p).toLowerCase();

@@ -135,11 +135,39 @@ export default function CheckoutStep3() {
     },
     { id: "efectivo", title: "Efectivo", badge: "20% de descuento" },
   ];
+  // Helpers para obtener imagen, nombre, cantidad y subtotal
+  const getItemImagen = (item) => {
+    if (!item) return "https://localhost:7247/uploads/placeholder.png";
+
+    const img =
+      item.image || item.Image || item.imageUrl || item.imagen || item.Imagen;
+    return img
+      ? img.startsWith("http")
+        ? img
+        : `https://localhost:7247/uploads/${img}`
+      : "https://localhost:7247/uploads/placeholder.png";
+  };
+
+  const getItemNombre = (item) =>
+    item.name ||
+    item.Name ||
+    item.productName ||
+    item.ProductName ||
+    item.nombre ||
+    "Producto";
+
+  const getItemCantidad = (item) =>
+    item.cantidad || item.Cantidad || item.quantity || 1;
+
+  const getItemSubtotal = (item) =>
+    item.subtotal ||
+    item.Subtotal ||
+    getItemCantidad(item) * item.unitPrice ||
+    0;
 
   return (
     <div className="min-h-screen bg-gray-100 py-8">
       <CheckoutProgress step={3} />
-      <h2 className="text-3xl font-bold text-center mb-6">Pago</h2>
 
       <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-[1fr_350px] gap-8">
         {/* IZQUIERDA */}
@@ -193,15 +221,20 @@ export default function CheckoutStep3() {
         </div>
 
         {/* DERECHA */}
-        <div className="bg-white p-6 rounded-xl shadow-md h-fit">
+        <div className="bg-white p-6 rounded-2xl shadow-sm h-fit">
           <h3 className="text-xl font-bold mb-4">Mi pedido</h3>
 
           {currentCart?.items?.length > 0 ? (
             currentCart.items.map((item) => (
               <div
                 key={item.productId || item.id}
-                className="flex justify-between border-b pb-2 mb-2 text-lg"
+                className="flex justify-between border-b pb-2 mb-2 text-sm"
               >
+                <img
+                  src={getItemImagen(item)}
+                  alt={getItemNombre(item)}
+                  className="w-12 h-12 object-cover rounded"
+                />
                 <span>
                   {item.productName || item.name} x {item.quantity}
                 </span>
@@ -216,8 +249,7 @@ export default function CheckoutStep3() {
           ) : (
             <p className="text-gray-500">El carrito está vacío</p>
           )}
-
-          <h4 className="mt-4 text-2xl font-bold">
+          <h4 className="font-bold text-xl">
             Total: ${(currentCart?.total ?? 0).toLocaleString("es-AR")}
           </h4>
 

@@ -25,14 +25,18 @@ useEffect(() => {
   if (saved.shippingOption) setSelectedShipping(saved.shippingOption);
 }, []);
 */
-
   const getItemImagen = (item) => {
-    const img = item.image || item.Image || item.imagen || item.Imagen;
+    if (!item) return "https://localhost:7247/uploads/placeholder.png";
+
+    // Si ya viene como URL completa, la usamos tal cual
+    if (item.imageUrl?.startsWith("http")) return item.imageUrl;
+
+    // Si viene solo el nombre del archivo, construimos la URL
+    const img =
+      item.image || item.Image || item.imageUrl || item.imagen || item.Imagen;
     return img
-      ? img.startsWith("/")
-        ? img
-        : `/images/${img}`
-      : "/placeholder.png";
+      ? `https://localhost:7247/uploads/${img}`
+      : "https://localhost:7247/uploads/placeholder.png";
   };
 
   const getItemNombre = (item) =>
@@ -164,7 +168,7 @@ useEffect(() => {
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b bg-white">
           <h2 className="text-xl font-bold flex items-center gap-2">
-            <FaShoppingCart /> Mi carrito
+            Mi carrito
           </h2>
           <button
             onClick={onClose}

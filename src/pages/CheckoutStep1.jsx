@@ -183,15 +183,22 @@ export default function CheckoutStep1() {
             currentCart.items.map((item) => (
               <div
                 key={item.productId || item.id}
-                className="flex justify-between items-center border-b pb-4 mb-4"
+                className="flex items-center justify-between border-b pb-4 mb-4"
               >
-                <div>
-                  <p className="font-semibold text-gray-900 text-base">
-                    {item.productName || item.name}
-                  </p>
-                  <p className="text-sm text-gray-500">
-                    {item.quantity || item.cantidad} unidad
-                  </p>
+                <div className="flex items-center gap-4">
+                  <img
+                    src={item.image || item.imageUrl || "/placeholder.jpg"}
+                    alt={item.productName || item.name}
+                    className="w-16 h-16 object-cover rounded-lg border"
+                  />
+                  <div>
+                    <p className="font-semibold text-gray-900 text-base">
+                      {item.productName || item.name}
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      {item.quantity || item.cantidad} unidad
+                    </p>
+                  </div>
                 </div>
                 <span className="font-semibold text-base text-gray-900">
                   ${item.subtotal?.toLocaleString() || 0}

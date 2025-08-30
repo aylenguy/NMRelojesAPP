@@ -14,6 +14,7 @@ import DetailProduct from "./components/DetailProduct";
 import Login from "./components/Login";
 import ProtectedRoute from "./components/ProtectedRoute";
 import GlobalSpinner from "./components/GlobalSpinner";
+import ScrollToTop from "./components/ScrollToTop";
 
 // Páginas
 import Home from "./pages/Home";
@@ -129,6 +130,7 @@ function App() {
         searchText={searchText}
         setSearchText={setSearchText}
       />
+      <ScrollToTop /> {/* <-- Colocalo aquí */}
       <Routes>
         {/* Rutas públicas */}
         <Route

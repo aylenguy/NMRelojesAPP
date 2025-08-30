@@ -1,17 +1,39 @@
 export default function CheckoutProgress({ step }) {
+  const steps = [{ number: 1 }, { number: 2 }, { number: 3 }];
+
   return (
-    <div className="flex items-center justify-center gap-4 my-6">
-      <div
-        className={`flex-1 h-2 rounded-full ${
-          step >= 1 ? "bg-blue-600" : "bg-gray-300"
-        }`}
-      />
-      <span className="font-bold">Paso {step} de 2</span>
-      <div
-        className={`flex-1 h-2 rounded-full ${
-          step >= 2 ? "bg-blue-600" : "bg-gray-300"
-        }`}
-      />
+    <div className="flex flex-col gap-2 my-6">
+      {/* Barra con círculos numerados */}
+      <div className="relative flex items-center justify-between">
+        {/* Barra de fondo */}
+        <div className="absolute top-3 w-full h-1 bg-gray-300 rounded-full"></div>
+
+        {/* Barra progresiva */}
+        <div
+          className="absolute top-3 h-1 bg-blue-600 rounded-full transition-all duration-300"
+          style={{ width: `${((step - 1) / (steps.length - 1)) * 100}%` }}
+        ></div>
+
+        {/* Círculos numerados */}
+        {steps.map((s, idx) => (
+          <div
+            key={s.number}
+            className="relative flex flex-col items-center z-10"
+          >
+            <div
+              className={`flex items-center justify-center w-8 h-8 rounded-full border-2 font-bold transition-all duration-300
+                ${
+                  step >= s.number
+                    ? "bg-blue-600 border-blue-600 text-white"
+                    : "bg-white border-gray-300 text-gray-500"
+                }`}
+            >
+              {s.number}
+            </div>
+            <span className="text-xs mt-1 text-center">{s.label}</span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
