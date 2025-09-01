@@ -61,60 +61,40 @@ export const AuthProvider = ({ children }) => {
   // 🔹 Login (admin o cliente)
   const login = async (email, password) => {
     try {
-      // 1️⃣ Intentar login admin
-      let res = await fetch(
-        `${API_BASE_URL}/api/Authenticate/authenticate-admin`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password }),
-        }
-      );
-      let data = await res.json();
+      const res = await fetch(`${API_BASE_URL}/api/client/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
 
-      // 2️⃣ Si no es admin, intentar cliente
-      if (!res.ok || !data.token) {
-        res = await fetch(`${API_BASE_URL}/api/Authenticate/authenticate`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password }),
-        });
-        data = await res.json();
-      }
+      const data = await res.json();
 
-      // 3️⃣ Si sigue fallando
-      if (!res.ok || !data.token) {
+      if (data.token) {
+        // ✅ Éxito
+        const decoded = jwtDecode(data.token);
+        const normalized = normalizeDecoded(decoded, data.userType);
+
+        setUser(normalized);
+        setToken(data.token);
+        localStorage.setItem("token", data.token);
+
+        return { success: true, role: normalized.role };
+      } else {
+        // ❌ Error controlado por backend
         return {
           success: false,
-          message: data.message || "Usuario o contraseña incorrectos",
+          error: data.error || data.Error || "login_failed",
         };
       }
-
-      // 4️⃣ Guardar datos
-      const decoded = jwtDecode(data.token);
-      const normalized = normalizeDecoded(decoded, data.userType);
-
-      setUser(normalized);
-      setToken(data.token);
-      localStorage.setItem("token", data.token);
-
-      // 5️⃣ Redirigir
-      if (normalized.role === "admin") {
-        navigate("/admin");
-      } else {
-        navigate("/");
-      }
-
-      return { success: true };
     } catch (err) {
       console.error("Error login:", err);
-      return { success: false, message: "Error de conexión con el servidor" };
+      return { success: false, error: "server_error" };
     }
   };
 
   // 🔹 Registro cliente
   const register = async (name, lastName, userName, email, password) => {
-    setLoading(true); // 🔹 start loading
+    setLoading(true);
     try {
       const res = await fetch(`${API_BASE_URL}/api/Client/register`, {
         method: "POST",
@@ -141,26 +121,19 @@ export const AuthProvider = ({ children }) => {
       console.error("Error registro:", err);
       return { success: false, message: "Error de conexión con el servidor" };
     } finally {
-      setLoading(false); // 🔹 stop loading
+      setLoading(false);
     }
   };
 
   // 🔹 Logout (limpia carrito y sesión)
   const logout = () => {
-    // Eliminar carrito del usuario actual
     if (user?.id) {
       localStorage.removeItem(`cart_${user.id}`);
     }
-
-    // Eliminar cualquier carrito genérico
     localStorage.removeItem("cart");
-
-    // Limpiar sesión
     setUser(null);
     setToken(null);
     localStorage.removeItem("token");
-
-    // Redirigir
     navigate("/");
   };
 

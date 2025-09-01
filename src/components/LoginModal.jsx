@@ -24,42 +24,68 @@ const LoginModal = ({ show, onClose, onSwitchToRegister }) => {
     return () => window.removeEventListener("keydown", handleEsc);
   }, [show, onClose]);
 
-  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+  const passwordRegex = /^.{8,}$/;
+
+  // Nuevo: comprobar si todos los campos tienen contenido
+  const isFormFilled = email.trim() !== "" && password.trim() !== "";
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const newErrors = {};
 
-    // Validación del email
+    // 🔹 Validación del email (frontend)
     if (!email.trim()) newErrors.email = "El email es obligatorio";
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
       newErrors.email = "Ingresa un email válido";
 
-    // Validación de la contraseña
+    // 🔹 Validación de la contraseña (frontend)
     if (!password.trim()) newErrors.password = "La contraseña es obligatoria";
     else if (!passwordRegex.test(password))
-      newErrors.password = "Contraseña incorrecta";
+      newErrors.password = "La contraseña debe tener al menos 8 caracteres";
 
-    // Si hay errores, los mostramos
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
     }
 
-    // Intentamos loguear
     setLoading(true);
     try {
-      const { success, role } = await login(email.trim(), password);
-      if (success) {
+      const result = await login(email.trim(), password);
+
+      if (result.success) {
         onClose();
-        if (role?.toLowerCase() === "admin") navigate("/admin");
+        if (result.role?.toLowerCase() === "admin") navigate("/admin");
         else navigate("/");
       } else {
-        setErrors({ api: "Email o contraseña incorrectos" });
+        // 🔹 Mostrar error según lo que manda el backend
+        switch (result.error) {
+          case "user_not_found":
+            setErrors({
+              email: "El e-mail no es correcto ¿Sos nuevo?",
+            });
+            break;
+          case "wrong_password":
+            setErrors({
+              password: "Contraseña incorrecta",
+            });
+            break;
+          case "invalid_email":
+            setErrors({
+              email: "El email ingresado no es válido",
+            });
+            break;
+          default:
+            setErrors({
+              api: "Error en el inicio de sesión",
+            });
+            break;
+        }
       }
     } catch (err) {
       console.error(err);
-      setErrors({ api: "Error en el servidor. Inténtalo más tarde." });
+      setErrors({
+        api: "Error en el servidor. Inténtalo más tarde.",
+      });
     } finally {
       setLoading(false);
     }
@@ -69,6 +95,7 @@ const LoginModal = ({ show, onClose, onSwitchToRegister }) => {
 
   return (
     <>
+      {/* Fondo */}
       <div
         className="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm z-40"
         onClick={onClose}
@@ -88,12 +115,9 @@ const LoginModal = ({ show, onClose, onSwitchToRegister }) => {
             </button>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-3">
             {/* Email */}
             <div>
-              <label className="block text-base font-semibold text-gray-800 mb-2">
-                Email
-              </label>
               <input
                 type="text"
                 ref={emailInputRef}
@@ -102,23 +126,22 @@ const LoginModal = ({ show, onClose, onSwitchToRegister }) => {
                   setEmail(e.target.value);
                   setErrors((prev) => ({ ...prev, email: null }));
                 }}
-                placeholder="ejemplo@correo.com"
+                placeholder="Correo electrónico"
                 className={`w-full p-2 text-sm border rounded-xl focus:outline-none focus:ring-2 ${
                   errors.email
-                    ? "border-red-500 focus:ring-red-500"
+                    ? "border-[#005f73] focus:ring-[#005f73]"
                     : "border-gray-300 focus:ring-black"
                 }`}
               />
               {errors.email && (
-                <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+                <p className="text-[#005f73] font-semibold text-sm mt-1 ">
+                  {errors.email}
+                </p>
               )}
             </div>
 
             {/* Contraseña */}
             <div>
-              <label className="block text-base font-semibold text-gray-800 mb-2">
-                Contraseña
-              </label>
               <input
                 type="password"
                 value={password}
@@ -126,29 +149,36 @@ const LoginModal = ({ show, onClose, onSwitchToRegister }) => {
                   setPassword(e.target.value);
                   setErrors((prev) => ({ ...prev, password: null }));
                 }}
-                placeholder="********"
+                placeholder="Contraseña"
                 className={`w-full p-2 text-sm border rounded-xl focus:outline-none focus:ring-2 ${
                   errors.password
-                    ? "border-red-500 focus:ring-red-500"
+                    ? "border-[#005f73] focus:ring-[#005f73]"
                     : "border-gray-300 focus:ring-black"
                 }`}
               />
               {errors.password && (
-                <p className="text-red-500 text-sm mt-1">{errors.password}</p>
+                <p className="text-[#005f73] font-semibold text-sm mt-1 ">
+                  {errors.password}
+                </p>
               )}
             </div>
 
+            {/* Botón submit */}
             <button
               type="submit"
-              className="w-full bg-black text-white py-2 rounded-xl hover:bg-gray-800 shadow transition-all text-sm disabled:opacity-50"
-              disabled={loading}
+              disabled={!isFormFilled || loading}
+              className={`w-full py-2 rounded-xl shadow text-sm transition-all ${
+                isFormFilled
+                  ? "bg-black text-white hover:bg-gray-800"
+                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
+              }`}
             >
               {loading ? "Cargando..." : "Iniciar Sesión"}
             </button>
 
             {/* Error general */}
             {errors.api && (
-              <p className="text-red-500 text-sm text-center mt-2">
+              <p className="text-[#005f73] font-semibold text-sm mt-1 ">
                 {errors.api}
               </p>
             )}

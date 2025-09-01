@@ -50,8 +50,14 @@ const Productos = ({ searchText }) => {
   // Función corregida para las imágenes
   const getImagen = (p) => {
     const path = p.image ?? p.Image ?? p.imagen ?? "placeholder.png";
+
+    // Si ya viene con http o https, devuelvo tal cual
+    if (path.startsWith("http")) return path;
+
+    // Si no, armo la ruta con tu backend
     return `https://localhost:7247/uploads/${path}`;
   };
+
   // Filtrar productos según búsqueda y categorías
   const filtered = productos.filter((p) => {
     const nombre = getNombre(p).toLowerCase();
