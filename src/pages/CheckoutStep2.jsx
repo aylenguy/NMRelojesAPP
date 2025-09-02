@@ -230,6 +230,11 @@ export default function CheckoutStep2() {
     item.Subtotal ||
     getItemCantidad(item) * item.unitPrice ||
     0;
+  const getItemFullName = (item) => {
+    const brand = item.brand || item.Brand || item.Marca || "";
+    const name = item.productName || item.name || "Producto";
+    return brand ? `${brand} ${name}` : name;
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -562,8 +567,17 @@ export default function CheckoutStep2() {
               </>
             )}
 
-            {/* BOTÓN FINAL */}
-            <div className="flex justify-end mt-6">
+            <div className="flex justify-between mt-6">
+              {/* Botón volver al paso anterior */}
+              <button
+                type="button"
+                onClick={() => navigate(-1)} // Retrocede una página en el historial
+                className="text-base text-gray-600 hover:underline"
+              >
+                Volver a contacto
+              </button>
+
+              {/* Botón continuar */}
               <button
                 type="submit"
                 disabled={cartLoading}
@@ -593,8 +607,7 @@ export default function CheckoutStep2() {
                       className="w-12 h-12 object-cover rounded"
                     />
                     <span className="font-medium">
-                      {item.productName || item.name} x{" "}
-                      {item.quantity || item.cantidad}
+                      {getItemFullName(item)} x {getItemCantidad(item)}
                     </span>
                     <span className="font-semibold">
                       ${Number(item.subtotal || 0).toLocaleString("es-AR")}

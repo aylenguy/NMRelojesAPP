@@ -90,6 +90,11 @@ export default function CheckoutStep1() {
       </div>
     );
   }
+  const getItemFullName = (item) => {
+    const brand = item.brand || item.Brand || item.Marca || "";
+    const name = item.productName || item.name || "Producto";
+    return brand ? `${brand} ${name}` : name;
+  };
 
   return (
     <div className="min-h-screen bg-gray-100 py-8">
@@ -159,7 +164,7 @@ export default function CheckoutStep1() {
 
           <div className="flex justify-between items-center mt-4">
             <button
-              onClick={() => navigate("/productos")}
+              onClick={() => navigate("/")}
               className="text-base text-gray-600 hover:underline"
             >
               Seguir comprando
@@ -193,7 +198,7 @@ export default function CheckoutStep1() {
                   />
                   <div>
                     <p className="font-semibold text-gray-900 text-base">
-                      {item.productName || item.name}
+                      {getItemFullName(item)}
                     </p>
                     <p className="text-sm text-gray-500">
                       {item.quantity || item.cantidad} unidad

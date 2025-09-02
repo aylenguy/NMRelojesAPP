@@ -154,6 +154,20 @@ const CartSidebar = ({ onClose: propOnClose }) => {
     navigate("/checkout/paso-1");
   };
 
+  const getItemBrand = (item) => item.brand || item.Brand || item.Marca || "";
+
+  const getItemFullName = (item) => {
+    const brand = getItemBrand(item);
+    const name =
+      item.name ||
+      item.Name ||
+      item.productName ||
+      item.ProductName ||
+      item.nombre ||
+      "Producto";
+    return brand ? `${brand} ${name}` : name;
+  };
+
   // Renderizado
   return (
     <>
@@ -208,7 +222,7 @@ const CartSidebar = ({ onClose: propOnClose }) => {
                   />
                   <div className="flex-1 flex flex-col justify-between">
                     <h3 className="text-sm font-semibold">
-                      {getItemNombre(item)}
+                      {getItemFullName(item)}
                     </h3>
                     <div className="flex items-center gap-2 mt-1">
                       <button

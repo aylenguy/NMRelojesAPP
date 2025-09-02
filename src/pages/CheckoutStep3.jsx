@@ -165,6 +165,12 @@ export default function CheckoutStep3() {
     getItemCantidad(item) * item.unitPrice ||
     0;
 
+  const getItemFullName = (item) => {
+    const brand = item.brand || item.Brand || item.Marca || "";
+    const name = item.productName || item.name || "Producto";
+    return brand ? `${brand} ${name}` : name;
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 py-8">
       <CheckoutProgress step={3} />
@@ -235,8 +241,8 @@ export default function CheckoutStep3() {
                   alt={getItemNombre(item)}
                   className="w-12 h-12 object-cover rounded"
                 />
-                <span>
-                  {item.productName || item.name} x {item.quantity}
+                <span className="font-medium">
+                  {getItemFullName(item)} x {getItemCantidad(item)}
                 </span>
                 <span>
                   $
@@ -252,8 +258,15 @@ export default function CheckoutStep3() {
           <h4 className="font-bold text-xl">
             Total: ${(currentCart?.total ?? 0).toLocaleString("es-AR")}
           </h4>
-
-          <div className="flex justify-end mt-4">
+          <div className="flex justify-between mt-4">
+            {/* Botón volver al paso anterior */}
+            <button
+              type="button"
+              onClick={() => navigate(-1)}
+              className="text-base text-gray-600 hover:underline"
+            >
+              Volver a envio
+            </button>
             <button
               onClick={handleConfirmOrder}
               disabled={loading}
