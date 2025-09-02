@@ -17,6 +17,7 @@ export default function AdminProducts() {
     color: "",
     caracteristicas: [],
     stock: "",
+    brand: "",
   };
 
   const [formData, setFormData] = useState(emptyForm);
@@ -33,6 +34,7 @@ export default function AdminProducts() {
     oldPrice: p.OldPrice ?? p.oldPrice ?? "",
     caracteristicas: p.Caracteristicas ?? p.caracteristicas ?? [],
     stock: p.Stock ?? p.stock ?? 0,
+    brand: p.Marca ?? p.marca ?? p.Brand ?? "",
   });
 
   const fetchProducts = async () => {
@@ -83,6 +85,7 @@ export default function AdminProducts() {
       color: product.color || "",
       caracteristicas: product.caracteristicas || [],
       stock: product.stock || "",
+      brand: product.brand || "",
     });
     setShowModal(true);
   };
@@ -107,6 +110,7 @@ export default function AdminProducts() {
           color: formData.color,
           caracteristicas: formData.caracteristicas,
           stock: parseInt(formData.stock),
+          brand: formData.brand,
         };
 
         await api.put(`/Product/UpdateProduct/${formData.id}`, updateData, {
@@ -124,6 +128,8 @@ export default function AdminProducts() {
           data.append("OldPrice", parseFloat(formData.oldPrice));
         data.append("Description", formData.description);
         data.append("Color", formData.color);
+        data.append("Brand", formData.brand);
+
         data.append("Stock", parseInt(formData.stock));
         data.append(
           "Caracteristicas",
@@ -207,7 +213,13 @@ export default function AdminProducts() {
                   Sin imagen
                 </div>
               )}
-              <h3 className="font-bold">{product.name}</h3>
+              <h3 className="font-bold">
+                {product.brand
+                  ? `${product.brand} ${product.name}`
+                  : product.name}
+              </h3>
+              <p className="text-sm text-gray-500">Marca: {product.brand}</p>{" "}
+              {/* 🔥 Nuevo */}
               <p>${product.price}</p>
               <p className="text-sm text-gray-600 flex-grow">
                 {product.description}
@@ -290,6 +302,14 @@ export default function AdminProducts() {
                 name="color"
                 placeholder="Color"
                 value={formData.color}
+                onChange={handleChange}
+                className="border p-2 w-full mb-2"
+              />
+              <input
+                type="text"
+                name="brand"
+                placeholder="Marca"
+                value={formData.brand}
                 onChange={handleChange}
                 className="border p-2 w-full mb-2"
               />

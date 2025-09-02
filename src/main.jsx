@@ -6,7 +6,7 @@ import { BrowserRouter } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import { CartProvider } from "./context/CartContext";
 import { LoaderProvider } from "./context/LoaderContext";
-import { Toaster } from "react-hot-toast";
+import { Toaster } from "sonner"; // 👈 sonner
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
@@ -15,7 +15,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
         <CartProvider>
           <LoaderProvider>
             <App />
-            <Toaster position="top-right" /> {/* Aquí agregas el Toaster */}
+            <Toaster position="top-right" richColors /> {/* 👈 sonner */}
           </LoaderProvider>
         </CartProvider>
       </AuthProvider>

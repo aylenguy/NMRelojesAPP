@@ -7,7 +7,6 @@ const RegisterModal = ({ show, onClose, onSwitchToLogin }) => {
   const [formData, setFormData] = useState({
     name: "",
     lastName: "",
-    userName: "",
     email: "",
     password: "",
   });
@@ -24,8 +23,6 @@ const RegisterModal = ({ show, onClose, onSwitchToLogin }) => {
     if (!formData.name.trim()) newErrors.name = "El nombre es obligatorio.";
     if (!formData.lastName.trim())
       newErrors.lastName = "El apellido es obligatorio.";
-    if (!formData.userName.trim())
-      newErrors.userName = "El usuario es obligatorio.";
     if (!formData.email.trim()) newErrors.email = "El email es obligatorio.";
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email))
       newErrors.email = "El email no es válido.";
@@ -47,21 +44,12 @@ const RegisterModal = ({ show, onClose, onSwitchToLogin }) => {
       return;
     }
 
-    let userNameToSend = formData.userName.trim();
-    if (!userNameToSend) {
-      const randomNum = Math.floor(Math.random() * 1000);
-      userNameToSend =
-        formData.name.trim().toLowerCase() +
-        "." +
-        formData.lastName.trim().toLowerCase() +
-        randomNum;
-    }
-
     try {
+      // Enviamos "" en userName solo para no romper el backend
       const regResult = await register(
         formData.name,
         formData.lastName,
-        userNameToSend,
+        "", // userName vacío
         formData.email,
         formData.password
       );
@@ -74,10 +62,8 @@ const RegisterModal = ({ show, onClose, onSwitchToLogin }) => {
       // Login automático tras registro
       await login(formData.email, formData.password);
 
-      // Mostrar modal de éxito y ocultar el formulario
       setShowSuccessModal(true);
     } catch (err) {
-      // Aquí capturamos el mensaje del backend si existe
       if (err.response && err.response.data?.Message) {
         setErrors({ api: err.response.data.Message });
       } else {
@@ -96,7 +82,7 @@ const RegisterModal = ({ show, onClose, onSwitchToLogin }) => {
         onClick={onClose}
       />
 
-      {/* Si todavía no se registró, mostrar formulario */}
+      {/* Formulario */}
       {!showSuccessModal && (
         <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50">
           <div className="w-[400px] bg-white p-6 rounded-lg shadow-2xl relative">
@@ -155,27 +141,6 @@ const RegisterModal = ({ show, onClose, onSwitchToLogin }) => {
                 )}
               </div>
 
-              {/* Usuario */}
-              <div>
-                <input
-                  type="text"
-                  name="userName"
-                  placeholder="Usuario"
-                  value={formData.userName}
-                  onChange={handleChange}
-                  className={`w-full p-2 text-sm border rounded-xl focus:outline-none focus:ring-2 ${
-                    errors.userName
-                      ? "border-[#005f73] focus:ring-[#005f73]"
-                      : "border-gray-300 focus:ring-black"
-                  }`}
-                />
-                {errors.userName && (
-                  <div className="text-[#005f73] font-semibold text-sm mt-1">
-                    {errors.userName}
-                  </div>
-                )}
-              </div>
-
               {/* Email */}
               <div>
                 <input
@@ -227,12 +192,11 @@ const RegisterModal = ({ show, onClose, onSwitchToLogin }) => {
               <button
                 type="submit"
                 disabled={!isFormFilled || loading}
-                className={`w-full py-2 rounded-xl shadow text-sm transition-all 
-                  ${
-                    isFormFilled
-                      ? "bg-black text-white hover:bg-gray-800"
-                      : "bg-gray-300 text-gray-500 cursor-not-allowed"
-                  }`}
+                className={`w-full py-2 rounded-xl shadow text-sm transition-all ${
+                  isFormFilled
+                    ? "bg-black text-white hover:bg-gray-800"
+                    : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                }`}
               >
                 {loading ? "Cargando..." : "Registrarse"}
               </button>

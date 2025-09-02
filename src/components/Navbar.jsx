@@ -110,7 +110,7 @@ const Navbar = ({ searchText, setSearchText }) => {
           {isAuthenticated ? (
             <>
               <span className="font-semibold mr-2 text-gray-700">
-                Hola, {user?.name || user?.email}
+                {user?.name} {user?.lastName}
               </span>
 
               {role === "client" && (

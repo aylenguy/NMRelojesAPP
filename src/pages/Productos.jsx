@@ -10,10 +10,15 @@ const Productos = ({ searchText }) => {
   const [showNotification, setShowNotification] = useState(false);
   const [error, setError] = useState(null);
   const [categoriasSeleccionadas, setCategoriasSeleccionadas] = useState([]);
-  const navigate = useNavigate();
-  const { addToCart } = useCart(); // Función del contexto
+  const [coloresSeleccionados, setColoresSeleccionados] = useState([]);
+  const [marcasSeleccionadas, setMarcasSeleccionadas] = useState([]);
+  const [sortOption, setSortOption] = useState("");
+  const [filtering, setFiltering] = useState(false);
 
-  // Cargar productos desde el backend
+  const navigate = useNavigate();
+  const { addToCart } = useCart();
+
+  // Cargar productos
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -26,49 +31,91 @@ const Productos = ({ searchText }) => {
         setLoading(false);
       }
     };
-
     fetchProducts();
   }, []);
 
-  // Alternar selección de categorías
+  const triggerFilter = () => {
+    setFiltering(true);
+    setTimeout(() => setFiltering(false), 500); // 0.5 seg de "carga"
+  };
+
+  // Toggle filtros
   const toggleCategoria = (categoria) => {
     setCategoriasSeleccionadas((prev) =>
       prev.includes(categoria)
         ? prev.filter((c) => c !== categoria)
         : [...prev, categoria]
     );
+    triggerFilter();
   };
 
-  // Funciones auxiliares para normalizar datos del producto
-  // Funciones auxiliares para normalizar datos del producto
+  const toggleColor = (color) => {
+    setColoresSeleccionados((prev) =>
+      prev.includes(color) ? prev.filter((c) => c !== color) : [...prev, color]
+    );
+    triggerFilter();
+  };
+
+  const toggleMarca = (marca) => {
+    setMarcasSeleccionadas((prev) =>
+      prev.includes(marca) ? prev.filter((m) => m !== marca) : [...prev, marca]
+    );
+    triggerFilter();
+  };
+
+  // Funciones auxiliares
   const getPrecio = (p) => p.price ?? p.Price ?? p.precio ?? 0;
   const getNombre = (p) =>
     p.name ?? p.Name ?? p.nombre ?? "Producto sin nombre";
   const getCategoria = (p) =>
     p.category ?? p.Category ?? p.categoria ?? "Sin categoría";
+  const getColor = (p) => p.color ?? p.Color ?? "Sin color";
+  const getMarca = (p) =>
+    p.brand ?? p.Brand ?? p.marca ?? p.Marca ?? "Sin marca";
 
-  // Función corregida para las imágenes
   const getImagen = (p) => {
     const path = p.image ?? p.Image ?? p.imagen ?? "placeholder.png";
-
-    // Si ya viene con http o https, devuelvo tal cual
     if (path.startsWith("http")) return path;
-
-    // Si no, armo la ruta con tu backend
     return `https://localhost:7247/uploads/${path}`;
   };
 
-  // Filtrar productos según búsqueda y categorías
+  const getTitulo = (p) => {
+    const nombre = getNombre(p);
+    const marca = getMarca(p);
+    return marca && marca !== "Sin marca" ? `${marca} ${nombre}` : nombre;
+  };
+
+  // Filtrar productos
   const filtered = productos.filter((p) => {
     const nombre = getNombre(p).toLowerCase();
     const coincideBusqueda = nombre.includes(searchText?.toLowerCase() || "");
     const coincideCategoria =
       categoriasSeleccionadas.length === 0 ||
       categoriasSeleccionadas.includes(getCategoria(p));
-    return coincideBusqueda && coincideCategoria;
+    const coincideColor =
+      coloresSeleccionados.length === 0 ||
+      coloresSeleccionados.includes(getColor(p));
+    const coincideMarca =
+      marcasSeleccionadas.length === 0 ||
+      marcasSeleccionadas.includes(getMarca(p));
+
+    return (
+      coincideBusqueda && coincideCategoria && coincideColor && coincideMarca
+    );
   });
 
-  // Agregar producto al carrito (logueado o invitado)
+  // Ordenar productos
+  const sorted = [...filtered].sort((a, b) => {
+    if (sortOption === "precio-asc") return getPrecio(a) - getPrecio(b);
+    if (sortOption === "precio-desc") return getPrecio(b) - getPrecio(a);
+    if (sortOption === "nombre-asc")
+      return getNombre(a).localeCompare(getNombre(b));
+    if (sortOption === "nombre-desc")
+      return getNombre(b).localeCompare(getNombre(a));
+    return 0;
+  });
+
+  // Agregar al carrito
   const handleAddToCart = async (producto) => {
     try {
       await addToCart(producto.id ?? producto.Id);
@@ -91,117 +138,169 @@ const Productos = ({ searchText }) => {
       <div className="p-8 text-center text-red-500 font-semibold">{error}</div>
     );
 
-  const categoriasUnicas = [...new Set(productos.map((p) => getCategoria(p)))];
+  const categoriasUnicas = [...new Set(productos.map(getCategoria))];
+  const coloresUnicos = [...new Set(productos.map(getColor))];
+  const marcasUnicas = [...new Set(productos.map(getMarca))];
 
   return (
-    <div className=" min-h-screen p-8">
-      <h2 className="text-3xl font-bold mb-8 text-center text-gray-800 font-mono">
+    <div className="min-h-screen p-8">
+      <h2 className="text-3xl font-bold mb-6 text-center text-gray-800 font-mono">
         Todos los Productos
       </h2>
 
+      {/* Selector de orden */}
+      <div className="flex justify-end mb-6">
+        <select
+          className="p-2 border rounded-md shadow-sm"
+          value={sortOption}
+          onChange={(e) => setSortOption(e.target.value)}
+        >
+          <option value="">Ordenar por...</option>
+          <option value="precio-asc">Precio: Menor a Mayor</option>
+          <option value="precio-desc">Precio: Mayor a Menor</option>
+          <option value="nombre-asc">A-Z</option>
+          <option value="nombre-desc">Z-A</option>
+        </select>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-[250px_1fr] gap-8">
-        {/* Sidebar de categorías */}
+        {/* Sidebar filtros */}
         <aside className="bg-white p-4 rounded-lg shadow-md border">
-          <h3 className="text-lg font-semibold mb-4">Categorías</h3>
+          <h2 className="text-xl font-bold mb-6 text-center text-[#005f73] font-mono">
+            Filtrar por
+          </h2>
+
+          {/* Colores */}
+          <h3 className="text-lg font-semibold mb-4 mt-6">Color</h3>
           <div className="flex flex-col gap-2">
-            {categoriasUnicas.map((categoria) => (
+            {coloresUnicos.map((color) => (
               <label
-                key={categoria}
+                key={color}
                 className="flex items-center gap-2 cursor-pointer"
               >
                 <input
                   type="checkbox"
-                  checked={categoriasSeleccionadas.includes(categoria)}
-                  onChange={() => toggleCategoria(categoria)}
+                  checked={coloresSeleccionados.includes(color)}
+                  onChange={() => toggleColor(color)}
                 />
-                <span className="text-gray-700">{categoria}</span>
+                <span className="text-gray-700">{color}</span>
+              </label>
+            ))}
+          </div>
+
+          {/* Marcas */}
+          <h3 className="text-lg font-semibold mb-4 mt-6">Marca</h3>
+          <div className="flex flex-col gap-2">
+            {marcasUnicas.map((marca) => (
+              <label
+                key={marca}
+                className="flex items-center gap-2 cursor-pointer"
+              >
+                <input
+                  type="checkbox"
+                  checked={marcasSeleccionadas.includes(marca)}
+                  onChange={() => toggleMarca(marca)}
+                />
+                <span className="text-gray-700">{marca}</span>
               </label>
             ))}
           </div>
         </aside>
 
-        {/* Grid de productos */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8">
-          {filtered.map((producto) => {
-            const stock = producto.stock ?? 0;
-            const sinStock = stock <= 0;
+        {/* Grid productos con overlay de spinner */}
+        <div className="relative">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8">
+            {sorted.map((producto) => {
+              const stock = producto.stock ?? 0;
+              const sinStock = stock <= 0;
 
-            return (
-              <div
-                key={producto.id ?? producto.Id}
-                className="relative bg-white rounded-lg shadow-md hover:shadow-lg transition overflow-hidden border"
-              >
+              return (
                 <div
-                  className="relative cursor-pointer group"
-                  onClick={() =>
-                    navigate(`/producto/${producto.id ?? producto.Id}`, {
-                      state: producto,
-                    })
-                  }
+                  key={producto.id ?? producto.Id}
+                  className="relative bg-white rounded-lg shadow-md hover:shadow-lg transition overflow-hidden border"
                 >
-                  <img
-                    src={getImagen(producto)}
-                    alt={getNombre(producto)}
-                    className="w-full h-80 object-cover"
-                  />
-
-                  {/* Etiqueta SIN STOCK */}
-                  {sinStock && (
-                    <span className="absolute top-3 left-3 bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-md shadow-md">
-                      SIN STOCK
+                  <div
+                    className="relative cursor-pointer group"
+                    onClick={() =>
+                      navigate(`/producto/${producto.id ?? producto.Id}`, {
+                        state: producto,
+                      })
+                    }
+                  >
+                    {/* Badge de marca */}
+                    <span className="absolute top-3 right-3 bg-[#005f73] text-white text-xs px-2 py-1 rounded-md shadow">
+                      {getMarca(producto)}
                     </span>
-                  )}
 
-                  {/* Botón carrito solo si hay stock */}
-                  {!sinStock && (
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleAddToCart(producto);
-                      }}
-                      className="absolute bottom-4 left-1/2 -translate-x-1/2 p-3 rounded-full shadow-lg transition bg-white hover:bg-gray-100 opacity-0 group-hover:opacity-100"
-                      title="Agregar al carrito"
-                    >
-                      <FaShoppingCart className="text-gray-800 text-lg" />
-                    </button>
-                  )}
-                </div>
+                    {/* Imagen con hover scale */}
+                    <img
+                      src={getImagen(producto)}
+                      alt={getNombre(producto)}
+                      className="w-full h-80 object-cover transform transition-transform duration-300 group-hover:scale-105"
+                    />
 
-                <div className="p-5 text-center">
-                  <h3 className="text-xl font-bold mb-1">
-                    {getNombre(producto)}
-                  </h3>
-                  <p className="text-gray-800 font-medium text-lg">
-                    ${getPrecio(producto).toLocaleString("es-AR")}
-                  </p>
-                  <p className="text-sm text-gray-500 mt-1">
-                    TRANSFERENCIA O EFECTIVO{" "}
-                    <span className="block font-semibold text-[#005f73] text-base">
-                      $
-                      {Math.round(getPrecio(producto) * 0.8).toLocaleString(
-                        "es-AR"
-                      )}
-                    </span>
-                  </p>
+                    {sinStock && (
+                      <span className="absolute top-3 left-3 bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-md shadow-md">
+                        SIN STOCK
+                      </span>
+                    )}
+                    {!sinStock && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleAddToCart(producto);
+                        }}
+                        className="absolute bottom-4 left-1/2 -translate-x-1/2 p-3 rounded-full shadow-lg transition bg-white hover:bg-gray-100 opacity-0 group-hover:opacity-100"
+                        title="Agregar al carrito"
+                      >
+                        <FaShoppingCart className="text-gray-800 text-lg" />
+                      </button>
+                    )}
+                  </div>
 
-                  {/* Mostrar stock o mensaje agotado */}
-                  {!sinStock ? (
-                    <p className="text-sm text-green-600 mt-2">
-                      Stock disponible: {stock}
+                  <div className="p-5 text-center">
+                    <h3 className="text-xl font-bold mb-1">
+                      {getTitulo(producto)}
+                    </h3>
+                    <p className="text-gray-800 font-medium text-lg">
+                      ${getPrecio(producto).toLocaleString("es-AR")}
                     </p>
-                  ) : (
-                    <p className="text-sm text-red-600 mt-2 font-bold">
-                      Agotado
+                    <p className="text-sm text-gray-500 mt-1">
+                      TRANSFERENCIA O EFECTIVO{" "}
+                      <span className="block font-semibold text-[#005f73] text-base">
+                        $
+                        {Math.round(getPrecio(producto) * 0.8).toLocaleString(
+                          "es-AR"
+                        )}
+                      </span>
                     </p>
-                  )}
+                    {!sinStock ? (
+                      <p className="text-sm text-green-600 mt-2">
+                        Stock disponible: {stock}
+                      </p>
+                    ) : (
+                      <p className="text-sm text-red-600 mt-2 font-bold">
+                        Agotado
+                      </p>
+                    )}
+                  </div>
                 </div>
-              </div>
-            );
-          })}
-          {filtered.length === 0 && (
-            <p className="text-center col-span-full text-gray-500">
-              No se encontraron productos.
-            </p>
+              );
+            })}
+
+            {sorted.length === 0 && !filtering && (
+              <p className="text-center col-span-full text-gray-500">
+                No se encontraron productos.
+              </p>
+            )}
+          </div>
+
+          {/* Overlay spinner mientras filtra */}
+          {/* Overlay spinner mientras filtra */}
+          {filtering && (
+            <div className="absolute inset-0 bg-white flex justify-center items-center z-10">
+              <div className="animate-spin rounded-full h-10 w-10 border-4 border-gray-300 border-t-gray-600"></div>
+            </div>
           )}
         </div>
       </div>

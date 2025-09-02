@@ -14,7 +14,10 @@ const Home = ({ onProductClick, searchText }) => {
   useEffect(() => {
     api
       .get("/Product/GetAllProducts")
-      .then((res) => setProducts(res.data))
+      .then((res) => {
+        const normalized = (res.data || []).map(normalizeServerProduct);
+        setProducts(normalized);
+      })
       .catch((err) => console.error("Error al cargar productos:", err));
   }, []);
 
@@ -29,6 +32,18 @@ const Home = ({ onProductClick, searchText }) => {
       .toLowerCase()
       .includes(searchText?.toLowerCase() || "")
   );
+
+  const normalizeServerProduct = (p) => ({
+    id: p.Id ?? p.id,
+    name: p.Nombre ?? p.nombre ?? p.Name ?? p.name,
+    price: p.Precio ?? p.precio ?? p.Price ?? p.price ?? 0,
+    image: p.Imagen ?? p.imagen ?? p.Image ?? p.image,
+    description:
+      p.Descripcion ?? p.descripcion ?? p.Description ?? p.description ?? "",
+    color: p.Color ?? p.color ?? "",
+    stock: p.Stock ?? p.stock ?? 0,
+    brand: p.Marca ?? p.marca ?? p.Brand ?? p.brand ?? "",
+  });
 
   return (
     <div className=" min-h-screen relative">
@@ -110,8 +125,11 @@ const Home = ({ onProductClick, searchText }) => {
                 {/* Información del producto */}
                 <div className="p-4 text-center">
                   <h3 className="text-lg font-bold mb-1">
-                    {product.name || product.Name || product.nombre}
+                    {product.brand
+                      ? `${product.brand} ${product.name}`
+                      : product.name}
                   </h3>
+
                   <p className="text-gray-800 font-medium text-lg">
                     $
                     {(

@@ -7,7 +7,7 @@ import {
 } from "react";
 import axios from "axios";
 import { useAuth } from "./AuthContext";
-import toast from "react-hot-toast";
+import { toast } from "sonner"; // 👈 usamos sonner
 
 const CartContext = createContext();
 const API_URL = "https://localhost:7247/api/cart";
@@ -27,7 +27,7 @@ export const CartProvider = ({ children }) => {
   const { token } = useAuth();
   const [cart, setCart] = useState({ items: [], total: 0 });
   const [loading, setLoading] = useState(false);
-  const [cartSidebarOpen, setCartSidebarOpen] = useState(false); // <- nuevo
+  const [cartSidebarOpen, setCartSidebarOpen] = useState(false);
 
   // 🔹 Obtener carrito (logueado o invitado)
   const fetchCart = useCallback(async () => {
@@ -40,7 +40,9 @@ export const CartProvider = ({ children }) => {
       setCart(res.data || { items: [], total: 0 });
     } catch (err) {
       console.error("Error al obtener carrito:", err);
-      toast.error("No se pudo cargar el carrito");
+      toast.error("No se pudo cargar el carrito", {
+        description: "Verificá tu conexión e intentá de nuevo",
+      });
     } finally {
       setLoading(false);
     }
@@ -61,10 +63,16 @@ export const CartProvider = ({ children }) => {
       await axios.post(url, { productId, cantidad }, { headers });
       await fetchCart();
 
-      setCartSidebarOpen(true); // <- abrir sidebar automáticamente
+      setCartSidebarOpen(true);
     } catch (err) {
       console.error("Error al agregar producto:", err);
-      toast.error("No se pudo agregar el producto");
+
+      const message =
+        err.response?.data?.message || "No se pudo agregar el producto";
+
+      toast.error("Error al agregar producto", {
+        description: message,
+      });
     }
   };
 
@@ -80,10 +88,17 @@ export const CartProvider = ({ children }) => {
       await fetchCart();
     } catch (err) {
       console.error("Error al actualizar item:", err);
-      toast.error("No se pudo actualizar la cantidad");
+
+      const message =
+        err.response?.data?.message || "No se pudo actualizar la cantidad";
+
+      toast.error("Error al actualizar", {
+        description: message,
+      });
     }
   };
 
+  // 🔹 Eliminar item
   // 🔹 Eliminar item
   const removeFromCart = async (cartItemId) => {
     try {
@@ -93,10 +108,20 @@ export const CartProvider = ({ children }) => {
         : `${API_URL}/guest/item/${cartItemId}?guestId=${getGuestId()}`;
 
       await axios.delete(url, { headers });
-      await fetchCart();
+
+      // 🕑 Delay de 500ms antes de refrescar el carrito
+      setTimeout(() => {
+        fetchCart();
+      }, 500);
     } catch (err) {
       console.error("Error al eliminar item:", err);
-      toast.error("No se pudo eliminar el producto");
+
+      const message =
+        err.response?.data?.message || "No se pudo eliminar el producto";
+
+      toast.error("Error al eliminar", {
+        description: message,
+      });
     }
   };
 
@@ -110,9 +135,19 @@ export const CartProvider = ({ children }) => {
 
       await axios.post(url, {}, { headers });
       await fetchCart();
+
+      toast.success("Carrito vacío", {
+        description: "Se eliminaron todos los productos",
+      });
     } catch (err) {
       console.error("Error al vaciar carrito:", err);
-      toast.error("No se pudo vaciar el carrito");
+
+      const message =
+        err.response?.data?.message || "No se pudo vaciar el carrito";
+
+      toast.error("Error al vaciar", {
+        description: message,
+      });
     }
   };
 
@@ -121,8 +156,8 @@ export const CartProvider = ({ children }) => {
       value={{
         cart,
         loading,
-        cartSidebarOpen, // <- exponer estado
-        setCartSidebarOpen, // <- exponer setter
+        cartSidebarOpen,
+        setCartSidebarOpen,
         fetchCart,
         addToCart,
         updateItem,

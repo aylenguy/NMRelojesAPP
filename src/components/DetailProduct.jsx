@@ -23,6 +23,16 @@ const DetailProduct = () => {
   const [relatedProducts, setRelatedProducts] = useState([]);
   const [showDetails, setShowDetails] = useState(false);
 
+  const getMarca = (p) =>
+    p.brand ?? p.Brand ?? p.marca ?? p.Marca ?? "Sin marca";
+  const getNombre = (p) =>
+    p.name ?? p.Name ?? p.nombre ?? p.Nombre ?? "Producto sin nombre";
+  const getTitulo = (p) => {
+    const nombre = getNombre(p);
+    const marca = getMarca(p);
+    return marca && marca !== "Sin marca" ? `${marca} ${nombre}` : nombre;
+  };
+
   // Cargar producto
   useEffect(() => {
     const productId = Number(id);
@@ -94,11 +104,33 @@ const DetailProduct = () => {
   // Agregar al carrito
   const handleAddToCart = () => {
     if (!product) return;
-    addToCart(product.id || product.Id, quantity);
+
+    const availableStock = product.stock ?? product.Stock ?? 0;
+    const productId = product.id || product.Id;
+
+    // 🔹 Buscar si ya está en el carrito y sumar cantidades
+    const existingItem = JSON.parse(localStorage.getItem("cart") || "[]").find(
+      (item) => item.id === productId
+    );
+
+    const currentInCart = existingItem ? existingItem.quantity : 0;
+    const totalRequested = currentInCart + quantity;
+
+    if (totalRequested > availableStock) {
+      setError(
+        `Solo quedan ${availableStock} ${
+          availableStock === 1 ? "unidad" : "unidades"
+        } disponibles.`
+      );
+      return;
+    }
+
+    // ✅ Si pasa la validación, agregar al carrito
+    addToCart(productId, quantity);
     setShowNotification(true);
+    setError(""); // Limpiamos el error
     setTimeout(() => setShowNotification(false), 2000);
   };
-
   // Cálculo de envío real
   const handleCalculateShipping = async () => {
     if (!postalCode.match(/^\d{4}$/)) {
@@ -157,12 +189,6 @@ const DetailProduct = () => {
 
   return (
     <div className="bg-white min-h-screen p-6 relative">
-      {showNotification && (
-        <div className="fixed top-6 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-4 py-2 rounded shadow-md z-50">
-          ✅ Producto agregado al carrito
-        </div>
-      )}
-
       <div className="max-w-6xl mx-auto flex flex-col md:flex-row gap-12">
         {/* Imagen */}
         <div className="w-full md:w-1/2 flex justify-center items-start">
@@ -175,7 +201,9 @@ const DetailProduct = () => {
 
         {/* Info */}
         <div className="w-full md:w-1/2">
-          <h1 className="text-4xl font-bold text-gray-900 mb-6">{name}</h1>
+          <h1 className="text-4xl font-bold text-gray-900 mb-6">
+            {getTitulo(product)}
+          </h1>
 
           {/* Precio */}
           <div className="text-4xl font-extrabold text-[#006d77] mb-2">
@@ -228,10 +256,6 @@ const DetailProduct = () => {
             <div className="flex items-center gap-3 mb-8">
               <span className="font-semibold">Color:</span>
               <span className="text-gray-600">{color}</span>
-              <span
-                className="w-8 h-8 rounded border"
-                style={{ backgroundColor: color }}
-              ></span>
             </div>
           )}
 
@@ -243,31 +267,38 @@ const DetailProduct = () => {
           )}
 
           {/* Cantidad + Botón */}
-          <div className="flex items-center gap-3 mb-6">
+          <div className="flex flex-col gap-3 mb-6">
             {stock > 0 ? (
               <>
-                <div className="flex items-center border rounded-md overflow-hidden">
+                <div className="flex items-center gap-3">
+                  {/* Controles de cantidad */}
+                  <div className="flex items-center border rounded-md overflow-hidden">
+                    <button
+                      onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                      className="px-3 py-1.5 bg-gray-200 hover:bg-gray-300 text-base"
+                    >
+                      -
+                    </button>
+                    <span className="px-5 text-lg">{quantity}</span>
+                    <button
+                      onClick={() => setQuantity((q) => q + 1)}
+                      className="px-3 py-1.5 bg-gray-200 hover:bg-gray-300 text-base"
+                    >
+                      +
+                    </button>
+                  </div>
+
                   <button
-                    onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                    className="px-3 py-1.5 bg-gray-200 hover:bg-gray-300 text-base"
+                    onClick={handleAddToCart}
+                    className="w-full bg-[#005f73] text-white py-2 rounded-md hover:bg-[#0a9396] transition text-base"
                   >
-                    -
-                  </button>
-                  <span className="px-5 text-lg">{quantity}</span>
-                  <button
-                    onClick={() => setQuantity((q) => q + 1)}
-                    className="px-3 py-1.5 bg-gray-200 hover:bg-gray-300 text-base"
-                  >
-                    +
+                    Agregar al carrito
                   </button>
                 </div>
 
-                <button
-                  onClick={handleAddToCart}
-                  className="flex-1 bg-[#005f73] text-white px-4 py-2 rounded-md hover:bg-[#0a9396] transition text-base"
-                >
-                  Agregar al carrito
-                </button>
+                {error && (
+                  <p className="text-red-600 font-medium text-sm">{error}</p>
+                )}
               </>
             ) : (
               <button disabled className="text-red-500 font-medium">
@@ -349,7 +380,7 @@ const DetailProduct = () => {
                 />
                 <div className="p-4">
                   <h3 className="font-semibold text-lg mb-2">
-                    {item.name || item.Name || item.nombre}
+                    {getTitulo(item)} {/* 🔹 usar getTitulo */}
                   </h3>
                   <p className="text-[#005f73] font-bold">
                     $

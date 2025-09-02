@@ -50,34 +50,32 @@ const LoginModal = ({ show, onClose, onSwitchToRegister }) => {
 
     setLoading(true);
     try {
+      // 👇 ahora sin el `isAdmin`
       const result = await login(email.trim(), password);
 
       if (result.success) {
         onClose();
-        if (result.role?.toLowerCase() === "admin") navigate("/admin");
-        else navigate("/");
+
+        // 👇 redirección según el rol que trae el backend
+        if (result.role?.toLowerCase() === "admin") {
+          navigate("/admin");
+        } else {
+          navigate("/");
+        }
       } else {
         // 🔹 Mostrar error según lo que manda el backend
         switch (result.error) {
           case "user_not_found":
-            setErrors({
-              email: "El e-mail no es correcto ¿Sos nuevo?",
-            });
+            setErrors({ email: "El e-mail no es correcto ¿Sos nuevo?" });
             break;
           case "wrong_password":
-            setErrors({
-              password: "Contraseña incorrecta",
-            });
+            setErrors({ password: "Contraseña incorrecta" });
             break;
           case "invalid_email":
-            setErrors({
-              email: "El email ingresado no es válido",
-            });
+            setErrors({ email: "El email ingresado no es válido" });
             break;
           default:
-            setErrors({
-              api: "Error en el inicio de sesión",
-            });
+            setErrors({ api: "Error en el inicio de sesión" });
             break;
         }
       }

@@ -1,6 +1,7 @@
 // src/context/AuthContext.js
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { jwtDecode } from "jwt-decode";
+
 import { useNavigate } from "react-router-dom";
 
 const AuthContext = createContext();
@@ -29,58 +30,72 @@ export const AuthProvider = ({ children }) => {
     return {
       id: decoded.sub || decoded.nameid || decoded.id || null,
       email: decoded.email || null,
-      name: decoded.username || decoded.name || decoded.unique_name || null,
-      role: role ? role.toLowerCase() : null,
+      name: decoded.name || decoded.username || decoded.unique_name || null,
+      lastName: decoded.lastName || decoded.family_name || null,
+      role: role || null,
     };
   };
 
   // 🔹 Recuperar sesión al recargar la página
   useEffect(() => {
     const savedToken = localStorage.getItem("token");
-
     if (savedToken) {
       try {
         const decoded = jwtDecode(savedToken);
         const notExpired = !decoded.exp || decoded.exp * 1000 > Date.now();
-
         if (notExpired) {
-          const normalized = normalizeDecoded(decoded);
+          const normalized = normalizeDecoded(
+            decoded,
+            localStorage.getItem("userType")
+          );
           setUser(normalized);
           setToken(savedToken);
         } else {
           localStorage.removeItem("token");
+          localStorage.removeItem("userType");
         }
       } catch (err) {
         console.error("Token inválido:", err);
         localStorage.removeItem("token");
+        localStorage.removeItem("userType");
       }
     }
     setLoading(false);
   }, []);
 
-  // 🔹 Login (admin o cliente)
+  // 🔹 Login (cliente o admin)
   const login = async (email, password) => {
     try {
-      const res = await fetch(`${API_BASE_URL}/api/client/login`, {
+      // 👉 primero probamos admin
+      let res = await fetch(`${API_BASE_URL}/api/Auth/admin-login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
 
-      const data = await res.json();
+      let data = await res.json();
+
+      // 👉 si admin falló, probamos cliente
+      if (!res.ok || !data.token) {
+        res = await fetch(`${API_BASE_URL}/api/Client/login`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
+        });
+        data = await res.json();
+      }
 
       if (data.token) {
-        // ✅ Éxito
         const decoded = jwtDecode(data.token);
         const normalized = normalizeDecoded(decoded, data.userType);
 
         setUser(normalized);
         setToken(data.token);
         localStorage.setItem("token", data.token);
+        localStorage.setItem("userType", normalized.role);
 
         return { success: true, role: normalized.role };
       } else {
-        // ❌ Error controlado por backend
         return {
           success: false,
           error: data.error || data.Error || "login_failed",
@@ -131,14 +146,15 @@ export const AuthProvider = ({ children }) => {
       localStorage.removeItem(`cart_${user.id}`);
     }
     localStorage.removeItem("cart");
+    localStorage.removeItem("token");
+    localStorage.removeItem("userType");
     setUser(null);
     setToken(null);
-    localStorage.removeItem("token");
     navigate("/");
   };
 
   // 🔹 Verificar rol
-  const hasRole = (role) => user?.role === role.toLowerCase();
+  const hasRole = (role) => user?.role === role;
 
   return (
     <AuthContext.Provider
