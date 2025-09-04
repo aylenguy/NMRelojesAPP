@@ -4,6 +4,7 @@ import CheckoutProgress from "../components/CheckoutProgress";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 import { addVenta, createFromCart } from "../api/orders";
+import LogoImg from "../assets/LogoMP.png"; // <-- asegurate de poner .png
 
 export default function CheckoutStep3() {
   const { cart, fetchCart, clearCart, loading: cartLoading } = useCart();
@@ -16,7 +17,7 @@ export default function CheckoutStep3() {
     total: 0,
   };
 
-  const [paymentMethod, setPaymentMethod] = useState("vendedor");
+  const [paymentMethod, setPaymentMethod] = useState("efectivo");
   const [loading, setLoading] = useState(false);
   const [orderNotes, setOrderNotes] = useState("");
 
@@ -29,42 +30,87 @@ export default function CheckoutStep3() {
   const handleConfirmOrder = async () => {
     try {
       setLoading(true);
+
+      // 🔹 Generar externalReference para Mercado Pago
+      const externalReference = `pedido-${Date.now()}`;
+      localStorage.setItem("lastExternalReference", externalReference);
+
+      // 🔹 Mercado Pago
+      if (paymentMethod === "mercadopago") {
+        const response = await fetch(
+          "https://localhost:7247/api/Payment/create-checkout",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json-patch+json" },
+            body: JSON.stringify({
+              amount: currentCart.total,
+              description: "Compra en NM Relojes",
+              payerEmail: checkoutData.email,
+              currencyId: "ARS",
+              quantity: 1,
+              externalReference,
+            }),
+          }
+        );
+
+        let data;
+        try {
+          data = await response.json();
+        } catch (e) {
+          const text = await response.text();
+          console.error("Respuesta inválida de backend:", text);
+          throw new Error("Error al crear preferencia Mercado Pago");
+        }
+
+        if (data?.initPoint) {
+          window.location.href = data.initPoint;
+          return;
+        } else {
+          throw new Error("No se pudo generar el checkout de Mercado Pago.");
+        }
+      }
+
+      // 🔹 Otros métodos
+      if (!currentCart.items || currentCart.items.length === 0) {
+        alert("El carrito está vacío");
+        setLoading(false);
+        return;
+      }
+
       let newVenta;
 
       if (token) {
-        // 🔹 Logueado: armar DTO con datos del checkout y enviar al backend
-        if (!currentCart.items || currentCart.items.length === 0) {
-          alert("El carrito está vacío");
-          setLoading(false);
-          return;
-        }
-
         const dto = {
           customerEmail: checkoutData.email,
           customerName: checkoutData.name,
           customerLastname: checkoutData.lastname,
-          shippingAddress: checkoutData.street + " " + checkoutData.number,
-          postalCode: checkoutData.postalCode,
-          province: checkoutData.province,
-          city: checkoutData.city,
-          department: checkoutData.department,
           street: checkoutData.street,
           number: checkoutData.number,
+          department: checkoutData.department,
+          city: checkoutData.city,
+          province: checkoutData.province,
+          postalCode: checkoutData.postalCode,
           paymentMethod,
           shippingMethod: checkoutData.shippingOption?.name ?? "",
           shippingCost: checkoutData.shippingOption?.cost ?? 0,
           notes: orderNotes,
+          paymentStatus: "pending",
+          externalReference,
+          items: currentCart.items.map((i) => ({
+            productId: i.productId || i.id,
+            quantity: i.quantity,
+            unitPrice: i.unitPrice,
+            subtotal: i.subtotal ?? i.quantity * i.unitPrice,
+          })),
+          total:
+            (currentCart.items?.reduce(
+              (acc, it) => acc + (it.subtotal || it.quantity * it.unitPrice),
+              0
+            ) || 0) + (checkoutData.shippingOption?.cost || 0),
         };
 
         newVenta = await createFromCart(dto, token);
       } else {
-        // 🔹 Invitado: armar DTO completo con items
-        if (!currentCart.items || currentCart.items.length === 0) {
-          alert("El carrito está vacío");
-          setLoading(false);
-          return;
-        }
-
         const orderPayload = {
           customerName: checkoutData.name,
           customerLastname: checkoutData.lastname,
@@ -79,11 +125,13 @@ export default function CheckoutStep3() {
           shippingCost: checkoutData.shippingOption?.cost ?? 0,
           paymentMethod,
           notes: orderNotes || "",
-          items: currentCart.items.map((item) => ({
-            productId: item.productId || item.id,
-            quantity: item.quantity,
-            unitPrice: item.unitPrice,
-            subtotal: item.subtotal ?? item.quantity * item.unitPrice,
+          paymentStatus: "pending",
+          externalReference,
+          items: currentCart.items.map((i) => ({
+            productId: i.productId || i.id,
+            quantity: i.quantity,
+            unitPrice: i.unitPrice,
+            subtotal: i.subtotal ?? i.quantity * i.unitPrice,
           })),
           total:
             (currentCart.items?.reduce(
@@ -92,18 +140,51 @@ export default function CheckoutStep3() {
             ) || 0) + (checkoutData.shippingOption?.cost || 0),
         };
 
-        console.log("DTO invitado:", orderPayload);
         newVenta = await addVenta(orderPayload);
       }
 
-      console.log("Venta creada:", newVenta);
+      // 🔹 Transformar la venta para CheckoutSuccess
+      const clientAddress = [
+        newVenta.street,
+        newVenta.number,
+        newVenta.department,
+        newVenta.city,
+        newVenta.province,
+        newVenta.postalCode,
+      ]
+        .filter(Boolean)
+        .join(", ");
 
-      // 🔹 Limpiar carrito y checkoutData
+      const ventaTransformada = {
+        client: {
+          name: newVenta.customerName,
+          lastName: newVenta.customerLastname,
+          email: newVenta.customerEmail,
+          address: clientAddress || "Sin dirección",
+        },
+        detalleVentas: (newVenta.items || []).map((i) => ({
+          id: i.productId,
+          product: {
+            name: i.productName || "Producto",
+            price: i.unitPrice || 0,
+          },
+          quantity: i.quantity,
+          subtotal: i.subtotal ?? i.quantity * i.unitPrice,
+        })),
+        total: newVenta.total,
+        paymentMethod: newVenta.paymentMethod,
+        paymentStatus: newVenta.paymentStatus,
+        externalReference: newVenta.externalReference,
+        notes: newVenta.notes || "",
+      };
+
+      // 🔹 Limpiar carrito y localStorage
       clearCart();
       localStorage.removeItem("checkoutData");
       if (!token) localStorage.removeItem("guestCart");
 
-      navigate("/checkout/success", { state: { venta: newVenta } });
+      // 🔹 Navegar a CheckoutSuccess
+      navigate("/checkout/success", { state: { venta: ventaTransformada } });
     } catch (err) {
       console.error("Error al confirmar venta:", err);
       alert(err.message || "Hubo un error al procesar tu pedido.");
@@ -125,7 +206,7 @@ export default function CheckoutStep3() {
     {
       id: "mercadopago",
       title: "Mercado Pago",
-      logo: "/img/mercadopago.png",
+      logo: LogoImg,
       badge: "Hasta 6 cuotas sin interés con tarjetas seleccionadas",
     },
     {
@@ -135,46 +216,10 @@ export default function CheckoutStep3() {
     },
     { id: "efectivo", title: "Efectivo", badge: "20% de descuento" },
   ];
-  // Helpers para obtener imagen, nombre, cantidad y subtotal
-  const getItemImagen = (item) => {
-    if (!item) return "https://localhost:7247/uploads/placeholder.png";
-
-    const img =
-      item.image || item.Image || item.imageUrl || item.imagen || item.Imagen;
-    return img
-      ? img.startsWith("http")
-        ? img
-        : `https://localhost:7247/uploads/${img}`
-      : "https://localhost:7247/uploads/placeholder.png";
-  };
-
-  const getItemNombre = (item) =>
-    item.name ||
-    item.Name ||
-    item.productName ||
-    item.ProductName ||
-    item.nombre ||
-    "Producto";
-
-  const getItemCantidad = (item) =>
-    item.cantidad || item.Cantidad || item.quantity || 1;
-
-  const getItemSubtotal = (item) =>
-    item.subtotal ||
-    item.Subtotal ||
-    getItemCantidad(item) * item.unitPrice ||
-    0;
-
-  const getItemFullName = (item) => {
-    const brand = item.brand || item.Brand || item.Marca || "";
-    const name = item.productName || item.name || "Producto";
-    return brand ? `${brand} ${name}` : name;
-  };
 
   return (
     <div className="min-h-screen bg-gray-100 py-8">
       <CheckoutProgress step={3} />
-
       <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-[1fr_350px] gap-8">
         {/* IZQUIERDA */}
         <div className="bg-white p-6 rounded-xl shadow-md">
@@ -195,13 +240,13 @@ export default function CheckoutStep3() {
                   value={option.id}
                   checked={paymentMethod === option.id}
                   onChange={(e) => setPaymentMethod(e.target.value)}
-                  className="w-5 h-5 text-gray-800 focus:ring-gray-500" // <- antes era green
+                  className="w-5 h-5 text-gray-800 focus:ring-gray-500"
                 />
                 {option.logo && (
                   <img
                     src={option.logo}
                     alt={option.title}
-                    className="h-8 object-contain"
+                    className="w-20 h-auto"
                   />
                 )}
                 <div className="flex-1">
@@ -215,7 +260,6 @@ export default function CheckoutStep3() {
               </label>
             ))}
           </div>
-
           <h3 className="text-xl font-bold mt-8 mb-2">Notas del pedido</h3>
           <textarea
             rows="3"
@@ -229,7 +273,6 @@ export default function CheckoutStep3() {
         {/* DERECHA */}
         <div className="bg-white p-6 rounded-2xl shadow-sm h-fit">
           <h3 className="text-xl font-bold mb-4">Mi pedido</h3>
-
           {currentCart?.items?.length > 0 ? (
             currentCart.items.map((item) => (
               <div
@@ -237,12 +280,22 @@ export default function CheckoutStep3() {
                 className="flex justify-between border-b pb-2 mb-2 text-sm"
               >
                 <img
-                  src={getItemImagen(item)}
-                  alt={getItemNombre(item)}
+                  src={
+                    item.image ||
+                    item.Image ||
+                    item.imageUrl ||
+                    item.imagen ||
+                    item.Imagen ||
+                    "https://localhost:7247/uploads/placeholder.png"
+                  }
+                  alt={item.name || item.productName || "Producto"}
                   className="w-12 h-12 object-cover rounded"
                 />
                 <span className="font-medium">
-                  {getItemFullName(item)} x {getItemCantidad(item)}
+                  {(item.brand || item.Brand || "") +
+                    " " +
+                    (item.productName || item.name || "Producto")}{" "}
+                  x {item.quantity || 1}
                 </span>
                 <span>
                   $
@@ -259,13 +312,12 @@ export default function CheckoutStep3() {
             Total: ${(currentCart?.total ?? 0).toLocaleString("es-AR")}
           </h4>
           <div className="flex justify-between mt-4">
-            {/* Botón volver al paso anterior */}
             <button
               type="button"
               onClick={() => navigate(-1)}
               className="text-base text-gray-600 hover:underline"
             >
-              Volver a envio
+              Volver a envío
             </button>
             <button
               onClick={handleConfirmOrder}

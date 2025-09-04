@@ -238,23 +238,23 @@ export default function CheckoutStep2() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="py-10">
+      <div className="py-4">
         <CheckoutProgress step={2} />
 
-        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-[2fr_1fr] gap-12">
+        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-[2fr_1fr] gap-8">
           {/* IZQUIERDA */}
           <form
             onSubmit={(e) => {
               e.preventDefault();
               handleContinue();
             }}
-            className="bg-white p-8 rounded-2xl shadow-sm flex flex-col gap-6"
+            className="bg-white p-8 rounded-2xl shadow-sm flex flex-col gap-3"
           >
-            <h2 className="text-2xl font-bold mb-8">Método de envío</h2>
+            <h2 className="text-2xl font-bold mb-3">Método de envío</h2>
 
             {/* Código postal */}
-            <div className="mb-6">
-              <label className="block text-base font-semibold text-gray-800 mb-2">
+            <div className="mb-1">
+              <label className="block text-base font-semibold text-gray-800 mb-1">
                 Código postal
               </label>
               <input
@@ -264,7 +264,7 @@ export default function CheckoutStep2() {
                 onChange={handleChange}
                 placeholder="Ingrese su código postal"
                 data-error={!!errors.postalCode}
-                className={`w-full p-4 text-lg border rounded-xl focus:outline-none focus:ring-2 ${
+                className={`w-full p-2 text-sm border rounded-xl focus:outline-none focus:ring-2 ${
                   errors.postalCode
                     ? "border-red-500 focus:ring-red-500"
                     : "border-gray-300 focus:ring-black"
@@ -276,12 +276,12 @@ export default function CheckoutStep2() {
             </div>
 
             {/* Opciones de envío */}
-            <div className="mb-8">
-              <div className="space-y-3">
+            <div className="mb-4">
+              <div className="space-y-4">
                 {shippingOptions.map((option, idx) => (
                   <label
                     key={idx}
-                    className={`flex items-center p-4 border rounded-xl cursor-pointer ${
+                    className={`flex items-center p-2 border rounded-xl cursor-pointer ${
                       shipping === option.name
                         ? "border-black bg-gray-50"
                         : "border-gray-300 bg-white"
@@ -293,7 +293,7 @@ export default function CheckoutStep2() {
                       value={option.name}
                       checked={shipping === option.name}
                       onChange={(e) => setShipping(e.target.value)}
-                      className="mr-4"
+                      className="mr-3"
                     />
                     <div>
                       <p className="font-semibold">{option.name}</p>
@@ -310,19 +310,19 @@ export default function CheckoutStep2() {
                 ))}
               </div>
               {errors.shipping && (
-                <p className="text-red-500 text-sm mt-2">{errors.shipping}</p>
+                <p className="text-red-500 text-sm mt-1">{errors.shipping}</p>
               )}
             </div>
 
             {/* Datos del cliente */}
             {shipping && (
               <>
-                <h2 className="text-xl font-bold mb-6">Datos del cliente</h2>
+                <h2 className="text-xl font-bold mb-2">Datos del cliente</h2>
 
                 {/* Nombre y apellido */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-2">
                   <div>
-                    <label className="block text-base font-semibold mb-2">
+                    <label className="block text-base font-semibold mb-1">
                       Nombre
                     </label>
                     <input
@@ -343,7 +343,7 @@ export default function CheckoutStep2() {
                     )}
                   </div>
                   <div>
-                    <label className="block text-base font-semibold mb-2">
+                    <label className="block text-base font-semibold mb-1">
                       Apellido
                     </label>
                     <input
@@ -369,7 +369,7 @@ export default function CheckoutStep2() {
 
                 {/* Email (solo invitado) */}
                 {!token && (
-                  <div className="mb-1">
+                  <div className="mb-2">
                     <label className="block text-base font-semibold mb-1">
                       Email
                     </label>
@@ -395,9 +395,9 @@ export default function CheckoutStep2() {
                 )}
 
                 {/* Teléfono y DNI */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-2">
                   <div>
-                    <label className="block text-base font-semibold mb-2">
+                    <label className="block text-base font-semibold mb-1">
                       Teléfono
                     </label>
                     <input
@@ -420,7 +420,7 @@ export default function CheckoutStep2() {
                     )}
                   </div>
                   <div>
-                    <label className="block text-base font-semibold mb-2">
+                    <label className="block text-base font-semibold mb-1">
                       DNI / CUIL / CUIT
                     </label>
                     <input
@@ -443,9 +443,9 @@ export default function CheckoutStep2() {
                 </div>
 
                 {/* Domicilio */}
-                <h2 className="text-2xl font-bold mb-6">Domicilio</h2>
-                <div className="mb-6">
-                  <label className="block text-base font-semibold mb-2">
+                <h2 className="text-xl font-bold mb-2">Domicilio</h2>
+                <div className="mb-2">
+                  <label className="block text-base font-semibold mb-1">
                     Calle
                   </label>
                   <input
@@ -466,9 +466,9 @@ export default function CheckoutStep2() {
                   )}
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mb-3">
                   <div>
-                    <label className="block text-base font-semibold mb-2">
+                    <label className="block text-base font-semibold mb-1">
                       Número
                     </label>
                     <input
@@ -491,7 +491,7 @@ export default function CheckoutStep2() {
                     )}
                   </div>
                   <div>
-                    <label className="block text-base font-semibold mb-2">
+                    <label className="block text-base font-semibold mb-1">
                       Departamento (opcional)
                     </label>
                     <input
@@ -504,7 +504,7 @@ export default function CheckoutStep2() {
                     />
                   </div>
                   <div>
-                    <label className="block text-base font-semibold mb-2">
+                    <label className="block text-base font-semibold mb-1">
                       Descripción (opcional)
                     </label>
                     <input
@@ -518,9 +518,9 @@ export default function CheckoutStep2() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-3">
                   <div>
-                    <label className="block text-base font-semibold mb-2">
+                    <label className="block text-base font-semibold mb-1">
                       Ciudad
                     </label>
                     <input
@@ -541,7 +541,7 @@ export default function CheckoutStep2() {
                     )}
                   </div>
                   <div>
-                    <label className="block text-base font-semibold mb-2">
+                    <label className="block text-base font-semibold mb-1">
                       Provincia
                     </label>
                     <input
@@ -567,27 +567,24 @@ export default function CheckoutStep2() {
               </>
             )}
 
-            <div className="flex justify-between mt-6">
-              {/* Botón volver al paso anterior */}
+            <div className="flex justify-between mt-4">
               <button
                 type="button"
-                onClick={() => navigate(-1)} // Retrocede una página en el historial
+                onClick={() => navigate(-1)}
                 className="text-base text-gray-600 hover:underline"
               >
                 Volver a contacto
               </button>
 
-              {/* Botón continuar */}
               <button
                 type="submit"
                 disabled={cartLoading}
-                className="py-2 px-9 bg-black text-white rounded-2xl hover:bg-gray-800 shadow transition-all text-sm"
+                className="py-2 px-7 bg-black text-white rounded-2xl hover:bg-gray-800 shadow transition-all text-sm"
               >
                 Continuar al pago
               </button>
             </div>
           </form>
-
           {/* DERECHA */}
           <div className="bg-white p-6 rounded-2xl shadow-sm h-fit">
             <h2 className="text-xl font-bold mb-6">Resumen del pedido</h2>

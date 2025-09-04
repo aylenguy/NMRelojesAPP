@@ -7,7 +7,6 @@ import {
 } from "react";
 import axios from "axios";
 import { useAuth } from "./AuthContext";
-import { toast } from "sonner"; // 👈 usamos sonner
 
 const CartContext = createContext();
 const API_URL = "https://localhost:7247/api/cart";
@@ -40,9 +39,6 @@ export const CartProvider = ({ children }) => {
       setCart(res.data || { items: [], total: 0 });
     } catch (err) {
       console.error("Error al obtener carrito:", err);
-      toast.error("No se pudo cargar el carrito", {
-        description: "Verificá tu conexión e intentá de nuevo",
-      });
     } finally {
       setLoading(false);
     }
@@ -66,13 +62,6 @@ export const CartProvider = ({ children }) => {
       setCartSidebarOpen(true);
     } catch (err) {
       console.error("Error al agregar producto:", err);
-
-      const message =
-        err.response?.data?.message || "No se pudo agregar el producto";
-
-      toast.error("Error al agregar producto", {
-        description: message,
-      });
     }
   };
 
@@ -88,13 +77,6 @@ export const CartProvider = ({ children }) => {
       await fetchCart();
     } catch (err) {
       console.error("Error al actualizar item:", err);
-
-      const message =
-        err.response?.data?.message || "No se pudo actualizar la cantidad";
-
-      toast.error("Error al actualizar", {
-        description: message,
-      });
     }
   };
 
@@ -115,13 +97,6 @@ export const CartProvider = ({ children }) => {
       }, 500);
     } catch (err) {
       console.error("Error al eliminar item:", err);
-
-      const message =
-        err.response?.data?.message || "No se pudo eliminar el producto";
-
-      toast.error("Error al eliminar", {
-        description: message,
-      });
     }
   };
 
@@ -135,19 +110,8 @@ export const CartProvider = ({ children }) => {
 
       await axios.post(url, {}, { headers });
       await fetchCart();
-
-      toast.success("Carrito vacío", {
-        description: "Se eliminaron todos los productos",
-      });
     } catch (err) {
       console.error("Error al vaciar carrito:", err);
-
-      const message =
-        err.response?.data?.message || "No se pudo vaciar el carrito";
-
-      toast.error("Error al vaciar", {
-        description: message,
-      });
     }
   };
 
