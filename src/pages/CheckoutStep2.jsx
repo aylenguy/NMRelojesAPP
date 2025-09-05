@@ -16,6 +16,7 @@ export default function CheckoutStep2() {
     total: 0,
   };
   const savedShipping = JSON.parse(localStorage.getItem("shippingData")) || {};
+  const couponDiscount = savedCheckout.couponDiscount || 0;
 
   const [shipping, setShipping] = useState(
     savedShipping?.shippingOption?.name || savedCheckout.shipping || ""
@@ -46,7 +47,6 @@ export default function CheckoutStep2() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
-  // Opcional: recalcular cuando cambia el CP (si querés auto-fetch al escribir)
   useEffect(() => {
     if (/^\d{4}$/.test(formData.postalCode)) {
       fetchShippingOptions(formData.postalCode);
@@ -131,7 +131,6 @@ export default function CheckoutStep2() {
       formData.email &&
       !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)
     ) {
-      // si está logueado y edita el email, validalo si lo completó
       newErrors.email = "Ingresa un email válido";
     }
 
@@ -157,8 +156,6 @@ export default function CheckoutStep2() {
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
-
-      // Scroll al primer campo con error
       const firstErrorField = document.querySelector("[data-error='true']");
       if (firstErrorField) {
         firstErrorField.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -179,6 +176,7 @@ export default function CheckoutStep2() {
         customerLastname: formData.lastname,
         customerEmail: token ? formData.email || user?.email : formData.email,
         shippingOption: selectedOption,
+        couponDiscount,
       })
     );
 
@@ -200,13 +198,10 @@ export default function CheckoutStep2() {
       </div>
     );
   }
-  // Agregar dentro de CheckoutStep2, arriba del return
+
   const getItemImagen = (item) => {
     if (!item) return "https://localhost:7247/uploads/placeholder.png";
-
-    // Si ya viene como URL completa
     if (item.imageUrl?.startsWith("http")) return item.imageUrl;
-
     const img =
       item.image || item.Image || item.imageUrl || item.imagen || item.Imagen;
     return img
@@ -230,17 +225,19 @@ export default function CheckoutStep2() {
     item.Subtotal ||
     getItemCantidad(item) * item.unitPrice ||
     0;
+
   const getItemFullName = (item) => {
     const brand = item.brand || item.Brand || item.Marca || "";
     const name = item.productName || item.name || "Producto";
     return brand ? `${brand} ${name}` : name;
   };
 
+  const totalConDescuento = (currentCart?.total || 0) - couponDiscount;
+
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen py-8">
       <div className="py-4">
         <CheckoutProgress step={2} />
-
         <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-[2fr_1fr] gap-8">
           {/* IZQUIERDA */}
           <form
@@ -248,10 +245,9 @@ export default function CheckoutStep2() {
               e.preventDefault();
               handleContinue();
             }}
-            className="bg-white p-8 rounded-2xl shadow-sm flex flex-col gap-3"
+            className="bg-white p-12 rounded-2xl shadow-sm border-2 border-gray-300 transition-all duration-300 hover:shadow-lg hover:bg-gray-50"
           >
             <h2 className="text-2xl font-bold mb-3">Método de envío</h2>
-
             {/* Código postal */}
             <div className="mb-1">
               <label className="block text-base font-semibold text-gray-800 mb-1">
@@ -318,7 +314,6 @@ export default function CheckoutStep2() {
             {shipping && (
               <>
                 <h2 className="text-xl font-bold mb-2">Datos del cliente</h2>
-
                 {/* Nombre y apellido */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-2">
                   <div>
@@ -585,8 +580,9 @@ export default function CheckoutStep2() {
               </button>
             </div>
           </form>
+
           {/* DERECHA */}
-          <div className="bg-white p-6 rounded-2xl shadow-sm h-fit">
+          <div className="bg-white p-8 rounded-2xl shadow-sm border-2 border-gray-300 transition-all duration-300 hover:shadow-lg hover:bg-gray-50 h-fit">
             <h2 className="text-xl font-bold mb-6">Resumen del pedido</h2>
             <div className="flex flex-col gap-2 max-h-60 overflow-y-auto">
               {currentCart?.items?.length > 0 ? (
@@ -607,7 +603,7 @@ export default function CheckoutStep2() {
                       {getItemFullName(item)} x {getItemCantidad(item)}
                     </span>
                     <span className="font-semibold">
-                      ${Number(item.subtotal || 0).toLocaleString("es-AR")}
+                      ${Number(getItemSubtotal(item)).toLocaleString("es-AR")}
                     </span>
                   </div>
                 ))
@@ -625,8 +621,15 @@ export default function CheckoutStep2() {
               </button>
             )}
 
+            {couponDiscount > 0 && (
+              <p className="text-green-600 text-sm mt-2">
+                ¡Cupón aplicado! Descuento: $
+                {couponDiscount.toLocaleString("es-AR")}
+              </p>
+            )}
+
             <h3 className="mt-4 text-xl font-bold text-gray-900">
-              Total: ${Number(currentCart?.total || 0).toLocaleString("es-AR")}
+              Total: ${totalConDescuento.toLocaleString("es-AR")}
             </h3>
           </div>
         </div>

@@ -4,7 +4,7 @@ import CheckoutProgress from "../components/CheckoutProgress";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 import { addVenta, createFromCart } from "../api/orders";
-import LogoImg from "../assets/LogoMP.png"; // <-- asegurate de poner .png
+import LogoImg from "../assets/LogoMP.png";
 
 export default function CheckoutStep3() {
   const { cart, fetchCart, clearCart, loading: cartLoading } = useCart();
@@ -17,7 +17,7 @@ export default function CheckoutStep3() {
     total: 0,
   };
 
-  const [paymentMethod, setPaymentMethod] = useState("efectivo");
+  const [paymentMethod, setPaymentMethod] = useState("vendedor"); // Por defecto "Acordar con el vendedor"
   const [loading, setLoading] = useState(false);
   const [orderNotes, setOrderNotes] = useState("");
 
@@ -31,21 +31,74 @@ export default function CheckoutStep3() {
     try {
       setLoading(true);
 
-      // 🔹 Generar externalReference para Mercado Pago
+      if (!currentCart.items || currentCart.items.length === 0) {
+        alert("El carrito está vacío");
+        setLoading(false);
+        return;
+      }
+
+      // 🔹 Generar referencia externa
       const externalReference = `pedido-${Date.now()}`;
       localStorage.setItem("lastExternalReference", externalReference);
 
-      // 🔹 Mercado Pago
+      // 🔹 Calcular subtotal y total
+      const subtotal = currentCart.items.reduce(
+        (acc, it) => acc + (it.subtotal ?? it.quantity * it.unitPrice),
+        0
+      );
+
+      const shippingCost = checkoutData.shippingOption?.cost || 0;
+      const couponDiscount = checkoutData.discount || 0;
+      const paymentDiscount =
+        paymentMethod === "efectivo" || paymentMethod === "transferencia"
+          ? 0.2 * subtotal
+          : 0;
+
+      const totalFinal =
+        subtotal + shippingCost - couponDiscount - paymentDiscount;
+
+      // 🔹 Preparar payload de venta
+      const ventaPayload = {
+        clientId: checkoutData.clientId || 1, // si tu cliente tiene ID
+        customerEmail: checkoutData.email || "sin-email@ejemplo.com",
+        customerName: checkoutData.name || "Cliente",
+        customerLastname: checkoutData.lastname || "",
+        externalReference,
+        couponCode: checkoutData.couponCode || "", // si aplica
+        shippingAddress: checkoutData.street || "Sin dirección",
+        postalCode: checkoutData.postalCode || "",
+        paymentMethod,
+        shippingMethod: checkoutData.shippingOption?.name || "",
+        shippingCost,
+        province: checkoutData.province || "",
+        city: checkoutData.city || "",
+        department: checkoutData.department || "",
+        description: checkoutData.description || "",
+        street: checkoutData.street || "",
+        number: checkoutData.number || "",
+        notes: orderNotes || "",
+        items: currentCart.items.map((i) => ({
+          productId: i.productId || i.id,
+          quantity: i.quantity || 1,
+          unitPrice: i.unitPrice || 0,
+          subtotal: i.subtotal ?? i.quantity * i.unitPrice,
+        })),
+        total: totalFinal,
+      };
+
+      let newVenta;
+
+      // 🔹 Si es Mercado Pago, crear la preferencia primero
       if (paymentMethod === "mercadopago") {
-        const response = await fetch(
+        const mpResponse = await fetch(
           "https://localhost:7247/api/Payment/create-checkout",
           {
             method: "POST",
             headers: { "Content-Type": "application/json-patch+json" },
             body: JSON.stringify({
-              amount: currentCart.total,
+              amount: totalFinal,
               description: "Compra en NM Relojes",
-              payerEmail: checkoutData.email,
+              payerEmail: checkoutData.email || "sin-email@ejemplo.com",
               currencyId: "ARS",
               quantity: 1,
               externalReference,
@@ -53,97 +106,33 @@ export default function CheckoutStep3() {
           }
         );
 
-        let data;
+        let mpData;
         try {
-          data = await response.json();
+          mpData = await mpResponse.json();
         } catch (e) {
-          const text = await response.text();
-          console.error("Respuesta inválida de backend:", text);
+          const text = await mpResponse.text();
+          console.error("Respuesta inválida de backend MP:", text);
           throw new Error("Error al crear preferencia Mercado Pago");
         }
 
-        if (data?.initPoint) {
-          window.location.href = data.initPoint;
+        if (mpData?.initPoint) {
+          // 🔹 Guardamos la venta pendiente en localStorage
+          localStorage.setItem("ventaPendiente", JSON.stringify(ventaPayload));
+          window.location.href = mpData.initPoint;
           return;
         } else {
           throw new Error("No se pudo generar el checkout de Mercado Pago.");
         }
       }
 
-      // 🔹 Otros métodos
-      if (!currentCart.items || currentCart.items.length === 0) {
-        alert("El carrito está vacío");
-        setLoading(false);
-        return;
-      }
-
-      let newVenta;
-
+      // 🔹 Crear la venta directamente (otros métodos)
       if (token) {
-        const dto = {
-          customerEmail: checkoutData.email,
-          customerName: checkoutData.name,
-          customerLastname: checkoutData.lastname,
-          street: checkoutData.street,
-          number: checkoutData.number,
-          department: checkoutData.department,
-          city: checkoutData.city,
-          province: checkoutData.province,
-          postalCode: checkoutData.postalCode,
-          paymentMethod,
-          shippingMethod: checkoutData.shippingOption?.name ?? "",
-          shippingCost: checkoutData.shippingOption?.cost ?? 0,
-          notes: orderNotes,
-          paymentStatus: "pending",
-          externalReference,
-          items: currentCart.items.map((i) => ({
-            productId: i.productId || i.id,
-            quantity: i.quantity,
-            unitPrice: i.unitPrice,
-            subtotal: i.subtotal ?? i.quantity * i.unitPrice,
-          })),
-          total:
-            (currentCart.items?.reduce(
-              (acc, it) => acc + (it.subtotal || it.quantity * it.unitPrice),
-              0
-            ) || 0) + (checkoutData.shippingOption?.cost || 0),
-        };
-
-        newVenta = await createFromCart(dto, token);
+        newVenta = await createFromCart(ventaPayload, token);
       } else {
-        const orderPayload = {
-          customerName: checkoutData.name,
-          customerLastname: checkoutData.lastname,
-          customerEmail: checkoutData.email,
-          street: checkoutData.street,
-          number: checkoutData.number,
-          department: checkoutData.department,
-          city: checkoutData.city,
-          province: checkoutData.province,
-          postalCode: checkoutData.postalCode,
-          shippingMethod: checkoutData.shippingOption?.name ?? "",
-          shippingCost: checkoutData.shippingOption?.cost ?? 0,
-          paymentMethod,
-          notes: orderNotes || "",
-          paymentStatus: "pending",
-          externalReference,
-          items: currentCart.items.map((i) => ({
-            productId: i.productId || i.id,
-            quantity: i.quantity,
-            unitPrice: i.unitPrice,
-            subtotal: i.subtotal ?? i.quantity * i.unitPrice,
-          })),
-          total:
-            (currentCart.items?.reduce(
-              (acc, it) => acc + (it.subtotal || it.quantity * it.unitPrice),
-              0
-            ) || 0) + (checkoutData.shippingOption?.cost || 0),
-        };
-
-        newVenta = await addVenta(orderPayload);
+        newVenta = await addVenta(ventaPayload);
       }
 
-      // 🔹 Transformar la venta para CheckoutSuccess
+      // 🔹 Transformar venta para CheckoutSuccess
       const clientAddress = [
         newVenta.street,
         newVenta.number,
@@ -178,12 +167,11 @@ export default function CheckoutStep3() {
         notes: newVenta.notes || "",
       };
 
-      // 🔹 Limpiar carrito y localStorage
+      // 🔹 Limpiar carrito y checkout
       clearCart();
       localStorage.removeItem("checkoutData");
       if (!token) localStorage.removeItem("guestCart");
 
-      // 🔹 Navegar a CheckoutSuccess
       navigate("/checkout/success", { state: { venta: ventaTransformada } });
     } catch (err) {
       console.error("Error al confirmar venta:", err);
@@ -200,6 +188,20 @@ export default function CheckoutStep3() {
       </div>
     );
   }
+
+  const subtotal =
+    currentCart.items?.reduce(
+      (acc, it) => acc + (it.subtotal ?? it.quantity * it.unitPrice),
+      0
+    ) || 0;
+
+  const shippingCost = checkoutData.shippingOption?.cost || 0;
+  const couponDiscount = checkoutData.discount || 0;
+  const paymentDiscount =
+    paymentMethod === "efectivo" || paymentMethod === "transferencia"
+      ? 0.2 * subtotal
+      : 0;
+  const totalFinal = subtotal + shippingCost - couponDiscount - paymentDiscount;
 
   const paymentOptions = [
     { id: "vendedor", title: "Acordar con el vendedor" },
@@ -218,11 +220,11 @@ export default function CheckoutStep3() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-100 py-8">
+    <div className="min-h-screen py-8">
       <CheckoutProgress step={3} />
       <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-[1fr_350px] gap-8">
         {/* IZQUIERDA */}
-        <div className="bg-white p-6 rounded-xl shadow-md">
+        <div className="bg-white p-12 rounded-2xl shadow-sm border-2 border-gray-300 transition-all duration-300 hover:shadow-lg hover:bg-gray-50">
           <h3 className="text-xl font-bold mb-4">Método de pago</h3>
           <div className="space-y-4">
             {paymentOptions.map((option) => (
@@ -271,7 +273,7 @@ export default function CheckoutStep3() {
         </div>
 
         {/* DERECHA */}
-        <div className="bg-white p-6 rounded-2xl shadow-sm h-fit">
+        <div className="bg-white p-8 rounded-2xl shadow-sm border-2 border-gray-300 transition-all duration-300 hover:shadow-lg hover:bg-gray-50 h-fit">
           <h3 className="text-xl font-bold mb-4">Mi pedido</h3>
           {currentCart?.items?.length > 0 ? (
             currentCart.items.map((item) => (
@@ -308,8 +310,18 @@ export default function CheckoutStep3() {
           ) : (
             <p className="text-gray-500">El carrito está vacío</p>
           )}
+          {couponDiscount > 0 && (
+            <p className="text-sm text-green-700">
+              Descuento cupón: -${couponDiscount.toLocaleString("es-AR")}
+            </p>
+          )}
+          {paymentDiscount > 0 && (
+            <p className="text-sm   text-[#006d77]">
+              Descuento pago: -${paymentDiscount.toLocaleString("es-AR")}
+            </p>
+          )}
           <h4 className="font-bold text-xl">
-            Total: ${(currentCart?.total ?? 0).toLocaleString("es-AR")}
+            Total: ${totalFinal.toLocaleString("es-AR")}
           </h4>
           <div className="flex justify-between mt-4">
             <button

@@ -10,7 +10,7 @@ export default function CheckoutProgress({ step }) {
 
         {/* Barra progresiva */}
         <div
-          className="absolute top-3 h-1 bg-blue-600 rounded-full transition-all duration-300"
+          className="absolute top-3 h-1 bg-[#005f73] rounded-full transition-all duration-300"
           style={{ width: `${((step - 1) / (steps.length - 1)) * 100}%` }}
         ></div>
 
@@ -24,7 +24,7 @@ export default function CheckoutProgress({ step }) {
               className={`flex items-center justify-center w-8 h-8 rounded-full border-2 font-bold transition-all duration-300
                 ${
                   step >= s.number
-                    ? "bg-blue-600 border-blue-600 text-white"
+                    ? "bg-[#005f73] border-[#005f73] text-white"
                     : "bg-white border-gray-300 text-gray-500"
                 }`}
             >

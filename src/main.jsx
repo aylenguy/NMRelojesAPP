@@ -7,6 +7,9 @@ import { AuthProvider } from "./context/AuthContext";
 import { CartProvider } from "./context/CartContext";
 import { LoaderProvider } from "./context/LoaderContext";
 import { Toaster } from "sonner"; // 👈 sonner
+import "@fontsource/poppins/400.css"; // peso normal
+import "@fontsource/poppins/500.css"; // medio
+import "@fontsource/poppins/700.css"; // negrita
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>

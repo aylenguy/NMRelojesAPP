@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { FaShoppingCart, FaUser, FaSignOutAlt } from "react-icons/fa";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -7,7 +7,6 @@ import LogoImg from "../assets/Logo.jpeg";
 import RegisterModal from "./RegisterModal";
 import LoginModal from "./LoginModal";
 import CartSidebar from "./CartSidebar";
-import GlobalSpinner from "./GlobalSpinner";
 
 const Navbar = ({ searchText, setSearchText }) => {
   const { user, isAuthenticated, logout } = useAuth();
@@ -17,7 +16,26 @@ const Navbar = ({ searchText, setSearchText }) => {
 
   const [showLogin, setShowLogin] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
-  const [loggingOut, setLoggingOut] = useState(false); // spinner logout
+  const [loggingOut, setLoggingOut] = useState(false);
+
+  const role = user?.role?.toLowerCase();
+
+  const cartCount = useMemo(
+    () =>
+      cart?.items?.reduce((acc, item) => acc + (item.quantity || 1), 0) ?? 0,
+    [cart]
+  );
+
+  const navLinks = useMemo(() => {
+    if (role === "admin") return [{ label: "Panel Admin", to: "/admin" }];
+    return [
+      { label: "Inicio", to: "/" },
+      { label: "Productos", to: "/producto" },
+      { label: "Contacto", to: "/contacto" },
+      { label: "¿Cómo comprar?", to: "/como-comprar" },
+      { label: "Envíos", to: "/envio" },
+    ];
+  }, [role]);
 
   useEffect(() => {
     setShowLogin(false);
@@ -52,73 +70,73 @@ const Navbar = ({ searchText, setSearchText }) => {
     }
   };
 
-  const role = user?.role?.toLowerCase();
-  const cartCount =
-    cart?.items?.reduce((acc, item) => acc + (item.quantity || 1), 0) ?? 0;
-
   return (
-    <nav className="bg-white shadow-md py-5 px-8 border-b border-gray-200 z-50 relative">
+    <nav className="bg-white shadow-md border-b border-gray-200 z-50 relative">
+      {/* Spinner logout */}
       {loggingOut && (
         <div className="fixed inset-0 flex items-center justify-center bg-white/40 backdrop-blur-sm z-[9999]">
           <div className="w-20 h-20 rounded-full border-4 border-t-transparent animate-spin shadow-lg"></div>
         </div>
       )}
 
-      <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center justify-between gap-6">
+      {/* Barra superior promo animada */}
+      <div className="bg-yellow-100 text-gray-800 text-sm font-medium overflow-hidden relative h-6">
+        <div className="absolute whitespace-nowrap flex animate-marquee">
+          {/* Texto duplicado para que sea continuo */}
+          <span className="mr-8">
+            20% de descuento abonando en efectivo/transferencia · Envío gratis a
+            todo el país
+          </span>
+          <span className="mr-8">
+            20% de descuento abonando en efectivo/transferencia · Envío gratis a
+            todo el país
+          </span>
+          <span className="mr-8">
+            20% de descuento abonando en efectivo/transferencia · Envío gratis a
+            todo el país
+          </span>
+        </div>
+      </div>
+
+      {/* Barra principal */}
+      <div className="max-w-7xl mx-auto flex items-center justify-between px-6 py-4 gap-6">
         {/* Logo */}
-        <Link to="/">
-          <img src={LogoImg} alt="Logo" className="h-28 cursor-pointer" />
+        <Link to="/" className="flex-shrink-0">
+          <img src={LogoImg} alt="Logo" className="h-24 cursor-pointer" />
         </Link>
 
         {/* Buscador */}
-        <div className="w-full lg:w-1/3">
+        <div className="flex-1 max-w-lg">
           <input
             type="text"
-            placeholder="Buscar relojes..."
+            placeholder="¿Qué buscás?"
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
-            className="w-full px-5 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-800"
+            className="w-full px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black"
           />
         </div>
 
-        {/* Menú */}
-        <div className="flex flex-wrap gap-4 justify-center text-base lg:text-lg font-semibold font-mono">
-          {role === "admin" ? (
-            <Link to="/admin" className="hover:text-black">
-              Panel Admin
-            </Link>
-          ) : (
-            <>
-              <Link to="/como-comprar" className="hover:text-black">
-                Cómo Comprar
-              </Link>
-              <Link to="/contacto" className="hover:text-black">
-                Contacto
-              </Link>
-              <Link to="/envio" className="hover:text-black">
-                Envío
-              </Link>
-              <Link to="/producto" className="hover:text-black">
-                Productos
-              </Link>
-            </>
-          )}
-        </div>
-
         {/* Usuario / Carrito */}
-        <div className="flex items-center gap-5 relative">
+        <div className="flex items-center gap-5">
           {isAuthenticated ? (
             <>
-              <span className="font-semibold mr-2 text-gray-700">
+              <span className="font-medium text-gray-700 hidden md:block font-poppins">
                 {user?.name} {user?.lastName}
               </span>
 
+              {/* Carrito */}
               {role === "client" && (
                 <button
-                  onClick={() => navigate("/profilepage")}
-                  className="text-gray-700 hover:text-black font-semibold mr-4"
+                  onClick={() => setCartSidebarOpen(!cartSidebarOpen)}
+                  className="relative flex items-center justify-center text-gray-700 hover:text-black"
+                  aria-label="Abrir carrito"
                 >
-                  Mi perfil
+                  <FaShoppingCart className="text-xl" />
+                  {cartCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full">
+                      {cartCount}
+                    </span>
+                  )}
                 </button>
               )}
 
@@ -129,45 +147,46 @@ const Navbar = ({ searchText, setSearchText }) => {
               >
                 <FaSignOutAlt className="text-xl" />
               </button>
-
-              {role === "client" && (
-                <button
-                  onClick={() => setCartSidebarOpen(!cartSidebarOpen)}
-                  className="relative text-gray-700 hover:text-black"
-                  aria-label="Abrir carrito"
-                >
-                  <FaShoppingCart className="text-xl" />
-                  {cartCount > 0 && (
-                    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
-                      {cartCount}
-                    </span>
-                  )}
-                </button>
-              )}
             </>
           ) : (
             <>
               <button
                 onClick={() => setShowLogin(true)}
-                className="text-gray-700 hover:text-gray-900"
-                aria-label="Abrir modal de inicio de sesión"
+                className="flex items-center gap-2 text-gray-700 hover:text-gray-900"
+                aria-label="Iniciar sesión"
               >
+                <span className="hidden md:inline font-poppins">
+                  Iniciar sesión
+                </span>
                 <FaUser className="text-xl" />
               </button>
+
+              {/* Carrito visible también si no está logueado */}
               <button
                 onClick={() => setCartSidebarOpen(true)}
-                className="relative text-gray-700 hover:text-black"
+                className="relative flex items-center justify-center text-gray-700 hover:text-black"
                 aria-label="Abrir carrito"
               >
                 <FaShoppingCart className="text-xl" />
                 {cartCount > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full">
                     {cartCount}
                   </span>
                 )}
               </button>
             </>
           )}
+        </div>
+      </div>
+
+      {/* Links de navegación */}
+      <div className="bg-gray-50 border-t border-gray-200">
+        <div className="max-w-7xl mx-auto flex items-center gap-8 py-3 pl-12 text-gray-700 text-base font-poppins">
+          {navLinks.map((link) => (
+            <Link key={link.to} to={link.to} className="hover:text-black">
+              {link.label}
+            </Link>
+          ))}
         </div>
       </div>
 
@@ -183,7 +202,6 @@ const Navbar = ({ searchText, setSearchText }) => {
             }}
             onLoginSuccess={() => setShowLogin(false)}
           />
-
           <RegisterModal
             show={showRegister}
             onClose={() => setShowRegister(false)}

@@ -31,10 +31,11 @@ export default function CheckoutSuccess() {
       const fetchVenta = async () => {
         try {
           const res = await axios.get(
-            `https://localhost:7081/api/Venta/${externalRef}`
+            `https://localhost:7247/api/Venta/GetByExternalReference/external/${externalRef}`
           );
 
           const data = res.data;
+
           const clientAddress = [
             data.street,
             data.number,
@@ -56,31 +57,7 @@ export default function CheckoutSuccess() {
           });
         } catch (err) {
           console.error("Error al obtener la venta:", err);
-
-          setVenta({
-            id: externalRef || "demo-001",
-            client: {
-              name: "Juan",
-              lastName: "Pérez",
-              email: "juan@test.com",
-              address: "Calle Falsa 123, Ciudad, Provincia, 0000",
-            },
-            total: 105000,
-            paymentMethod: "Transferencia",
-            paymentStatus: "pending",
-            detalleVentas: [
-              {
-                id: 1,
-                product: { name: "Reloj Casio", price: 35000 },
-                quantity: 1,
-              },
-              {
-                id: 2,
-                product: { name: "Reloj Seiko", price: 70000 },
-                quantity: 1,
-              },
-            ],
-          });
+          setVenta(null);
         } finally {
           setLoading(false);
         }
@@ -117,10 +94,20 @@ export default function CheckoutSuccess() {
     );
 
   const method = (venta.paymentMethod || "").toLowerCase();
-
   const isTransfer = method === "transferencia";
   const isCash = method === "efectivo";
   const isArrange = method === "acordar" || method === "vendedor";
+  const isCard = method === "tarjeta" || method === "mercadopago";
+
+  // 🔹 Calcular subtotal, descuento y total final
+  const subtotal =
+    venta.detalleVentas?.reduce(
+      (acc, i) => acc + (i.subtotal ?? i.quantity * i.product.price),
+      0
+    ) ?? 0;
+
+  const paymentDiscount = isCash || isTransfer ? 0.2 * subtotal : 0;
+  const totalFinal = subtotal - paymentDiscount;
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center py-10 px-4">
@@ -146,7 +133,17 @@ export default function CheckoutSuccess() {
                 {venta.client?.lastName}
               </p>
               <p className="text-gray-700">
-                <strong>Total:</strong> ${venta.total.toLocaleString("es-AR")}
+                <strong>Subtotal:</strong> ${subtotal.toLocaleString("es-AR")}
+              </p>
+              {paymentDiscount > 0 && (
+                <p className="text-[#006d77]">
+                  <strong>Descuento por pago:</strong> -$
+                  {paymentDiscount.toLocaleString("es-AR")}
+                </p>
+              )}
+              <p className="text-gray-900 font-semibold">
+                <strong>Total final:</strong> $
+                {totalFinal.toLocaleString("es-AR")}
               </p>
             </div>
 
@@ -181,16 +178,10 @@ export default function CheckoutSuccess() {
         </div>
 
         {/* 💳 Detalles de pago */}
-        {(isTransfer || isCash || isArrange) && (
+        {(isTransfer || isCash || isArrange || isCard) && (
           <div
             className={`p-6 rounded-3xl shadow-lg space-y-4 ${
-              isTransfer
-                ? "bg-blue-50"
-                : isCash
-                ? "bg-blue-50"
-                : isArrange
-                ? "bg-blue-50" // 👈 azul para Acordar
-                : "bg-yellow-50"
+              isTransfer || isCash || isArrange ? "bg-blue-50" : "bg-green-50"
             }`}
           >
             {isTransfer && (
@@ -228,35 +219,10 @@ export default function CheckoutSuccess() {
                   <strong>Banco:</strong> Banco de Ejemplo
                 </p>
                 <p>
-                  <strong>Monto:</strong>{" "}
+                  <strong>Monto a transferir:</strong>{" "}
                   <span className="font-semibold text-blue-700">
-                    ${venta.total.toLocaleString("es-AR")}
+                    ${totalFinal.toLocaleString("es-AR")}
                   </span>
-                </p>
-                <p>
-                  <strong>Dirección:</strong>{" "}
-                  {venta.client?.address || "Sin dirección"}
-                </p>
-                <p className="text-gray-500 mt-1 text-sm">
-                  Cuando realices la transferencia, envíanos el comprobante por{" "}
-                  <a
-                    href="https://www.instagram.com/NMrelojes"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="font-semibold hover:underline"
-                  >
-                    Instagram
-                  </a>{" "}
-                  o{" "}
-                  <a
-                    href="https://wa.me/5491123456789"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="font-semibold hover:underline"
-                  >
-                    WhatsApp
-                  </a>
-                  .
                 </p>
               </>
             )}
@@ -274,26 +240,11 @@ export default function CheckoutSuccess() {
                   En breve nos comunicaremos contigo para coordinar el pago y la
                   entrega de tu pedido.
                 </div>
-                <p className="text-gray-500 mt-1 text-sm">
-                  Para confirmar tu compra, envíanos un mensaje por{" "}
-                  <a
-                    href="https://www.instagram.com/NMrelojes"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="font-semibold hover:underline"
-                  >
-                    Instagram
-                  </a>{" "}
-                  o{" "}
-                  <a
-                    href="https://wa.me/5491123456789"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="font-semibold hover:underline"
-                  >
-                    WhatsApp
-                  </a>
-                  .
+                <p>
+                  <strong>Monto a abonar:</strong>{" "}
+                  <span className="font-semibold text-blue-700">
+                    ${totalFinal.toLocaleString("es-AR")}
+                  </span>
                 </p>
               </>
             )}
@@ -307,26 +258,22 @@ export default function CheckoutSuccess() {
                   En breve nos comunicaremos contigo para coordinar el pago y la
                   entrega de tu pedido.
                 </div>
-                <p className="mt-2">
-                  Puedes ponerte en contacto con nosotros por{" "}
-                  <a
-                    href="https://www.instagram.com/NMrelojes"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="font-semibold hover:underline"
-                  >
-                    Instagram
-                  </a>{" "}
-                  o{" "}
-                  <a
-                    href="https://wa.me/5491123456789"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="font-semibold hover:underline"
-                  >
-                    WhatsApp
-                  </a>{" "}
-                  si deseas anticipar la coordinación.
+              </>
+            )}
+
+            {isCard && (
+              <>
+                <h2 className="text-lg font-bold text-green-800">
+                  ¡Pago con tarjeta confirmado!
+                </h2>
+                <p>
+                  Tu pago fue procesado exitosamente a través de Mercado Pago.
+                </p>
+                <p>
+                  <strong>ID de pago:</strong> {paymentId || venta.id}
+                </p>
+                <p>
+                  <strong>Estado:</strong> {status || "Aprobado"}
                 </p>
               </>
             )}

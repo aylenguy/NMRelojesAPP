@@ -201,12 +201,12 @@ const DetailProduct = () => {
 
         {/* Info */}
         <div className="w-full md:w-1/2">
-          <h1 className="text-4xl font-bold text-gray-900 mb-6">
+          <h1 className="text-4xl font-poppins  font-bold text-gray-900 mb-6">
             {getTitulo(product)}
           </h1>
 
           {/* Precio */}
-          <div className="text-4xl font-extrabold text-[#006d77] mb-2">
+          <div className="text-3xl font-bold text-[#006d77] mb-2">
             ${totalPrice.toLocaleString("es-AR")}
           </div>
 
@@ -356,7 +356,9 @@ const DetailProduct = () => {
 
       {/* Productos relacionados */}
       <div className="max-w-6xl mx-auto mt-16">
-        <h2 className="text-2xl font-bold mb-6">También te puede interesar</h2>
+        <h2 className="text-2xl font-poppins font-bold mb-6">
+          También te puede interesar
+        </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
           {relatedProducts
             .filter((item) => (item.stock ?? item.Stock ?? 0) > 0) // 🔹 solo mostrar con stock

@@ -24,7 +24,6 @@ const CartSidebar = ({ onClose: propOnClose }) => {
   const total = cart?.total ?? 0;
   const itemsContainerRef = useRef(null);
 
-  // Scroll automático al agregar item
   useEffect(() => {
     if (cartSidebarOpen && itemsContainerRef.current) {
       itemsContainerRef.current.scrollTo({
@@ -54,6 +53,7 @@ const CartSidebar = ({ onClose: propOnClose }) => {
 
   const getItemCantidad = (item) =>
     item.cantidad || item.Cantidad || item.quantity || 1;
+
   const getItemSubtotal = (item) =>
     item.subtotal || item.Subtotal || item.quantity * item.unitPrice || 0;
 
@@ -148,14 +148,11 @@ const CartSidebar = ({ onClose: propOnClose }) => {
     };
 
     localStorage.setItem("checkoutData", JSON.stringify(checkoutPayload));
-
     setCartSidebarOpen(false);
-
     navigate("/checkout/paso-1");
   };
 
   const getItemBrand = (item) => item.brand || item.Brand || item.Marca || "";
-
   const getItemFullName = (item) => {
     const brand = getItemBrand(item);
     const name =
@@ -168,7 +165,6 @@ const CartSidebar = ({ onClose: propOnClose }) => {
     return brand ? `${brand} ${name}` : name;
   };
 
-  // Renderizado
   return (
     <>
       {/* Overlay */}
@@ -202,18 +198,20 @@ const CartSidebar = ({ onClose: propOnClose }) => {
         {/* Contenido scrollable */}
         <div
           ref={itemsContainerRef}
-          className="flex-1 overflow-y-auto p-4 space-y-4"
+          className="flex-1 overflow-y-auto p-4 space-y-4 pb-6"
         >
           {!cart?.items?.length ? (
-            <p className="text-center text-gray-500 italic">
-              Tenés tu carrito vacío. Agregá productos y realizá tu compra.
-            </p>
+            <div className="text-center space-y-4">
+              <p className="text-gray-600 font-poppins text-base">
+                Tenés tu carrito vacío. Agregá productos y realizá tu compra.
+              </p>
+            </div>
           ) : (
             <>
               {cart.items.map((item) => (
                 <div
                   key={item.id}
-                  className="flex items-center justify-between gap-3 p-2 border rounded shadow-sm hover:shadow-md transition"
+                  className="flex items-center justify-between gap-3 p-2 border rounded shadow-sm hover:shadow-md transition transform duration-200"
                 >
                   <img
                     src={getItemImagen(item)}
@@ -221,13 +219,14 @@ const CartSidebar = ({ onClose: propOnClose }) => {
                     className="w-20 h-20 object-cover rounded"
                   />
                   <div className="flex-1 flex flex-col justify-between">
-                    <h3 className="text-sm font-semibold">
+                    <h3 className="text-lg font-poppins mb-2 truncate">
                       {getItemFullName(item)}
                     </h3>
                     <div className="flex items-center gap-2 mt-1">
                       <button
                         onClick={() => handleDecrease(item)}
                         className="bg-gray-200 hover:bg-gray-300 text-gray-700 rounded px-2"
+                        aria-label="Disminuir cantidad"
                       >
                         -
                       </button>
@@ -235,6 +234,7 @@ const CartSidebar = ({ onClose: propOnClose }) => {
                       <button
                         onClick={() => handleIncrease(item)}
                         className="bg-gray-200 hover:bg-gray-300 text-gray-700 rounded px-2"
+                        aria-label="Aumentar cantidad"
                       >
                         +
                       </button>
@@ -247,6 +247,7 @@ const CartSidebar = ({ onClose: propOnClose }) => {
                     <button
                       onClick={() => removeFromCart(item.id)}
                       className="text-red-500 hover:text-red-700"
+                      aria-label="Eliminar producto"
                     >
                       <FaTrash />
                     </button>
@@ -318,7 +319,7 @@ const CartSidebar = ({ onClose: propOnClose }) => {
                 )}
               </div>
 
-              <div className="pt-4 border-t mt-4">
+              <div className="pt-4 border-t mt-4 space-y-2">
                 <p className="text-xl font-bold">
                   Total: $
                   {(total + (selectedShipping?.cost ?? 0)).toLocaleString(
@@ -330,6 +331,16 @@ const CartSidebar = ({ onClose: propOnClose }) => {
                   className="mt-2 w-full bg-[#005f73] hover:bg-[#0a4a4a] text-white py-3 rounded-lg font-semibold transition-all"
                 >
                   Finalizar compra
+                </button>
+                {/* Botón Ver más productos debajo */}
+                <button
+                  onClick={() => {
+                    setCartSidebarOpen(false);
+                    navigate("/");
+                  }}
+                  className="mt-3 w-full border border-[#005f73] text-[#005f73]  py-3 rounded-lg font-semibold transition-all flex items-center justify-center gap-1"
+                >
+                  Ver más productos <span>→</span>
                 </button>
               </div>
             </>
