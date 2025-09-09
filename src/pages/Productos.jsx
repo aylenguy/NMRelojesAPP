@@ -23,8 +23,11 @@ const Productos = ({ searchText }) => {
     const fetchProducts = async () => {
       try {
         setLoading(true);
-        const res = await api.get("/Product/GetAllProducts");
-        setProductos(res.data);
+        // const res = await api.get("/Product/GetAllProducts");
+        //setProductos(res.data);
+        const res = await fetch("/api/productos");
+        const data = await res.json();
+        setProductos(data);
       } catch {
         setError("No se pudieron cargar los productos. Intenta nuevamente.");
       } finally {
