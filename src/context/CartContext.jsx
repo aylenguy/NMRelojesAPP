@@ -56,7 +56,7 @@ export const CartProvider = ({ children }) => {
         ? `${API_URL}/add`
         : `${API_URL}/guest/add?guestId=${getGuestId()}`;
 
-      await axios.post(url, { productId, cantidad }, { headers });
+      await axios.post(url, { productId, quantity: cantidad }, { headers });
       await fetchCart();
 
       setCartSidebarOpen(true);
@@ -73,7 +73,7 @@ export const CartProvider = ({ children }) => {
         ? `${API_URL}/item/${cartItemId}`
         : `${API_URL}/guest/item/${cartItemId}?guestId=${getGuestId()}`;
 
-      await axios.put(url, { cantidad }, { headers });
+      await axios.put(url, { quantity: cantidad }, { headers });
       await fetchCart();
     } catch (err) {
       console.error("Error al actualizar item:", err);

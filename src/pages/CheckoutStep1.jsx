@@ -271,9 +271,10 @@ export default function CheckoutStep1() {
               <p className="text-red-500 text-sm mt-2">{couponError}</p>
             )}
             {couponDiscount > 0 && (
-              <p className="text-green-600 text-sm mt-2">
-                ¡Cupón aplicado! Descuento: ${couponDiscount.toLocaleString()}
-              </p>
+              <div className="flex justify-between text-sm text-[#006d77] mt-2">
+                <span>¡Cupón aplicado!</span>
+                <span>- ${couponDiscount.toLocaleString("es-AR")}</span>
+              </div>
             )}
           </div>
 

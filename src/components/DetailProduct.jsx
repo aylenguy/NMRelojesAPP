@@ -212,7 +212,7 @@ const DetailProduct = () => {
 
           {/* Stock disponible */}
           {stock > 0 ? (
-            <p className="text-green-600 font-medium mb-4">
+            <p className=" font-medium mb-4">
               Stock disponible: {stock} {stock === 1 ? "unidad" : "unidades"}
             </p>
           ) : (
@@ -308,9 +308,11 @@ const DetailProduct = () => {
           </div>
 
           {/* Envío */}
-          <div className="border rounded-lg p-4 mb-8">
-            <h3 className="font-semibold mb-3 text-lg">Calculá tu envío</h3>
-            <div className="flex gap-3">
+          <div className="border rounded-lg p-3 mb-4">
+            <h3 className="font-medium mb-2 text-sm text-gray-800">
+              Calculá tu envío
+            </h3>
+            <div className="flex gap-2">
               <input
                 type="text"
                 placeholder="Código postal"
@@ -319,11 +321,11 @@ const DetailProduct = () => {
                   setPostalCode(e.target.value);
                   setError("");
                 }}
-                className="border rounded-lg px-4 py-2 flex-1 text-base focus:outline-none focus:ring-2 focus:ring-black"
+                className="border rounded-md px-3 py-1.5 flex-1 text-sm focus:outline-none focus:ring-1 focus:ring-black"
               />
               <button
                 onClick={handleCalculateShipping}
-                className="w-28 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-all text-sm font-medium"
+                className="py-1.5 px-6 bg-black text-white rounded-xl hover:bg-gray-800 shadow-sm transition-all text-sm"
               >
                 Calcular
               </button>

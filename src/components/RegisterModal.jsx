@@ -87,7 +87,7 @@ const RegisterModal = ({ show, onClose, onSwitchToLogin }) => {
         <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50">
           <div className="w-[400px] bg-white p-6 rounded-lg shadow-2xl relative">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-bold text-gray-900 font-mono">
+              <h2 className="text-xl font-bold text-gray-900 font-poppins">
                 Registrarse
               </h2>
               <button

@@ -1,3 +1,4 @@
+// src/pages/admin/AdminOrders.jsx
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 
@@ -40,7 +41,7 @@ export default function AdminOrders() {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({ status }),
+          body: JSON.stringify({ status }), // 👈 IMPORTANTE: mandar el body correcto
         }
       );
       if (!res.ok) throw new Error("Error actualizando estado");
@@ -85,7 +86,7 @@ export default function AdminOrders() {
       ) : (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {orders.map((o) => {
-            // 🔹 Calcular subtotal, descuento y total final
+            // 🔹 Calcular subtotal, descuentos y total final
             const subtotal =
               o.items?.reduce(
                 (acc, i) => acc + (i.subtotal ?? i.quantity * i.price),
@@ -93,12 +94,14 @@ export default function AdminOrders() {
               ) || 0;
 
             const method = (o.paymentMethod || "").toLowerCase();
-            const paymentDiscount =
-              method === "transferencia" || method === "efectivo"
-                ? 0.2 * subtotal
-                : 0;
+            const paymentDiscount = o.paymentDiscount || 0;
+            const couponDiscount = o.couponDiscount || 0;
+
             const totalFinal =
-              subtotal - paymentDiscount + (o.shippingCost || 0);
+              subtotal -
+              paymentDiscount -
+              couponDiscount +
+              (o.shippingCost || 0);
 
             return (
               <div
@@ -132,7 +135,7 @@ export default function AdminOrders() {
                     </p>
                   </div>
                   <div className="flex flex-col">
-                    <h3 className="font-semibold text-gray-700"> Dirección</h3>
+                    <h3 className="font-semibold text-gray-700">Dirección</h3>
                     <p className="text-gray-700 text-sm leading-relaxed w-full">
                       {o.street} {o.number} {o.department}, {o.city},{" "}
                       {o.province}, CP {o.postalCode}
@@ -181,12 +184,21 @@ export default function AdminOrders() {
                     <span className="text-gray-600">Pago:</span>
                     <span>{o.paymentMethod}</span>
                   </div>
+
                   {paymentDiscount > 0 && (
                     <div className="flex justify-between w-full text-green-700">
                       <span>Descuento por pago:</span>
                       <span>- ${paymentDiscount.toFixed(2)}</span>
                     </div>
                   )}
+
+                  {couponDiscount > 0 && (
+                    <div className="flex justify-between w-full text-green-700">
+                      <span>Descuento por cupón:</span>
+                      <span>- ${couponDiscount.toFixed(2)}</span>
+                    </div>
+                  )}
+
                   <div className="flex justify-between font-bold text-lg w-full">
                     <span>Total final:</span>
                     <span>${totalFinal.toFixed(2)}</span>

@@ -97,7 +97,7 @@ const Home = ({ onProductClick, searchText }) => {
                       "/placeholder.png"
                     }
                     alt={product.name || product.Name || product.nombre}
-                    className="w-full h-72 object-cover"
+                    className="w-full h-80 object-cover transform transition-transform duration-300 group-hover:scale-105"
                   />
 
                   {/* Etiqueta SIN STOCK */}
@@ -124,7 +124,7 @@ const Home = ({ onProductClick, searchText }) => {
 
                 {/* Información del producto */}
                 <div className="p-4 text-center">
-                  <h3 className="text-lg font-bold mb-1">
+                  <h3 className="text-lg font-bold font-poppins mb-1">
                     {product.brand
                       ? `${product.brand} ${product.name}`
                       : product.name}
@@ -139,7 +139,7 @@ const Home = ({ onProductClick, searchText }) => {
                       0
                     ).toLocaleString("es-AR")}
                   </p>
-                  <p className="text-sm text-gray-500 mt-1">
+                  <p className="text-sm text-[#005f73] font-poppins mt-1">
                     TRANSFERENCIA O EFECTIVO{" "}
                     <span className="block font-semibold text-[#005f73] text-base">
                       $
@@ -154,7 +154,7 @@ const Home = ({ onProductClick, searchText }) => {
 
                   {/* Mostrar stock o mensaje agotado */}
                   {!sinStock ? (
-                    <p className="text-sm text-green-600 mt-2">
+                    <p className="text-sm  font-poppins mt-2">
                       Stock disponible: {stock}
                     </p>
                   ) : (

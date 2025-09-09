@@ -16,10 +16,14 @@ export default function CheckoutSuccess() {
   const status = params.get("status");
   const externalRef = params.get("external_reference");
 
+  // 🔹 Vaciar carrito solo si el pago está aprobado
   useEffect(() => {
-    clearCart().catch(console.error);
-  }, [clearCart]);
+    if (status === "approved" || status === "success") {
+      clearCart().catch(console.error);
+    }
+  }, [status, clearCart]);
 
+  // 🔹 Obtener datos de la venta
   useEffect(() => {
     if (state?.venta) {
       setVenta(state.venta);
@@ -54,6 +58,7 @@ export default function CheckoutSuccess() {
               email: data.customerEmail,
               address: clientAddress || "Sin dirección",
             },
+            couponDiscount: data.couponDiscount ?? 0,
           });
         } catch (err) {
           console.error("Error al obtener la venta:", err);
@@ -93,21 +98,24 @@ export default function CheckoutSuccess() {
       </div>
     );
 
+  // 🔹 Normalizar método de pago
   const method = (venta.paymentMethod || "").toLowerCase();
   const isTransfer = method === "transferencia";
   const isCash = method === "efectivo";
   const isArrange = method === "acordar" || method === "vendedor";
   const isCard = method === "tarjeta" || method === "mercadopago";
 
-  // 🔹 Calcular subtotal, descuento y total final
+  // 🔹 Calcular subtotal, descuentos y total
   const subtotal =
-    venta.detalleVentas?.reduce(
-      (acc, i) => acc + (i.subtotal ?? i.quantity * i.product.price),
-      0
-    ) ?? 0;
+    venta.detalleVentas?.reduce((acc, i) => acc + Number(i.subtotal || 0), 0) ??
+    0;
 
-  const paymentDiscount = isCash || isTransfer ? 0.2 * subtotal : 0;
-  const totalFinal = subtotal - paymentDiscount;
+  const paymentDiscount =
+    venta.paymentDiscount ?? (isCash || isTransfer ? 0.2 * subtotal : 0);
+
+  const couponDiscount = venta.couponDiscount ?? 0;
+
+  const totalFinal = subtotal - paymentDiscount - couponDiscount;
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center py-10 px-4">
@@ -139,6 +147,12 @@ export default function CheckoutSuccess() {
                 <p className="text-[#006d77]">
                   <strong>Descuento por pago:</strong> -$
                   {paymentDiscount.toLocaleString("es-AR")}
+                </p>
+              )}
+              {couponDiscount > 0 && (
+                <p className="text-[#006d77]">
+                  <strong>Descuento por cupón:</strong> -$
+                  {couponDiscount.toLocaleString("es-AR")}
                 </p>
               )}
               <p className="text-gray-900 font-semibold">
@@ -193,7 +207,7 @@ export default function CheckoutSuccess() {
                   <strong>ID de pago:</strong> {paymentId || "Pendiente"}
                 </p>
                 <p>
-                  <strong>Estado:</strong> Pendiente
+                  <strong>Estado:</strong> {venta.status || "Pendiente"}
                 </p>
                 <p>
                   <strong>Referencia:</strong> {externalRef || venta.id}
@@ -273,7 +287,7 @@ export default function CheckoutSuccess() {
                   <strong>ID de pago:</strong> {paymentId || venta.id}
                 </p>
                 <p>
-                  <strong>Estado:</strong> {status || "Aprobado"}
+                  <strong>Estado:</strong> {venta.status || "Aprobado"}
                 </p>
               </>
             )}

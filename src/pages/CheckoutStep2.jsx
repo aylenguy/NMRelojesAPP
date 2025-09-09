@@ -622,10 +622,10 @@ export default function CheckoutStep2() {
             )}
 
             {couponDiscount > 0 && (
-              <p className="text-green-600 text-sm mt-2">
-                ¡Cupón aplicado! Descuento: $
-                {couponDiscount.toLocaleString("es-AR")}
-              </p>
+              <div className="flex justify-between text-sm text-[#006d77] mt-2">
+                <span>Descuento por cupón</span>
+                <span>- ${couponDiscount.toLocaleString("es-AR")}</span>
+              </div>
             )}
 
             <h3 className="mt-4 text-xl font-bold text-gray-900">

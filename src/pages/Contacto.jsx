@@ -58,7 +58,7 @@ const Contacto = () => {
   return (
     <div className="min-h-screen px-4 py-10">
       <div className="max-w-2xl mx-auto">
-        <h1 className="text-4xl font-bold font-mono text-center text-gray-800 mb-10">
+        <h1 className="text-4xl font-bold font-poppins text-center text-gray-800 mb-10">
           Contacto
         </h1>
 

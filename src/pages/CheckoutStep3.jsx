@@ -26,7 +26,6 @@ export default function CheckoutStep3() {
   useEffect(() => {
     if (token) fetchCart();
   }, [token, fetchCart]);
-
   const handleConfirmOrder = async () => {
     try {
       setLoading(true);
@@ -48,7 +47,8 @@ export default function CheckoutStep3() {
       );
 
       const shippingCost = checkoutData.shippingOption?.cost || 0;
-      const couponDiscount = checkoutData.discount || 0;
+      const couponDiscount = checkoutData.couponDiscount || 0;
+
       const paymentDiscount =
         paymentMethod === "efectivo" || paymentMethod === "transferencia"
           ? 0.2 * subtotal
@@ -59,12 +59,12 @@ export default function CheckoutStep3() {
 
       // 🔹 Preparar payload de venta
       const ventaPayload = {
-        clientId: checkoutData.clientId || 1, // si tu cliente tiene ID
+        clientId: checkoutData.clientId || 1,
         customerEmail: checkoutData.email || "sin-email@ejemplo.com",
         customerName: checkoutData.name || "Cliente",
         customerLastname: checkoutData.lastname || "",
         externalReference,
-        couponCode: checkoutData.couponCode || "", // si aplica
+        couponCode: checkoutData.couponCode || "",
         shippingAddress: checkoutData.street || "Sin dirección",
         postalCode: checkoutData.postalCode || "",
         paymentMethod,
@@ -84,6 +84,8 @@ export default function CheckoutStep3() {
           subtotal: i.subtotal ?? i.quantity * i.unitPrice,
         })),
         total: totalFinal,
+        couponDiscount,
+        paymentDiscount,
       };
 
       let newVenta;
@@ -95,25 +97,35 @@ export default function CheckoutStep3() {
           {
             method: "POST",
             headers: { "Content-Type": "application/json-patch+json" },
+
             body: JSON.stringify({
-              amount: totalFinal,
-              description: "Compra en NM Relojes",
-              payerEmail: checkoutData.email || "sin-email@ejemplo.com",
-              currencyId: "ARS",
-              quantity: 1,
-              externalReference,
+              Description: "Compra en NM Relojes",
+              PayerEmail: checkoutData.email || "sin-email@ejemplo.com",
+              CurrencyId: "ARS",
+              ExternalReference: externalReference,
+
+              Items: currentCart.items.map((i) => ({
+                Title: i.productName || i.name || "Producto",
+                Quantity: i.quantity || 1,
+                UnitPrice: i.unitPrice || 0,
+              })),
+              BackUrls: {
+                Success: "http://localhost:5173/checkout/success",
+                Failure: "http://localhost:5173/checkout/failure",
+                Pending: "http://localhost:5173/checkout/pending",
+              },
+              NotificationUrl: "https://tu-dominio.com/api/Payment/webhook",
             }),
           }
         );
 
-        let mpData;
-        try {
-          mpData = await mpResponse.json();
-        } catch (e) {
-          const text = await mpResponse.text();
-          console.error("Respuesta inválida de backend MP:", text);
+        if (!mpResponse.ok) {
+          const errorText = await mpResponse.text();
+          console.error("Error backend MP:", errorText);
           throw new Error("Error al crear preferencia Mercado Pago");
         }
+
+        const mpData = await mpResponse.json();
 
         if (mpData?.initPoint) {
           // 🔹 Guardamos la venta pendiente en localStorage
@@ -160,6 +172,8 @@ export default function CheckoutStep3() {
           quantity: i.quantity,
           subtotal: i.subtotal ?? i.quantity * i.unitPrice,
         })),
+        couponDiscount: newVenta.couponDiscount || couponDiscount || 0,
+        paymentDiscount: newVenta.paymentDiscount || paymentDiscount || 0,
         total: newVenta.total,
         paymentMethod: newVenta.paymentMethod,
         paymentStatus: newVenta.paymentStatus,
@@ -196,7 +210,8 @@ export default function CheckoutStep3() {
     ) || 0;
 
   const shippingCost = checkoutData.shippingOption?.cost || 0;
-  const couponDiscount = checkoutData.discount || 0;
+  const couponDiscount = checkoutData.couponDiscount || 0;
+
   const paymentDiscount =
     paymentMethod === "efectivo" || paymentMethod === "transferencia"
       ? 0.2 * subtotal
@@ -311,16 +326,18 @@ export default function CheckoutStep3() {
             <p className="text-gray-500">El carrito está vacío</p>
           )}
           {couponDiscount > 0 && (
-            <p className="text-sm text-green-700">
-              Descuento cupón: -${couponDiscount.toLocaleString("es-AR")}
-            </p>
+            <div className="flex justify-between text-sm text-[#006d77] mt-2">
+              <span>Descuento por cupón</span>
+              <span>- ${couponDiscount.toLocaleString("es-AR")}</span>
+            </div>
           )}
           {paymentDiscount > 0 && (
-            <p className="text-sm   text-[#006d77]">
-              Descuento pago: -${paymentDiscount.toLocaleString("es-AR")}
-            </p>
+            <div className="flex justify-between text-sm text-[#006d77] mt-2">
+              <span>Descuento por pago</span>
+              <span>- ${paymentDiscount.toLocaleString("es-AR")}</span>
+            </div>
           )}
-          <h4 className="font-bold text-xl">
+          <h4 className="font-bold text-xl mt-3">
             Total: ${totalFinal.toLocaleString("es-AR")}
           </h4>
           <div className="flex justify-between mt-4">

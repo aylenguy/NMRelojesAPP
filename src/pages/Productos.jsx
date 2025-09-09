@@ -144,7 +144,7 @@ const Productos = ({ searchText }) => {
 
   return (
     <div className="min-h-screen p-8">
-      <h2 className="text-3xl font-bold mb-6 text-center text-gray-800 font-mono">
+      <h2 className="text-3xl font-bold mb-6 text-center text-gray-800 font-poppins">
         Todos los Productos
       </h2>
 
@@ -166,12 +166,12 @@ const Productos = ({ searchText }) => {
       <div className="grid grid-cols-1 lg:grid-cols-[250px_1fr] gap-8">
         {/* Sidebar filtros */}
         <aside className="bg-white p-4 rounded-lg shadow-md border">
-          <h2 className="text-xl font-bold mb-6 text-center text-[#005f73] font-mono">
+          <h2 className="text-xl font-bold mb-6 text-center text-[#005f73] font-poppins">
             Filtrar por
           </h2>
 
           {/* Colores */}
-          <h3 className="text-lg font-semibold mb-4 mt-6">Color</h3>
+          <h3 className="text-lg font-poppin font-poppins mb-4 mt-6">Color</h3>
           <div className="flex flex-col gap-2">
             {coloresUnicos.map((color) => (
               <label
@@ -189,7 +189,7 @@ const Productos = ({ searchText }) => {
           </div>
 
           {/* Marcas */}
-          <h3 className="text-lg font-semibold mb-4 mt-6">Marca</h3>
+          <h3 className="text-lg font-poppins mb-4 mt-6">Marca</h3>
           <div className="flex flex-col gap-2">
             {marcasUnicas.map((marca) => (
               <label
@@ -217,7 +217,7 @@ const Productos = ({ searchText }) => {
               return (
                 <div
                   key={producto.id ?? producto.Id}
-                  className="relative bg-white rounded-lg shadow-md hover:shadow-lg transition overflow-hidden border"
+                  className="relative bg-white font-poppins rounded-lg shadow-md hover:shadow-lg transition overflow-hidden border"
                 >
                   <div
                     className="relative cursor-pointer group"
@@ -259,13 +259,13 @@ const Productos = ({ searchText }) => {
                   </div>
 
                   <div className="p-5 text-center">
-                    <h3 className="text-xl font-bold mb-1">
+                    <h3 className="text-lg font-bold font-poppins mb-1">
                       {getTitulo(producto)}
                     </h3>
                     <p className="text-gray-800 font-medium text-lg">
                       ${getPrecio(producto).toLocaleString("es-AR")}
                     </p>
-                    <p className="text-sm text-gray-500 mt-1">
+                    <p className="text-sm text-[#005f73] font-poppins mt-1">
                       TRANSFERENCIA O EFECTIVO{" "}
                       <span className="block font-semibold text-[#005f73] text-base">
                         $
@@ -275,7 +275,7 @@ const Productos = ({ searchText }) => {
                       </span>
                     </p>
                     {!sinStock ? (
-                      <p className="text-sm text-green-600 mt-2">
+                      <p className="text-sm font-poppins mt-2">
                         Stock disponible: {stock}
                       </p>
                     ) : (

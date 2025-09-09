@@ -211,17 +211,21 @@ const CartSidebar = ({ onClose: propOnClose }) => {
               {cart.items.map((item) => (
                 <div
                   key={item.id}
-                  className="flex items-center justify-between gap-3 p-2 border rounded shadow-sm hover:shadow-md transition transform duration-200"
+                  className="flex items-start justify-between gap-3 p-2 border rounded shadow-sm hover:shadow-md transition transform duration-200"
                 >
+                  {/* Imagen */}
                   <img
                     src={getItemImagen(item)}
                     alt={getItemNombre(item)}
                     className="w-20 h-20 object-cover rounded"
                   />
-                  <div className="flex-1 flex flex-col justify-between">
-                    <h3 className="text-lg font-poppins mb-2 truncate">
+
+                  {/* Info y cantidad */}
+                  <div className="flex-1 flex flex-col justify-between min-w-0 h-full">
+                    <h3 className="text-lg font-poppins mb-2 break-words">
                       {getItemFullName(item)}
                     </h3>
+
                     <div className="flex items-center gap-2 mt-1">
                       <button
                         onClick={() => handleDecrease(item)}
@@ -240,13 +244,15 @@ const CartSidebar = ({ onClose: propOnClose }) => {
                       </button>
                     </div>
                   </div>
-                  <div className="flex flex-col items-end gap-1">
+
+                  {/* Precio y eliminar */}
+                  <div className="flex flex-col items-end justify-end gap-1">
                     <p className="font-bold">
                       ${getItemSubtotal(item).toLocaleString("es-AR")}
                     </p>
                     <button
                       onClick={() => removeFromCart(item.id)}
-                      className="text-red-500 hover:text-red-700"
+                      className="text-[#005f73] hover:text-[#0a4a4a]"
                       aria-label="Eliminar producto"
                     >
                       <FaTrash />

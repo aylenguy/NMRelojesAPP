@@ -82,7 +82,6 @@ const Navbar = ({ searchText, setSearchText }) => {
       {/* Barra superior promo animada */}
       <div className="bg-yellow-100 text-gray-800 text-sm font-medium overflow-hidden relative h-6">
         <div className="absolute whitespace-nowrap flex animate-marquee">
-          {/* Texto duplicado para que sea continuo */}
           <span className="mr-8">
             20% de descuento abonando en efectivo/transferencia · Envío gratis a
             todo el país
@@ -124,6 +123,15 @@ const Navbar = ({ searchText, setSearchText }) => {
                 {user?.name} {user?.lastName}
               </span>
 
+              {/* 👇 Enlace a perfil */}
+              <Link
+                to="/profilepage"
+                className="flex items-center gap-2 text-gray-700 hover:text-black"
+              >
+                <FaUser className="text-xl" />
+                <span className="hidden md:inline">Mi perfil</span>
+              </Link>
+
               {/* Carrito */}
               {role === "client" && (
                 <button
@@ -140,6 +148,7 @@ const Navbar = ({ searchText, setSearchText }) => {
                 </button>
               )}
 
+              {/* Logout */}
               <button
                 onClick={handleLogout}
                 className="text-red-600 hover:text-red-800"
