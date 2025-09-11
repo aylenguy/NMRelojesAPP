@@ -5,7 +5,7 @@ import {
   useEffect,
   useCallback,
 } from "react";
-import api from "../services/api"; // 👈 importar tu instancia de axios
+import api from "../api/api.js";
 import { useAuth } from "./AuthContext";
 
 const CartContext = createContext();
