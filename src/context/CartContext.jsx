@@ -20,12 +20,16 @@ const getGuestId = () => {
 
 export const CartProvider = ({ children }) => {
   const [cart, setCart] = useState([]);
+  const [cartSidebarOpen, setCartSidebarOpen] = useState(false); // ✅ Estado sidebar
   const [token, setToken] = useState(localStorage.getItem("token"));
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   // Obtener headers
   const getHeaders = () => (token ? { Authorization: `Bearer ${token}` } : {});
+
+  // Ajuste para HTTPS en imágenes (si tu backend soporta)
+  const fixImageUrl = (url) => url.replace("http://", "https://");
 
   // Cargar carrito
   const fetchCart = async () => {
@@ -36,8 +40,15 @@ export const CartProvider = ({ children }) => {
         ? `${API_URL}`
         : `${API_URL}/guest?guestId=${getGuestId()}`;
       const res = await axios.get(url, { headers: getHeaders() });
-      setCart(res.data);
-      return res.data;
+
+      // Opcional: convertir todas las URLs de imagen a HTTPS
+      const cartWithHttpsImages = res.data.map((item) => ({
+        ...item,
+        image: item.image ? fixImageUrl(item.image) : null,
+      }));
+
+      setCart(cartWithHttpsImages);
+      return cartWithHttpsImages;
     } catch (err) {
       console.error("Error al obtener carrito:", err);
       setError("No se pudo cargar el carrito");
@@ -106,6 +117,8 @@ export const CartProvider = ({ children }) => {
     <CartContext.Provider
       value={{
         cart,
+        cartSidebarOpen, // ✅ Expuesto para Navbar/CartSidebar
+        setCartSidebarOpen, // ✅ Expuesto para Navbar/CartSidebar
         loading,
         error,
         fetchCart,

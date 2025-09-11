@@ -1,3 +1,4 @@
+// src/components/CartSidebar.jsx
 import { useState, useEffect, useRef } from "react";
 import { FaTimes, FaTrash } from "react-icons/fa";
 import { useAuth } from "../context/AuthContext";
@@ -6,19 +7,13 @@ import { useCart } from "../context/CartContext";
 import axios from "axios";
 
 const API_URL = import.meta.env.VITE_API_URL;
-// forzar https siempre
+// Forzar HTTPS siempre
 const BASE_URL = API_URL.replace("/api", "").replace("http://", "https://");
 
-const CartSidebar = ({ onClose: propOnClose }) => {
+const CartSidebar = ({ isOpen, onClose }) => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const {
-    cart,
-    removeFromCart,
-    updateItem,
-    cartSidebarOpen,
-    setCartSidebarOpen,
-  } = useCart();
+  const { cart, removeFromCart, updateItem } = useCart();
 
   const [postalCode, setPostalCode] = useState("");
   const [error, setError] = useState("");
@@ -29,24 +24,21 @@ const CartSidebar = ({ onClose: propOnClose }) => {
   const itemsContainerRef = useRef(null);
 
   useEffect(() => {
-    if (cartSidebarOpen && itemsContainerRef.current) {
+    if (isOpen && itemsContainerRef.current) {
       itemsContainerRef.current.scrollTo({
         top: itemsContainerRef.current.scrollHeight,
         behavior: "smooth",
       });
     }
-  }, [cart?.items, cartSidebarOpen]);
+  }, [cart?.items, isOpen]);
 
+  // Helpers para obtener datos de productos
   const getItemImagen = (item) => {
     if (!item) return `${BASE_URL}/uploads/placeholder.png`;
-    if (item.imageUrl?.startsWith("http")) return item.imageUrl;
-
     const img =
       item.image || item.Image || item.imageUrl || item.imagen || item.Imagen;
-
-    return img
-      ? `${BASE_URL}/uploads/${img}`
-      : `${BASE_URL}/uploads/placeholder.png`;
+    if (!img) return `${BASE_URL}/uploads/placeholder.png`;
+    return img.startsWith("http") ? img : `${BASE_URL}/uploads/${img}`;
   };
 
   const getItemNombre = (item) =>
@@ -61,8 +53,18 @@ const CartSidebar = ({ onClose: propOnClose }) => {
     item.cantidad || item.Cantidad || item.quantity || 1;
 
   const getItemSubtotal = (item) =>
-    item.subtotal || item.Subtotal || item.quantity * item.unitPrice || 0;
+    item.subtotal ||
+    item.Subtotal ||
+    getItemCantidad(item) * (item.unitPrice || 0);
 
+  const getItemBrand = (item) => item.brand || item.Brand || item.Marca || "";
+  const getItemFullName = (item) => {
+    const brand = getItemBrand(item);
+    const name = getItemNombre(item);
+    return brand ? `${brand} ${name}` : name;
+  };
+
+  // Modificar cantidades
   const handleDecrease = (item) => {
     const cantidad = getItemCantidad(item);
     if (cantidad > 1) updateItem(item.id, cantidad - 1);
@@ -74,10 +76,12 @@ const CartSidebar = ({ onClose: propOnClose }) => {
     updateItem(item.id, cantidad + 1);
   };
 
+  // Calcular envío
   const handleCalculateShipping = async () => {
     if (!postalCode.match(/^\d{4}$/)) {
       setShippingOptions([]);
       setSelectedShipping(null);
+      setError("Código postal inválido");
       return;
     }
     setError("");
@@ -122,6 +126,7 @@ const CartSidebar = ({ onClose: propOnClose }) => {
     );
   };
 
+  // Finalizar compra
   const handleFinalizePurchase = () => {
     if (user?.role?.toLowerCase() === "admin") {
       alert("Los administradores no pueden realizar compras.");
@@ -152,29 +157,16 @@ const CartSidebar = ({ onClose: propOnClose }) => {
     };
 
     localStorage.setItem("checkoutData", JSON.stringify(checkoutPayload));
-    setCartSidebarOpen(false);
+    onClose();
     navigate("/checkout/paso-1");
-  };
-
-  const getItemBrand = (item) => item.brand || item.Brand || item.Marca || "";
-  const getItemFullName = (item) => {
-    const brand = getItemBrand(item);
-    const name =
-      item.name ||
-      item.Name ||
-      item.productName ||
-      item.ProductName ||
-      item.nombre ||
-      "Producto";
-    return brand ? `${brand} ${name}` : name;
   };
 
   return (
     <>
       {/* Overlay */}
-      {cartSidebarOpen && (
+      {isOpen && (
         <div
-          onClick={() => setCartSidebarOpen(false)}
+          onClick={onClose}
           className="fixed inset-0 bg-black bg-opacity-40 z-40 transition-opacity duration-300"
         />
       )}
@@ -182,7 +174,7 @@ const CartSidebar = ({ onClose: propOnClose }) => {
       {/* Sidebar */}
       <div
         className={`fixed top-0 right-0 h-full w-96 bg-white shadow-2xl transform z-50 flex flex-col transition-transform duration-500 ease-in-out ${
-          cartSidebarOpen ? "translate-x-0" : "translate-x-full"
+          isOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
         {/* Header */}
@@ -191,7 +183,7 @@ const CartSidebar = ({ onClose: propOnClose }) => {
             Mi carrito
           </h2>
           <button
-            onClick={() => setCartSidebarOpen(false)}
+            onClick={onClose}
             aria-label="Cerrar"
             className="text-gray-600 hover:text-gray-900 transition"
           >
@@ -217,19 +209,15 @@ const CartSidebar = ({ onClose: propOnClose }) => {
                   key={item.id}
                   className="flex items-start justify-between gap-3 p-2 border rounded shadow-sm hover:shadow-md transition transform duration-200"
                 >
-                  {/* Imagen */}
                   <img
                     src={getItemImagen(item)}
                     alt={getItemNombre(item)}
                     className="w-20 h-20 object-cover rounded"
                   />
-
-                  {/* Info y cantidad */}
                   <div className="flex-1 flex flex-col justify-between min-w-0 h-full">
                     <h3 className="text-lg font-poppins mb-2 break-words">
                       {getItemFullName(item)}
                     </h3>
-
                     <div className="flex items-center gap-2 mt-1">
                       <button
                         onClick={() => handleDecrease(item)}
@@ -248,8 +236,6 @@ const CartSidebar = ({ onClose: propOnClose }) => {
                       </button>
                     </div>
                   </div>
-
-                  {/* Precio y eliminar */}
                   <div className="flex flex-col items-end justify-end gap-1">
                     <p className="font-bold">
                       ${getItemSubtotal(item).toLocaleString("es-AR")}
@@ -265,7 +251,7 @@ const CartSidebar = ({ onClose: propOnClose }) => {
                 </div>
               ))}
 
-              {/* Medios de envío */}
+              {/* Envío */}
               <div className="mt-6">
                 <label className="block text-sm font-semibold text-gray-800 mb-2">
                   Código postal
@@ -342,13 +328,12 @@ const CartSidebar = ({ onClose: propOnClose }) => {
                 >
                   Finalizar compra
                 </button>
-                {/* Botón Ver más productos debajo */}
                 <button
                   onClick={() => {
-                    setCartSidebarOpen(false);
+                    onClose();
                     navigate("/");
                   }}
-                  className="mt-3 w-full border border-[#005f73] text-[#005f73]  py-3 rounded-lg font-semibold transition-all flex items-center justify-center gap-1"
+                  className="mt-3 w-full border border-[#005f73] text-[#005f73] py-3 rounded-lg font-semibold transition-all flex items-center justify-center gap-1"
                 >
                   Ver más productos <span>→</span>
                 </button>
