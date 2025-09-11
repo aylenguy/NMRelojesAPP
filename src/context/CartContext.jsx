@@ -9,7 +9,7 @@ import axios from "axios";
 import { useAuth } from "./AuthContext";
 
 const CartContext = createContext();
-const API_URL = "https://localhost:7247/api/cart";
+const API_URL = `${import.meta.env.VITE_API_URL}/cart`; // 🔹 URL de la API desde env
 const GUEST_CART_KEY = "guest_cart_id";
 
 // Generar o recuperar guestId
@@ -58,7 +58,6 @@ export const CartProvider = ({ children }) => {
 
       await axios.post(url, { productId, quantity: cantidad }, { headers });
       await fetchCart();
-
       setCartSidebarOpen(true);
     } catch (err) {
       console.error("Error al agregar producto:", err);
@@ -80,7 +79,6 @@ export const CartProvider = ({ children }) => {
     }
   };
 
-  // 🔹 Eliminar item
   // 🔹 Eliminar item
   const removeFromCart = async (cartItemId) => {
     try {
