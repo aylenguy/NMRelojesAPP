@@ -5,6 +5,9 @@ import { useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import axios from "axios";
 
+const API_URL = import.meta.env.VITE_API_URL;
+const BASE_URL = API_URL.replace("/api", ""); // para imágenes
+
 const CartSidebar = ({ onClose: propOnClose }) => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -34,13 +37,15 @@ const CartSidebar = ({ onClose: propOnClose }) => {
   }, [cart.items, cartSidebarOpen]);
 
   const getItemImagen = (item) => {
-    if (!item) return "https://localhost:7247/uploads/placeholder.png";
+    if (!item) return `${BASE_URL}/uploads/placeholder.png`;
     if (item.imageUrl?.startsWith("http")) return item.imageUrl;
+
     const img =
       item.image || item.Image || item.imageUrl || item.imagen || item.Imagen;
+
     return img
-      ? `https://localhost:7247/uploads/${img}`
-      : "https://localhost:7247/uploads/placeholder.png";
+      ? `${BASE_URL}/uploads/${img}`
+      : `${BASE_URL}/uploads/placeholder.png`;
   };
 
   const getItemNombre = (item) =>
@@ -80,14 +85,12 @@ const CartSidebar = ({ onClose: propOnClose }) => {
       let res;
       try {
         res = await axios.post(
-          "https://localhost:7247/api/shipping/calculate",
+          `${API_URL}/shipping/calculate`,
           { postalCode },
           { headers: { "Content-Type": "application/json" } }
         );
       } catch {
-        res = await axios.get(
-          `https://localhost:7247/api/shipping/calculate/${postalCode}`
-        );
+        res = await axios.get(`${API_URL}/shipping/calculate/${postalCode}`);
       }
 
       const data = Array.isArray(res.data) ? res.data : [res.data];
