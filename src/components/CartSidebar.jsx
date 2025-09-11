@@ -6,7 +6,8 @@ import { useCart } from "../context/CartContext";
 import axios from "axios";
 
 const API_URL = import.meta.env.VITE_API_URL;
-const BASE_URL = API_URL.replace("/api", ""); // para imágenes
+// forzar https siempre
+const BASE_URL = API_URL.replace("/api", "").replace("http://", "https://");
 
 const CartSidebar = ({ onClose: propOnClose }) => {
   const { user } = useAuth();
@@ -34,7 +35,7 @@ const CartSidebar = ({ onClose: propOnClose }) => {
         behavior: "smooth",
       });
     }
-  }, [cart.items, cartSidebarOpen]);
+  }, [cart?.items, cartSidebarOpen]);
 
   const getItemImagen = (item) => {
     if (!item) return `${BASE_URL}/uploads/placeholder.png`;

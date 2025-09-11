@@ -20,61 +20,71 @@ const getGuestId = () => {
 
 export const CartProvider = ({ children }) => {
   const [cart, setCart] = useState([]);
-  const token = localStorage.getItem("token");
+  const [token, setToken] = useState(localStorage.getItem("token"));
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  // Obtener headers
+  const getHeaders = () => (token ? { Authorization: `Bearer ${token}` } : {});
 
   // Cargar carrito
   const fetchCart = async () => {
+    setLoading(true);
+    setError(null);
     try {
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
       const url = token
         ? `${API_URL}`
         : `${API_URL}/guest?guestId=${getGuestId()}`;
-      const res = await axios.get(url, { headers });
+      const res = await axios.get(url, { headers: getHeaders() });
       setCart(res.data);
+      return res.data;
     } catch (err) {
       console.error("Error al obtener carrito:", err);
+      setError("No se pudo cargar el carrito");
+    } finally {
+      setLoading(false);
     }
   };
 
   // Agregar producto
   const addToCart = async (productId, quantity = 1) => {
     try {
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
       const url = token
         ? `${API_URL}/add`
         : `${API_URL}/guest/add?guestId=${getGuestId()}`;
-      await axios.post(url, { productId, quantity }, { headers });
-      fetchCart();
+      await axios.post(url, { productId, quantity }, { headers: getHeaders() });
+      return await fetchCart();
     } catch (err) {
       console.error("Error al agregar producto:", err);
+      setError("No se pudo agregar el producto");
     }
   };
 
   // Eliminar producto
   const removeFromCart = async (productId) => {
     try {
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
       const url = token
         ? `${API_URL}/remove/${productId}`
         : `${API_URL}/guest/remove/${productId}?guestId=${getGuestId()}`;
-      await axios.delete(url, { headers });
-      fetchCart();
+      await axios.delete(url, { headers: getHeaders() });
+      return await fetchCart();
     } catch (err) {
       console.error("Error al eliminar producto:", err);
+      setError("No se pudo eliminar el producto");
     }
   };
 
   // Vaciar carrito
   const clearCart = async () => {
     try {
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
       const url = token
         ? `${API_URL}/clear`
         : `${API_URL}/guest/clear?guestId=${getGuestId()}`;
-      await axios.delete(url, { headers });
-      fetchCart();
+      await axios.delete(url, { headers: getHeaders() });
+      return await fetchCart();
     } catch (err) {
       console.error("Error al vaciar carrito:", err);
+      setError("No se pudo vaciar el carrito");
     }
   };
 
@@ -83,9 +93,26 @@ export const CartProvider = ({ children }) => {
     fetchCart();
   }, [token]);
 
+  // Escuchar cambios de token en localStorage
+  useEffect(() => {
+    const handleStorageChange = () => {
+      setToken(localStorage.getItem("token"));
+    };
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
+
   return (
     <CartContext.Provider
-      value={{ cart, addToCart, removeFromCart, clearCart }}
+      value={{
+        cart,
+        loading,
+        error,
+        fetchCart,
+        addToCart,
+        removeFromCart,
+        clearCart,
+      }}
     >
       {children}
     </CartContext.Provider>
