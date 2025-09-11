@@ -5,10 +5,11 @@ import {
   useEffect,
   useCallback,
 } from "react";
-import api from "../api/api.js";
+import axios from "axios";
 import { useAuth } from "./AuthContext";
 
 const CartContext = createContext();
+const API_URL = "https://localhost:7247/api/cart";
 const GUEST_CART_KEY = "guest_cart_id";
 
 // Generar o recuperar guestId
@@ -27,14 +28,14 @@ export const CartProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
   const [cartSidebarOpen, setCartSidebarOpen] = useState(false);
 
-  // 🔹 Obtener carrito
+  // 🔹 Obtener carrito (logueado o invitado)
   const fetchCart = useCallback(async () => {
     try {
       setLoading(true);
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
-      const url = token ? "/cart" : `/cart/guest?guestId=${getGuestId()}`;
+      const url = token ? API_URL : `${API_URL}/guest?guestId=${getGuestId()}`;
 
-      const res = await api.get(url, { headers });
+      const res = await axios.get(url, { headers });
       setCart(res.data || { items: [], total: 0 });
     } catch (err) {
       console.error("Error al obtener carrito:", err);
@@ -52,10 +53,10 @@ export const CartProvider = ({ children }) => {
     try {
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
       const url = token
-        ? "/cart/add"
-        : `/cart/guest/add?guestId=${getGuestId()}`;
+        ? `${API_URL}/add`
+        : `${API_URL}/guest/add?guestId=${getGuestId()}`;
 
-      await api.post(url, { productId, quantity: cantidad }, { headers });
+      await axios.post(url, { productId, quantity: cantidad }, { headers });
       await fetchCart();
 
       setCartSidebarOpen(true);
@@ -69,10 +70,10 @@ export const CartProvider = ({ children }) => {
     try {
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
       const url = token
-        ? `/cart/item/${cartItemId}`
-        : `/cart/guest/item/${cartItemId}?guestId=${getGuestId()}`;
+        ? `${API_URL}/item/${cartItemId}`
+        : `${API_URL}/guest/item/${cartItemId}?guestId=${getGuestId()}`;
 
-      await api.put(url, { quantity: cantidad }, { headers });
+      await axios.put(url, { quantity: cantidad }, { headers });
       await fetchCart();
     } catch (err) {
       console.error("Error al actualizar item:", err);
@@ -80,14 +81,17 @@ export const CartProvider = ({ children }) => {
   };
 
   // 🔹 Eliminar item
+  // 🔹 Eliminar item
   const removeFromCart = async (cartItemId) => {
     try {
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
       const url = token
-        ? `/cart/item/${cartItemId}`
-        : `/cart/guest/item/${cartItemId}?guestId=${getGuestId()}`;
+        ? `${API_URL}/item/${cartItemId}`
+        : `${API_URL}/guest/item/${cartItemId}?guestId=${getGuestId()}`;
 
-      await api.delete(url, { headers });
+      await axios.delete(url, { headers });
+
+      // 🕑 Delay de 500ms antes de refrescar el carrito
       setTimeout(() => {
         fetchCart();
       }, 500);
@@ -101,10 +105,10 @@ export const CartProvider = ({ children }) => {
     try {
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
       const url = token
-        ? "/cart/clear"
-        : `/cart/guest/clear?guestId=${getGuestId()}`;
+        ? `${API_URL}/clear`
+        : `${API_URL}/guest/clear?guestId=${getGuestId()}`;
 
-      await api.post(url, {}, { headers });
+      await axios.post(url, {}, { headers });
       await fetchCart();
     } catch (err) {
       console.error("Error al vaciar carrito:", err);
