@@ -107,10 +107,11 @@ export const CartProvider = ({ children }) => {
   // Vaciar carrito
   const clearCart = async () => {
     try {
-      const url = token
-        ? `${API_URL}/clear`
-        : `${API_URL}/guest/clear?guestId=${getGuestId()}`;
-      await axios.delete(url, { headers: getHeaders() });
+      if (token) {
+        await axios.delete(`${API_URL}/clear`, { headers: getHeaders() });
+      } else {
+        await axios.post(`${API_URL}/guest/clear?guestId=${getGuestId()}`);
+      }
       return await fetchCart();
     } catch (err) {
       console.error("Error al vaciar carrito:", err);

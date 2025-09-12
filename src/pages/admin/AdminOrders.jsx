@@ -10,7 +10,7 @@ export default function AdminOrders() {
 
   const fetchOrders = async () => {
     try {
-      const res = await fetch(`${API_BASE_URL}/api/Venta/GetAll/all`, {
+      const res = await fetch(`${API_BASE_URL}/api/Venta/GetAll`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) throw new Error("Error al cargar pedidos");
@@ -41,7 +41,7 @@ export default function AdminOrders() {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({ status }), // 👈 IMPORTANTE: mandar el body correcto
+          body: JSON.stringify({ status }), // 👈 manda el body
         }
       );
       if (!res.ok) throw new Error("Error actualizando estado");
