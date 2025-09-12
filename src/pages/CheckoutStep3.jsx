@@ -5,6 +5,7 @@ import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 import { addVenta, createFromCart } from "../api/orders";
 import LogoImg from "../assets/LogoMP.png";
+import api from "../api"; // 👈 asegurate de tenerlo importado arriba
 
 export default function CheckoutStep3() {
   const { cart, fetchCart, clearCart, loading: cartLoading } = useCart();
@@ -22,6 +23,7 @@ export default function CheckoutStep3() {
   const [orderNotes, setOrderNotes] = useState("");
 
   const currentCart = token ? cart : guestCart;
+  const API_BASE = import.meta.env.VITE_API_URL.replace("/api", ""); // para imágenes
 
   useEffect(() => {
     if (token) fetchCart();
@@ -92,43 +94,29 @@ export default function CheckoutStep3() {
 
       // 🔹 Si es Mercado Pago, crear la preferencia primero
       if (paymentMethod === "mercadopago") {
-        const mpResponse = await fetch(
-          "https://localhost:7247/api/Payment/create-checkout",
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json-patch+json" },
+        const mpResponse = await api.post("/Payment/create-checkout", {
+          Description: "Compra en NM Relojes",
+          PayerEmail: checkoutData.email || "sin-email@ejemplo.com",
+          CurrencyId: "ARS",
+          ExternalReference: externalReference,
+          Items: currentCart.items.map((i) => ({
+            Title: i.productName || i.name || "Producto",
+            Quantity: i.quantity || 1,
+            UnitPrice: i.unitPrice || 0,
+          })),
+          BackUrls: {
+            Success: "https://nm-relojes.vercel.app/checkout/success", // 👈 tu dominio en Vercel
+            Failure: "https://nm-relojes.vercel.app/checkout/failure",
+            Pending: "https://nm-relojes.vercel.app/checkout/pending",
+          },
+          NotificationUrl:
+            "https://nmrelojesapi.onrender.com/api/Payment/webhook", // 👈 Render
+        });
 
-            body: JSON.stringify({
-              Description: "Compra en NM Relojes",
-              PayerEmail: checkoutData.email || "sin-email@ejemplo.com",
-              CurrencyId: "ARS",
-              ExternalReference: externalReference,
-
-              Items: currentCart.items.map((i) => ({
-                Title: i.productName || i.name || "Producto",
-                Quantity: i.quantity || 1,
-                UnitPrice: i.unitPrice || 0,
-              })),
-              BackUrls: {
-                Success: "http://localhost:5173/checkout/success",
-                Failure: "http://localhost:5173/checkout/failure",
-                Pending: "http://localhost:5173/checkout/pending",
-              },
-              NotificationUrl: "https://tu-dominio.com/api/Payment/webhook",
-            }),
-          }
-        );
-
-        if (!mpResponse.ok) {
-          const errorText = await mpResponse.text();
-          console.error("Error backend MP:", errorText);
-          throw new Error("Error al crear preferencia Mercado Pago");
-        }
-
-        const mpData = await mpResponse.json();
+        const mpData = mpResponse.data;
 
         if (mpData?.initPoint) {
-          // 🔹 Guardamos la venta pendiente en localStorage
+          // Guardar la venta pendiente
           localStorage.setItem("ventaPendiente", JSON.stringify(ventaPayload));
           window.location.href = mpData.initPoint;
           return;
@@ -303,7 +291,7 @@ export default function CheckoutStep3() {
                     item.imageUrl ||
                     item.imagen ||
                     item.Imagen ||
-                    "https://localhost:7247/uploads/placeholder.png"
+                    `${API_BASE}/uploads/placeholder.png`
                   }
                   alt={item.name || item.productName || "Producto"}
                   className="w-12 h-12 object-cover rounded"

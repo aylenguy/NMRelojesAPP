@@ -4,6 +4,8 @@ import CheckoutProgress from "../components/CheckoutProgress";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
 
+const API_URL = import.meta.env.VITE_API_URL; // ✅ variable de entorno
+
 export default function CheckoutStep1() {
   const { cart, fetchCart, loading: cartLoading } = useCart();
   const { user, token } = useAuth();
@@ -84,7 +86,7 @@ export default function CheckoutStep1() {
     }
 
     try {
-      const response = await fetch("https://localhost:7247/api/coupon/apply", {
+      const response = await fetch(`${API_URL}/api/coupon/apply`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ code: couponCode, total: subtotal }),

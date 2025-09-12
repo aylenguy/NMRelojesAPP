@@ -41,6 +41,8 @@ export default function CheckoutStep2() {
   const [showAll, setShowAll] = useState(false);
   const currentCart = token ? cart : guestCart;
 
+  const API_BASE = import.meta.env.VITE_API_URL.replace("/api", "");
+
   useEffect(() => {
     if (token) fetchCart();
     if (formData.postalCode) fetchShippingOptions(formData.postalCode);
@@ -64,15 +66,9 @@ export default function CheckoutStep2() {
     try {
       let res;
       try {
-        res = await axios.post(
-          "https://localhost:7247/api/shipping/calculate",
-          { postalCode: cp },
-          { headers: { "Content-Type": "application/json" } }
-        );
+        res = await api.post("/shipping/calculate", { postalCode: cp });
       } catch {
-        res = await axios.get(
-          `https://localhost:7247/api/shipping/calculate/${cp}`
-        );
+        res = await api.get(`/shipping/calculate/${cp}`);
       }
 
       const data = Array.isArray(res.data) ? res.data : [res.data];
@@ -200,13 +196,13 @@ export default function CheckoutStep2() {
   }
 
   const getItemImagen = (item) => {
-    if (!item) return "https://localhost:7247/uploads/placeholder.png";
+    if (!item) return `${API_BASE}/uploads/placeholder.png`;
     if (item.imageUrl?.startsWith("http")) return item.imageUrl;
     const img =
       item.image || item.Image || item.imageUrl || item.imagen || item.Imagen;
     return img
-      ? `https://localhost:7247/uploads/${img}`
-      : "https://localhost:7247/uploads/placeholder.png";
+      ? `${API_BASE}/uploads/${img}`
+      : `${API_BASE}/uploads/placeholder.png`;
   };
 
   const getItemNombre = (item) =>
