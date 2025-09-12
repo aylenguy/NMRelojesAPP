@@ -29,8 +29,11 @@ export const CartProvider = ({ children }) => {
   // Obtener headers
   const getHeaders = () => (token ? { Authorization: `Bearer ${token}` } : {});
 
-  // Ajuste para HTTPS en imágenes (si tu backend soporta)
-  const fixImageUrl = (url) => url.replace("http://", "https://");
+  // Ajuste para HTTPS en imágenes
+  const fixImageUrl = (url) => {
+    if (!url) return null;
+    return url.startsWith("http://") ? url.replace("http://", "https://") : url;
+  };
 
   // Cargar carrito
   const fetchCart = async () => {
@@ -44,8 +47,7 @@ export const CartProvider = ({ children }) => {
       const res = await axios.get(url, { headers: getHeaders() });
 
       // 👇 Tu backend devuelve { items, total }
-      const items = Array.isArray(res.data.items) ? res.data.items : [];
-      const total = res.data.total ?? 0;
+      const { items = [], total = 0 } = res.data;
 
       // Opcional: convertir todas las URLs de imagen a HTTPS
       const cartWithHttpsImages = items.map((item) => ({
@@ -58,7 +60,8 @@ export const CartProvider = ({ children }) => {
       return updatedCart;
     } catch (err) {
       console.error("Error al obtener carrito:", err);
-      setError("No se pudo cargar el carrito");
+      setError(err.response?.data?.message || "No se pudo cargar el carrito");
+      setCart({ items: [], total: 0 }); // reset al fallar
     } finally {
       setLoading(false);
     }
@@ -74,7 +77,7 @@ export const CartProvider = ({ children }) => {
       return await fetchCart();
     } catch (err) {
       console.error("Error al agregar producto:", err);
-      setError("No se pudo agregar el producto");
+      setError(err.response?.data?.message || "No se pudo agregar el producto");
     }
   };
 
@@ -88,7 +91,9 @@ export const CartProvider = ({ children }) => {
       return await fetchCart();
     } catch (err) {
       console.error("Error al eliminar producto:", err);
-      setError("No se pudo eliminar el producto");
+      setError(
+        err.response?.data?.message || "No se pudo eliminar el producto"
+      );
     }
   };
 
@@ -102,7 +107,7 @@ export const CartProvider = ({ children }) => {
       return await fetchCart();
     } catch (err) {
       console.error("Error al vaciar carrito:", err);
-      setError("No se pudo vaciar el carrito");
+      setError(err.response?.data?.message || "No se pudo vaciar el carrito");
     }
   };
 

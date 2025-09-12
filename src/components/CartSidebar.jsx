@@ -10,10 +10,11 @@ const API_URL = import.meta.env.VITE_API_URL;
 // Forzar HTTPS siempre
 const BASE_URL = API_URL.replace("/api", "").replace("http://", "https://");
 
-const CartSidebar = ({ isOpen, onClose }) => {
+const CartSidebar = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { cart, removeFromCart, updateItem } = useCart();
+  const { cart, removeFromCart, cartSidebarOpen, setCartSidebarOpen } =
+    useCart();
 
   const [postalCode, setPostalCode] = useState("");
   const [error, setError] = useState("");
@@ -24,13 +25,13 @@ const CartSidebar = ({ isOpen, onClose }) => {
   const itemsContainerRef = useRef(null);
 
   useEffect(() => {
-    if (isOpen && itemsContainerRef.current) {
+    if (cartSidebarOpen && itemsContainerRef.current) {
       itemsContainerRef.current.scrollTo({
         top: itemsContainerRef.current.scrollHeight,
         behavior: "smooth",
       });
     }
-  }, [cart?.items, isOpen]);
+  }, [cart?.items, cartSidebarOpen]);
 
   // Helpers para obtener datos de productos
   const getItemImagen = (item) => {
@@ -67,13 +68,18 @@ const CartSidebar = ({ isOpen, onClose }) => {
   // Modificar cantidades
   const handleDecrease = (item) => {
     const cantidad = getItemCantidad(item);
-    if (cantidad > 1) updateItem(item.id, cantidad - 1);
-    else removeFromCart(item.id);
+    if (cantidad > 1) {
+      // TODO: implementar updateItem en tu CartContext si lo querés usar
+      console.log("Disminuir cantidad de", item.id);
+    } else {
+      removeFromCart(item.id);
+    }
   };
 
   const handleIncrease = (item) => {
     const cantidad = getItemCantidad(item);
-    updateItem(item.id, cantidad + 1);
+    // TODO: implementar updateItem en tu CartContext si lo querés usar
+    console.log("Aumentar cantidad de", item.id, "a", cantidad + 1);
   };
 
   // Calcular envío
@@ -157,16 +163,16 @@ const CartSidebar = ({ isOpen, onClose }) => {
     };
 
     localStorage.setItem("checkoutData", JSON.stringify(checkoutPayload));
-    onClose();
+    setCartSidebarOpen(false);
     navigate("/checkout/paso-1");
   };
 
   return (
     <>
       {/* Overlay */}
-      {isOpen && (
+      {cartSidebarOpen && (
         <div
-          onClick={onClose}
+          onClick={() => setCartSidebarOpen(false)}
           className="fixed inset-0 bg-black bg-opacity-40 z-40 transition-opacity duration-300"
         />
       )}
@@ -174,7 +180,7 @@ const CartSidebar = ({ isOpen, onClose }) => {
       {/* Sidebar */}
       <div
         className={`fixed top-0 right-0 h-full w-96 bg-white shadow-2xl transform z-50 flex flex-col transition-transform duration-500 ease-in-out ${
-          isOpen ? "translate-x-0" : "translate-x-full"
+          cartSidebarOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
         {/* Header */}
@@ -183,7 +189,7 @@ const CartSidebar = ({ isOpen, onClose }) => {
             Mi carrito
           </h2>
           <button
-            onClick={onClose}
+            onClick={() => setCartSidebarOpen(false)}
             aria-label="Cerrar"
             className="text-gray-600 hover:text-gray-900 transition"
           >
@@ -330,7 +336,7 @@ const CartSidebar = ({ isOpen, onClose }) => {
                 </button>
                 <button
                   onClick={() => {
-                    onClose();
+                    setCartSidebarOpen(false);
                     navigate("/");
                   }}
                   className="mt-3 w-full border border-[#005f73] text-[#005f73] py-3 rounded-lg font-semibold transition-all flex items-center justify-center gap-1"

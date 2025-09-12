@@ -20,9 +20,13 @@ const Navbar = ({ searchText, setSearchText }) => {
 
   const role = user?.role?.toLowerCase();
 
+  // ✅ misma lógica que en CartSidebar
+  const getItemCantidad = (item) =>
+    item.cantidad || item.Cantidad || item.quantity || 1;
+
   const cartCount = useMemo(
     () =>
-      cart?.items?.reduce((acc, item) => acc + (item.quantity || 1), 0) ?? 0,
+      cart?.items?.reduce((acc, item) => acc + getItemCantidad(item), 0) ?? 0,
     [cart]
   );
 
@@ -123,7 +127,7 @@ const Navbar = ({ searchText, setSearchText }) => {
                 {user?.name} {user?.lastName}
               </span>
 
-              {/* 👇 Enlace a perfil */}
+              {/* Perfil */}
               <Link
                 to="/profilepage"
                 className="flex items-center gap-2 text-gray-700 hover:text-black"
@@ -223,7 +227,10 @@ const Navbar = ({ searchText, setSearchText }) => {
       )}
 
       {/* Sidebar */}
-      <CartSidebar />
+      <CartSidebar
+        isOpen={cartSidebarOpen}
+        onClose={() => setCartSidebarOpen(false)}
+      />
     </nav>
   );
 };
