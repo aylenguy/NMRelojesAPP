@@ -19,7 +19,8 @@ const getGuestId = () => {
 };
 
 export const CartProvider = ({ children }) => {
-  const [cart, setCart] = useState([]);
+  // 👇 Inicializamos como objeto con items + total
+  const [cart, setCart] = useState({ items: [], total: 0 });
   const [cartSidebarOpen, setCartSidebarOpen] = useState(false); // ✅ Estado sidebar
   const [token, setToken] = useState(localStorage.getItem("token"));
   const [loading, setLoading] = useState(false);
@@ -39,16 +40,22 @@ export const CartProvider = ({ children }) => {
       const url = token
         ? `${API_URL}`
         : `${API_URL}/guest?guestId=${getGuestId()}`;
+
       const res = await axios.get(url, { headers: getHeaders() });
 
+      // 👇 Tu backend devuelve { items, total }
+      const items = Array.isArray(res.data.items) ? res.data.items : [];
+      const total = res.data.total ?? 0;
+
       // Opcional: convertir todas las URLs de imagen a HTTPS
-      const cartWithHttpsImages = res.data.map((item) => ({
+      const cartWithHttpsImages = items.map((item) => ({
         ...item,
         image: item.image ? fixImageUrl(item.image) : null,
       }));
 
-      setCart(cartWithHttpsImages);
-      return cartWithHttpsImages;
+      const updatedCart = { items: cartWithHttpsImages, total };
+      setCart(updatedCart);
+      return updatedCart;
     } catch (err) {
       console.error("Error al obtener carrito:", err);
       setError("No se pudo cargar el carrito");
