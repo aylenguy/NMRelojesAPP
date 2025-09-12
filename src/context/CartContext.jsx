@@ -92,8 +92,9 @@ export const CartProvider = ({ children }) => {
   const removeFromCart = async (productId) => {
     try {
       const url = token
-        ? `${API_URL}/remove/${productId}`
-        : `${API_URL}/guest/remove/${productId}?guestId=${getGuestId()}`;
+        ? `${API_URL}/Cart/item/${productId}` // ✅ endpoint correcto para usuarios logueados
+        : `${API_URL}/Cart/guest/item/${productId}?guestId=${getGuestId()}`; // ✅ para invitados
+
       await axios.delete(url, { headers: getHeaders() });
       return await fetchCart();
     } catch (err) {
