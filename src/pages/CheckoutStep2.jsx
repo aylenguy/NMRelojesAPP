@@ -66,9 +66,11 @@ export default function CheckoutStep2() {
     try {
       let res;
       try {
-        res = await api.post("/shipping/calculate", { postalCode: cp });
+        res = await axios.post(`${API_BASE}/shipping/calculate`, {
+          postalCode: cp,
+        });
       } catch {
-        res = await api.get(`/shipping/calculate/${cp}`);
+        res = await axios.get(`${API_BASE}/shipping/calculate/${cp}`);
       }
 
       const data = Array.isArray(res.data) ? res.data : [res.data];
