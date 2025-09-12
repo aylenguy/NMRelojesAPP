@@ -10,7 +10,7 @@ export default function AdminOrders() {
 
   const fetchOrders = async () => {
     try {
-      const res = await fetch(`${API_BASE_URL}/Venta/all`, {
+      const res = await fetch(`${API_BASE_URL}/Venta/All`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) throw new Error("Error al cargar pedidos");
@@ -33,17 +33,14 @@ export default function AdminOrders() {
     )
       return;
     try {
-      const res = await fetch(
-        `${API_BASE_URL}/api/Venta/UpdateStatus/${orderId}/status`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ status }), // 👈 manda el body
-        }
-      );
+      const res = await fetch(`${API_BASE_URL}/Venta/UpdateStatus/${orderId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ status }), // 👈 manda el body
+      });
       if (!res.ok) throw new Error("Error actualizando estado");
       fetchOrders();
     } catch (err) {
@@ -55,13 +52,10 @@ export default function AdminOrders() {
   const cancelOrder = async (orderId) => {
     if (!window.confirm("¿Seguro querés cancelar esta venta?")) return;
     try {
-      const res = await fetch(
-        `${API_BASE_URL}/api/Venta/CancelVenta/${orderId}/cancel`,
-        {
-          method: "PUT",
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      const res = await fetch(`${API_BASE_URL}/Venta/Cancel/${orderId}`, {
+        method: "PUT",
+        headers: { Authorization: `Bearer ${token}` },
+      });
       if (!res.ok) throw new Error("Error cancelando venta");
       fetchOrders();
     } catch (err) {

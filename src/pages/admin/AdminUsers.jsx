@@ -11,7 +11,7 @@ export default function AdminUsers() {
   // 🔹 Obtener lista de usuarios
   const fetchUsers = async () => {
     try {
-      const res = await fetch(`${API_BASE_URL}/api/Admin/GetAllUsers`, {
+      const res = await fetch(`${API_BASE_URL}/Admin/GetAllUsers`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) throw new Error("Error obteniendo usuarios");
@@ -35,7 +35,7 @@ export default function AdminUsers() {
   const handleDelete = async (id) => {
     if (!window.confirm("¿Eliminar usuario?")) return;
     try {
-      const res = await fetch(`${API_BASE_URL}/api/Admin/DeleteUser/${id}`, {
+      const res = await fetch(`${API_BASE_URL}/Admin/DeleteUser/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
