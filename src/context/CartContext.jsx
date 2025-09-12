@@ -68,13 +68,20 @@ export const CartProvider = ({ children }) => {
   };
 
   // Agregar producto
+  // Agregar producto
   const addToCart = async (productId, quantity = 1) => {
     try {
       const url = token
         ? `${API_URL}/add`
         : `${API_URL}/guest/add?guestId=${getGuestId()}`;
       await axios.post(url, { productId, quantity }, { headers: getHeaders() });
-      return await fetchCart();
+
+      const updatedCart = await fetchCart();
+
+      // 👇 Abrir sidebar automáticamente al agregar
+      setCartSidebarOpen(true);
+
+      return updatedCart;
     } catch (err) {
       console.error("Error al agregar producto:", err);
       setError(err.response?.data?.message || "No se pudo agregar el producto");
