@@ -10,19 +10,30 @@ export default function AdminOrders() {
 
   const fetchOrders = async () => {
     try {
-      const res = await fetch(`${API_BASE_URL}/Venta/All`, {
+      const res = await fetch(`${API_BASE_URL}/Venta/MyOrdersAll`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (!res.ok) throw new Error("Error al cargar pedidos");
-      const data = await res.json();
+
+      console.log("📡 Status:", res.status);
+      const raw = await res.text();
+      console.log("📡 Response crudo:", raw);
+
+      if (!res.ok) throw new Error("Error obteniendo pedidos");
+
+      const data = JSON.parse(raw);
       setOrders(data);
     } catch (err) {
-      console.error(err);
+      console.error("Error cargando pedidos", err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    if (token) fetchOrders();
+    if (token) {
+      fetchOrders();
+    }
   }, [token]);
 
   const updateStatus = async (orderId, status) => {
