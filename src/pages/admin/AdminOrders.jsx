@@ -10,7 +10,7 @@ export default function AdminOrders() {
 
   const fetchOrders = async () => {
     try {
-      const res = await fetch(`${API_BASE_URL}/api/Venta/MyOrdersAll`, {
+      const res = await fetch(`${API_BASE_URL}/Venta/all`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
