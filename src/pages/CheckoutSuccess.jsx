@@ -4,6 +4,8 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import axios from "axios";
 
+const API_BASE_URL = import.meta.env.VITE_API_URL;
+
 export default function CheckoutSuccess() {
   const { state, search } = useLocation();
   const { clearCart } = useCart();
@@ -35,7 +37,7 @@ export default function CheckoutSuccess() {
       const fetchVenta = async () => {
         try {
           const res = await axios.get(
-            `https://localhost:7247/api/Venta/GetByExternalReference/external/${externalRef}`
+            `${API_BASE_URL}/Venta/GetByExternalReference/external/${externalRef}`
           );
 
           const data = res.data;

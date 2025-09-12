@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 
-const API_BASE_URL = "https://localhost:7247";
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 export default function AdminPanel() {
   const { token } = useAuth();

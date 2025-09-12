@@ -1,6 +1,9 @@
+// src/pages/ResetPassword.jsx
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 export default function ResetPassword() {
   const [password, setPassword] = useState("");
@@ -36,14 +39,11 @@ export default function ResetPassword() {
 
     try {
       setLoading(true);
-      const res = await fetch(
-        "https://localhost:7247/api/Client/reset-password",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ Token: token, NewPassword: password }),
-        }
-      );
+      const res = await fetch(`${API_BASE_URL}/Client/reset-password`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ Token: token, NewPassword: password }),
+      });
 
       const data = await res.json().catch(() => ({
         message: "Error desconocido",

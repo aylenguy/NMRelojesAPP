@@ -1,11 +1,11 @@
 // src/context/AuthContext.js
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { jwtDecode } from "jwt-decode";
-
 import { useNavigate } from "react-router-dom";
 
 const AuthContext = createContext();
-const API_BASE_URL = "https://localhost:7247";
+// 🔹 Ahora toma la URL de la variable de entorno
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);

@@ -4,6 +4,8 @@ import axios from "axios";
 import api from "../api/api";
 import { useCart } from "../context/CartContext";
 
+const API_BASE_URL = import.meta.env.VITE_API_URL;
+
 const DetailProduct = () => {
   const { state: productFromState } = useLocation();
   const { id } = useParams();
@@ -144,14 +146,15 @@ const DetailProduct = () => {
     try {
       let res;
       try {
+        // 🔹 ahora usamos la variable de entorno
         res = await axios.post(
-          "https://localhost:7247/api/shipping/calculate",
+          `${API_BASE_URL}/shipping/calculate`,
           { postalCode },
           { headers: { "Content-Type": "application/json" } }
         );
       } catch {
         res = await axios.get(
-          `https://localhost:7247/api/shipping/calculate/${postalCode}`
+          `${API_BASE_URL}/shipping/calculate/${postalCode}`
         );
       }
 

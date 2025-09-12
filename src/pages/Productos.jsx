@@ -76,7 +76,7 @@ const Productos = ({ searchText }) => {
   const getImagen = (p) => {
     const path = p.image ?? p.Image ?? p.imagen ?? "placeholder.png";
     if (path.startsWith("http")) return path;
-    return `https://localhost:7247/uploads/${path}`;
+    return `${import.meta.env.VITE_API_URL}/uploads/${path}`;
   };
 
   const getTitulo = (p) => {

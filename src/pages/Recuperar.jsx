@@ -1,6 +1,8 @@
 // src/pages/Recuperar.jsx
 import { useState } from "react";
 
+const API_BASE_URL = import.meta.env.VITE_API_URL;
+
 export default function Recuperar() {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
@@ -12,19 +14,20 @@ export default function Recuperar() {
     setLoading(true);
 
     try {
-      const res = await fetch(
-        "https://localhost:7247/api/Client/forgot-password",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email }),
-        }
-      );
+      const res = await fetch(`${API_BASE_URL}/Client/forgot-password`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+
+      if (!res.ok) throw new Error("Error al enviar el correo");
 
       const data = await res.json();
       setMessage(data.message);
     } catch (err) {
-      setMessage("Error al enviar el correo. Intenta nuevamente.");
+      setMessage(
+        err.message || "Error al enviar el correo. Intenta nuevamente."
+      );
     } finally {
       setLoading(false);
     }

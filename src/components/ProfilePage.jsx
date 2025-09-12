@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 
+const API_BASE_URL = import.meta.env.VITE_API_URL;
+
 export default function ProfilePage() {
   const { token, user } = useAuth();
   const [orders, setOrders] = useState([]);
@@ -13,10 +15,9 @@ export default function ProfilePage() {
 
     try {
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
-      const res = await fetch(
-        "https://localhost:7247/api/Venta/MyOrdersAll/MyOrdersAll",
-        { headers }
-      );
+      const res = await fetch(`${API_BASE_URL}/Venta/MyOrdersAll/MyOrdersAll`, {
+        headers,
+      });
       if (!res.ok) throw new Error("Error cargando tus pedidos");
       const data = await res.json();
       setOrders(data);
