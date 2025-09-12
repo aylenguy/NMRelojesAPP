@@ -159,48 +159,52 @@ export default function CheckoutStep1() {
             )}
           </div>
 
-          {!postalCode ? (
-            <div className="mb-6">
-              <label className="block text-base font-semibold text-gray-800 mb-2">
-                Código postal
-              </label>
-              <input
-                type="text"
-                value={postalCode}
-                onChange={(e) => {
-                  setPostalCode(e.target.value);
-                  setErrors((prev) => ({ ...prev, postalCode: null }));
-                }}
-                placeholder="Ingrese su código postal"
-                className={`w-full p-2 text-sm border rounded-xl focus:outline-none focus:ring-2 ${
-                  errors.postalCode
-                    ? "border-[#005f73] focus:ring-[#005f73]"
-                    : "border-gray-300 focus:ring-black"
-                }`}
-              />
-              {errors.postalCode && (
-                <p className="text-[#005f73] font-semibold text-sm mt-1">
-                  {errors.postalCode}
-                </p>
-              )}
-            </div>
-          ) : (
-            <div className="mb-8">
-              <p className="text-base text-gray-700">
+          <div className="mb-6">
+            <label className="block text-base font-semibold text-gray-800 mb-2">
+              Código postal
+            </label>
+            <input
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              value={postalCode}
+              onChange={(e) => {
+                // Solo permitir números
+                const value = e.target.value.replace(/\D/g, "");
+                setPostalCode(value);
+                setErrors((prev) => ({ ...prev, postalCode: null }));
+              }}
+              placeholder="Ingrese su código postal"
+              className={`w-full p-2 text-sm border rounded-xl focus:outline-none focus:ring-2 ${
+                errors.postalCode
+                  ? "border-[#005f73] focus:ring-[#005f73]"
+                  : "border-gray-300 focus:ring-black"
+              }`}
+            />
+
+            {errors.postalCode && (
+              <p className="text-[#005f73] font-semibold text-sm mt-1">
+                {errors.postalCode}
+              </p>
+            )}
+
+            {postalCode && (
+              <p className="text-sm text-gray-600 mt-2">
                 Código postal seleccionado:{" "}
                 <span className="font-bold">{postalCode}</span>
               </p>
-              {shippingOption && (
-                <p className="text-sm text-gray-600">
-                  Envío:{" "}
-                  <span className="font-semibold">{shippingOption.name}</span> –{" "}
-                  {shippingOption.cost === 0
-                    ? "Gratis"
-                    : `$${shippingOption.cost.toLocaleString("es-AR")}`}
-                </p>
-              )}
-            </div>
-          )}
+            )}
+
+            {shippingOption && (
+              <p className="text-sm text-gray-600 mt-1">
+                Envío:{" "}
+                <span className="font-semibold">{shippingOption.name}</span> –{" "}
+                {shippingOption.cost === 0
+                  ? "Gratis"
+                  : `$${shippingOption.cost.toLocaleString("es-AR")}`}
+              </p>
+            )}
+          </div>
 
           <div className="flex justify-between items-center mt-4">
             <button
