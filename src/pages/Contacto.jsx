@@ -21,12 +21,11 @@ const Contacto = () => {
     setIsSubmitting(true); // activar spinner
 
     try {
-      const response = await fetch("https://localhost:7247/api/contacto", {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/contacto`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
-
       if (response.ok) {
         setStatus("¡Mensaje enviado correctamente!");
         setStatusType("success");

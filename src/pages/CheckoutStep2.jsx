@@ -66,13 +66,18 @@ export default function CheckoutStep2() {
     try {
       let res;
       try {
-        res = await axios.post(`${API_BASE}/shipping/calculate`, {
-          postalCode: cp,
-        });
-      } catch {
-        res = await axios.get(`${API_BASE}/shipping/calculate/${cp}`);
+        res = await axios.post(
+          `${import.meta.env.VITE_API_URL}/shipping/calculate`,
+          {
+            postalCode,
+          }
+        );
+      } catch (err) {
+        // Si falla el POST, intento con GET
+        res = await axios.get(
+          `${import.meta.env.VITE_API_URL}/shipping/calculate/${postalCode}`
+        );
       }
-
       const data = Array.isArray(res.data) ? res.data : [res.data];
       if (data.length > 0) {
         setShippingOptions(data);
