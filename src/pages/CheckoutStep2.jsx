@@ -268,12 +268,14 @@ export default function CheckoutStep2() {
                 data-error={!!errors.postalCode}
                 className={`w-full p-2 text-sm border rounded-xl focus:outline-none focus:ring-2 ${
                   errors.postalCode
-                    ? "border-red-500 focus:ring-red-500"
+                    ? "border-[#005f73] focus:ring-[#005f73]"
                     : "border-gray-300 focus:ring-black"
                 }`}
               />
               {errors.postalCode && (
-                <p className="text-red-500 text-sm mt-1">{errors.postalCode}</p>
+                <p className="text-[#005f73] font-semibold text-sm mt-1">
+                  {errors.postalCode}
+                </p>
               )}
             </div>
 
@@ -312,7 +314,9 @@ export default function CheckoutStep2() {
                 ))}
               </div>
               {errors.shipping && (
-                <p className="text-red-500 text-sm mt-1">{errors.shipping}</p>
+                <p className="text-[#005f73] font-semibold text-sm mt-1">
+                  {errors.shipping}
+                </p>
               )}
             </div>
 
@@ -335,12 +339,14 @@ export default function CheckoutStep2() {
                       data-error={!!errors.name}
                       className={`w-full p-2 text-sm border rounded-xl focus:outline-none focus:ring-2 ${
                         errors.name
-                          ? "border-red-500 focus:ring-red-500"
+                          ? "border-[#005f73] focus:ring-[#005f73]"
                           : "border-gray-300 focus:ring-black"
                       }`}
                     />
                     {errors.name && (
-                      <p className="text-red-500 text-sm mt-1">{errors.name}</p>
+                      <p className="text-[#005f73] font-semibold text-sm mt-1">
+                        {errors.name}
+                      </p>
                     )}
                   </div>
                   <div>
@@ -356,12 +362,12 @@ export default function CheckoutStep2() {
                       data-error={!!errors.lastname}
                       className={`w-full p-2 text-sm border rounded-xl focus:outline-none focus:ring-2 ${
                         errors.lastname
-                          ? "border-red-500 focus:ring-red-500"
+                          ? "border-[#005f73] focus:ring-[#005f73]"
                           : "border-gray-300 focus:ring-black"
                       }`}
                     />
                     {errors.lastname && (
-                      <p className="text-red-500 text-sm mt-1">
+                      <p className="text-[#005f73] font-semibold text-sm mt-1">
                         {errors.lastname}
                       </p>
                     )}
@@ -383,12 +389,12 @@ export default function CheckoutStep2() {
                       data-error={!!errors.email}
                       className={`w-full p-2 text-sm border rounded-xl focus:outline-none focus:ring-2 ${
                         errors.email
-                          ? "border-red-500 focus:ring-red-500"
+                          ? "border-[#005f73] focus:ring-[#005f73]"
                           : "border-gray-300 focus:ring-black"
                       }`}
                     />
                     {errors.email && (
-                      <p className="text-red-500 text-sm mt-1">
+                      <p className="text-[#005f73] font-semibold text-sm mt-1">
                         {errors.email}
                       </p>
                     )}
@@ -410,12 +416,12 @@ export default function CheckoutStep2() {
                       data-error={!!errors.phone}
                       className={`w-full p-2 text-sm border rounded-xl focus:outline-none focus:ring-2 ${
                         errors.phone
-                          ? "border-red-500 focus:ring-red-500"
+                          ? "border-[#005f73] focus:ring-[#005f73]"
                           : "border-gray-300 focus:ring-black"
                       }`}
                     />
                     {errors.phone && (
-                      <p className="text-red-500 text-sm mt-1">
+                      <p className="text-[#005f73] font-semibold text-sm mt-1">
                         {errors.phone}
                       </p>
                     )}
@@ -433,12 +439,14 @@ export default function CheckoutStep2() {
                       data-error={!!errors.dni}
                       className={`w-full p-2 text-sm border rounded-xl focus:outline-none focus:ring-2 ${
                         errors.dni
-                          ? "border-red-500 focus:ring-red-500"
+                          ? "border-[#005f73] focus:ring-[#005f73]"
                           : "border-gray-300 focus:ring-black"
                       }`}
                     />
                     {errors.dni && (
-                      <p className="text-red-500 text-sm mt-1">{errors.dni}</p>
+                      <p className="text-[#005f73] font-semibold text-sm mt-1">
+                        {errors.dni}
+                      </p>
                     )}
                   </div>
                 </div>
@@ -458,12 +466,14 @@ export default function CheckoutStep2() {
                     data-error={!!errors.street}
                     className={`w-full p-2 text-sm border rounded-xl focus:outline-none focus:ring-2 ${
                       errors.street
-                        ? "border-red-500 focus:ring-red-500"
+                        ? "border-[#005f73] focus:ring-[#005f73]"
                         : "border-gray-300 focus:ring-black"
                     }`}
                   />
                   {errors.street && (
-                    <p className="text-red-500 text-sm mt-1">{errors.street}</p>
+                    <p className="text-[#005f73] font-semibold text-sm mt-1">
+                      {errors.street}
+                    </p>
                   )}
                 </div>
 
@@ -481,12 +491,12 @@ export default function CheckoutStep2() {
                       data-error={!!errors.number}
                       className={`w-full p-2 text-sm border rounded-xl focus:outline-none focus:ring-2 ${
                         errors.number
-                          ? "border-red-500 focus:ring-red-500"
+                          ? "border-[#005f73] focus:ring-[#005f73]"
                           : "border-gray-300 focus:ring-black"
                       }`}
                     />
                     {errors.number && (
-                      <p className="text-red-500 text-sm mt-1">
+                      <p className="text-[#005f73] font-semibold text-sm mt-1">
                         {errors.number}
                       </p>
                     )}
@@ -533,12 +543,14 @@ export default function CheckoutStep2() {
                       data-error={!!errors.city}
                       className={`w-full p-2 text-sm border rounded-xl focus:outline-none focus:ring-2 ${
                         errors.city
-                          ? "border-red-500 focus:ring-red-500"
+                          ? "border-[#005f73] focus:ring-[#005f73]"
                           : "border-gray-300 focus:ring-black"
                       }`}
                     />
                     {errors.city && (
-                      <p className="text-red-500 text-sm mt-1">{errors.city}</p>
+                      <p className="text-[#005f73] font-semibold text-sm mt-1">
+                        {errors.city}
+                      </p>
                     )}
                   </div>
                   <div>
@@ -554,12 +566,12 @@ export default function CheckoutStep2() {
                       data-error={!!errors.province}
                       className={`w-full p-2 text-sm border rounded-xl focus:outline-none focus:ring-2 ${
                         errors.province
-                          ? "border-red-500 focus:ring-red-500"
+                          ? "border-[#005f73] focus:ring-[#005f73]"
                           : "border-gray-300 focus:ring-black"
                       }`}
                     />
                     {errors.province && (
-                      <p className="text-red-500 text-sm mt-1">
+                      <p className="text-[#005f73] font-semibold text-sm mt-1">
                         {errors.province}
                       </p>
                     )}

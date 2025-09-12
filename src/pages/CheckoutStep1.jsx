@@ -148,27 +148,41 @@ export default function CheckoutStep1() {
               placeholder="Ingresa tu email"
               className={`w-full p-2 text-sm border rounded-xl focus:outline-none focus:ring-2 ${
                 errors.email
-                  ? "border-red-500 focus:ring-red-500"
+                  ? "border-[#005f73] focus:ring-[#005f73]"
                   : "border-gray-300 focus:ring-black"
               }`}
             />
             {errors.email && (
-              <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+              <p className="text-[#005f73] font-semibold text-sm mt-1">
+                {errors.email}
+              </p>
             )}
           </div>
 
           {!postalCode ? (
-            <div className="mb-8">
+            <div className="mb-6">
               <label className="block text-base font-semibold text-gray-800 mb-2">
                 Código postal
               </label>
               <input
                 type="text"
                 value={postalCode}
-                onChange={(e) => setPostalCode(e.target.value)}
+                onChange={(e) => {
+                  setPostalCode(e.target.value);
+                  setErrors((prev) => ({ ...prev, postalCode: null }));
+                }}
                 placeholder="Ingrese su código postal"
-                className="w-full p-4 text-lg border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-black"
+                className={`w-full p-2 text-sm border rounded-xl focus:outline-none focus:ring-2 ${
+                  errors.postalCode
+                    ? "border-[#005f73] focus:ring-[#005f73]"
+                    : "border-gray-300 focus:ring-black"
+                }`}
               />
+              {errors.postalCode && (
+                <p className="text-[#005f73] font-semibold text-sm mt-1">
+                  {errors.postalCode}
+                </p>
+              )}
             </div>
           ) : (
             <div className="mb-8">
@@ -256,7 +270,7 @@ export default function CheckoutStep1() {
                 placeholder="Ingresa tu cupón"
                 className={`flex-1 px-4 py-2 text-sm border rounded-xl focus:outline-none focus:ring-2 transition ${
                   couponError
-                    ? "border-red-500 focus:ring-red-500"
+                    ? "border-[#005f73] focus:ring-[#005f73]"
                     : "border-gray-300 focus:ring-black"
                 }`}
               />
@@ -270,7 +284,9 @@ export default function CheckoutStep1() {
             </div>
 
             {couponError && (
-              <p className="text-red-500 text-sm mt-2">{couponError}</p>
+              <p className="text-[#005f73] font-semibold text-sm mt-1">
+                {couponError}
+              </p>
             )}
             {couponDiscount > 0 && (
               <div className="flex justify-between text-sm text-[#006d77] mt-2">
