@@ -68,16 +68,15 @@ export default function CheckoutStep2() {
       try {
         res = await axios.post(
           `${import.meta.env.VITE_API_URL}/shipping/calculate`,
-          {
-            postalCode,
-          }
+          { postalCode: cp }
         );
       } catch (err) {
         // Si falla el POST, intento con GET
         res = await axios.get(
-          `${import.meta.env.VITE_API_URL}/shipping/calculate/${postalCode}`
+          `${import.meta.env.VITE_API_URL}/shipping/calculate/${cp}`
         );
       }
+
       const data = Array.isArray(res.data) ? res.data : [res.data];
       if (data.length > 0) {
         setShippingOptions(data);
@@ -89,7 +88,6 @@ export default function CheckoutStep2() {
         setShipping(
           previouslySelected ? previouslySelected.name : data[0].name
         );
-
         setErrors((prev) => ({ ...prev, postalCode: null }));
       } else {
         setShippingOptions([]);
@@ -261,6 +259,11 @@ export default function CheckoutStep2() {
                 name="postalCode"
                 value={formData.postalCode}
                 onChange={handleChange}
+                onBlur={() => {
+                  if (/^\d{4}$/.test(formData.postalCode)) {
+                    fetchShippingOptions(formData.postalCode);
+                  }
+                }}
                 placeholder="Ingrese su código postal"
                 data-error={!!errors.postalCode}
                 className={`w-full p-2 text-sm border rounded-xl focus:outline-none focus:ring-2 ${
