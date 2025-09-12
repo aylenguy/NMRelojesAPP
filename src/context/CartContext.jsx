@@ -20,7 +20,8 @@ const getGuestId = () => {
 
 export const CartProvider = ({ children }) => {
   // 👇 Inicializamos como objeto con items + total
-  const [cart, setCart] = useState({ items: [], total: 0 });
+  const [cart, setCart] = useState(null);
+
   const [cartSidebarOpen, setCartSidebarOpen] = useState(false); // ✅ Estado sidebar
   const [token, setToken] = useState(localStorage.getItem("token"));
   const [loading, setLoading] = useState(false);
@@ -67,7 +68,6 @@ export const CartProvider = ({ children }) => {
     }
   };
 
-  // Agregar producto
   // Agregar producto
   const addToCart = async (productId, quantity = 1) => {
     try {
