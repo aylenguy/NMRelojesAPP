@@ -1,8 +1,12 @@
+// 🔹 Crear venta normal
 export async function addVenta(venta, token = null) {
   const res = await fetch(`${import.meta.env.VITE_API_URL}/Venta/AddVenta`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(ventaData),
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}), // solo agrega el token si existe
+    },
+    body: JSON.stringify(venta), // ✅ corregido: antes estaba "ventaData"
   });
 
   if (!res.ok) {
@@ -13,7 +17,7 @@ export async function addVenta(venta, token = null) {
   return await res.json();
 }
 
-// 🔹 Ahora recibe el dto y el token
+// 🔹 Crear venta desde carrito
 export async function createFromCart(dto, token) {
   const res = await fetch(
     `${import.meta.env.VITE_API_URL}/Venta/CreateFromCart`,
@@ -21,17 +25,16 @@ export async function createFromCart(dto, token) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${token}`, // siempre requiere token
       },
       body: JSON.stringify(dto),
     }
   );
-  return res;
 
   if (!res.ok) {
     const error = await res.json().catch(() => ({}));
     throw new Error(error?.error || "Error al crear la venta desde el carrito");
   }
 
-  return await res.json();
+  return await res.json(); // ✅ corregido: antes cortaba con "return res;"
 }

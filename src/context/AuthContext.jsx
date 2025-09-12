@@ -4,7 +4,7 @@ import { jwtDecode } from "jwt-decode";
 import { useNavigate } from "react-router-dom";
 
 const AuthContext = createContext();
-// 🔹 Ahora toma la URL de la variable de entorno
+// 🔹 Toma la URL base del backend
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 export const AuthProvider = ({ children }) => {
@@ -66,23 +66,34 @@ export const AuthProvider = ({ children }) => {
   // 🔹 Login (cliente o admin)
   const login = async (email, password) => {
     try {
+      let data = {};
+
       // 👉 primero probamos admin
-      let res = await fetch(`${API_BASE_URL}/api/Auth/admin-login`, {
+      let res = await fetch(`${API_BASE_URL}/Auth/admin-login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
 
-      let data = await res.json();
+      try {
+        data = await res.json();
+      } catch {
+        data = {};
+      }
 
       // 👉 si admin falló, probamos cliente
       if (!res.ok || !data.token) {
-        res = await fetch(`${API_BASE_URL}/api/Client/login`, {
+        res = await fetch(`${API_BASE_URL}/Client/login`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email, password }),
         });
-        data = await res.json();
+
+        try {
+          data = await res.json();
+        } catch {
+          data = {};
+        }
       }
 
       if (data.token) {
@@ -111,7 +122,7 @@ export const AuthProvider = ({ children }) => {
   const register = async (name, lastName, userName, email, password) => {
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE_URL}/api/Client/register`, {
+      const res = await fetch(`${API_BASE_URL}/Client/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -124,7 +135,7 @@ export const AuthProvider = ({ children }) => {
       });
 
       if (!res.ok) {
-        const errData = await res.json();
+        const errData = await res.json().catch(() => ({}));
         return {
           success: false,
           message: errData.message || "Error en el registro",
