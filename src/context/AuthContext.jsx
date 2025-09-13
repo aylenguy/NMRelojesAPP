@@ -2,9 +2,10 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { jwtDecode } from "jwt-decode";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const AuthContext = createContext();
-// 🔹 Toma la URL base del backend
+// 🔹 URL base del backend
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 export const AuthProvider = ({ children }) => {
@@ -13,7 +14,7 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  // 🔹 Función para normalizar datos del token
+  // 🔹 Normalizar datos del token
   const normalizeDecoded = (decoded, userTypeFromApi) => {
     let role =
       decoded.role ||
@@ -50,6 +51,10 @@ export const AuthProvider = ({ children }) => {
           );
           setUser(normalized);
           setToken(savedToken);
+          // 👉 Inyectar token a axios
+          axios.defaults.headers.common[
+            "Authorization"
+          ] = `Bearer ${savedToken}`;
         } else {
           localStorage.removeItem("token");
           localStorage.removeItem("userType");
@@ -63,34 +68,31 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
-  // 🔹 Login (cliente o admin)
+  // 🔹 Login (admin o cliente)
   const login = async (email, password) => {
     try {
       let data = {};
+      let res;
 
-      // 👉 primero probamos admin
-      let res = await fetch(`${API_BASE_URL}/Auth/admin-login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-
+      // 👉 primero admin
       try {
-        data = await res.json();
+        res = await axios.post(`${API_BASE_URL}/Auth/admin-login`, {
+          email,
+          password,
+        });
+        data = res.data;
       } catch {
         data = {};
       }
 
       // 👉 si admin falló, probamos cliente
-      if (!res.ok || !data.token) {
-        res = await fetch(`${API_BASE_URL}/Client/login`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password }),
-        });
-
+      if (!data.token) {
         try {
-          data = await res.json();
+          res = await axios.post(`${API_BASE_URL}/Client/login`, {
+            email,
+            password,
+          });
+          data = res.data;
         } catch {
           data = {};
         }
@@ -104,6 +106,9 @@ export const AuthProvider = ({ children }) => {
         setToken(data.token);
         localStorage.setItem("token", data.token);
         localStorage.setItem("userType", normalized.role);
+
+        // 👉 Inyectar token a axios
+        axios.defaults.headers.common["Authorization"] = `Bearer ${data.token}`;
 
         return { success: true, role: normalized.role };
       } else {
@@ -122,23 +127,18 @@ export const AuthProvider = ({ children }) => {
   const register = async (name, lastName, userName, email, password) => {
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE_URL}/Client/register`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          Name: name,
-          LastName: lastName,
-          UserName: userName,
-          Email: email,
-          Password: password,
-        }),
+      const res = await axios.post(`${API_BASE_URL}/Client/register`, {
+        Name: name,
+        LastName: lastName,
+        UserName: userName,
+        Email: email,
+        Password: password,
       });
 
-      if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
+      if (res.status !== 200 && res.status !== 201) {
         return {
           success: false,
-          message: errData.message || "Error en el registro",
+          message: res.data?.message || "Error en el registro",
         };
       }
 
@@ -161,6 +161,10 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem("userType");
     setUser(null);
     setToken(null);
+
+    // 👉 limpiar headers
+    delete axios.defaults.headers.common["Authorization"];
+
     navigate("/");
   };
 
