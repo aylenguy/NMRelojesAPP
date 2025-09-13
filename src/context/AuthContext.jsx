@@ -98,7 +98,7 @@ export const AuthProvider = ({ children }) => {
       // 👉 Si no hubo token, probar cliente
       if (!data.token) {
         try {
-          res = await axios.post(`${API_BASE_URL}/Client/login`, {
+          res = await axios.post(`${API_BASE_URL}/Authenticate/authenticate`, {
             email,
             password,
           });
