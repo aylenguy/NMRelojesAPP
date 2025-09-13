@@ -6,7 +6,7 @@ const CartContext = createContext();
 export const useCart = () => useContext(CartContext);
 
 // API base (usando variable de entorno)
-const API_URL = `${import.meta.env.VITE_API_URL}/cart`;
+const API_URL = `${import.meta.env.VITE_API_URL}/Cart`;
 
 // Guest ID local (para carrito sin login)
 const getGuestId = () => {

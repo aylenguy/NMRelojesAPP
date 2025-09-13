@@ -36,8 +36,7 @@ const CartSidebar = () => {
   // Helpers para obtener datos de productos
   const getItemImagen = (item) => {
     if (!item) return `${BASE_URL}/uploads/placeholder.png`;
-    const img =
-      item.image || item.Image || item.imageUrl || item.imagen || item.Imagen;
+    const img = item.imageUrl || item.ImageUrl; // ✅ usar el nombre del DTO
     if (!img) return `${BASE_URL}/uploads/placeholder.png`;
     return img.startsWith("http") ? img : `${BASE_URL}/uploads/${img}`;
   };
