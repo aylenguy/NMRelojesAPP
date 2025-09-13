@@ -77,8 +77,8 @@ export const AuthProvider = ({ children }) => {
       // 👉 primero admin
       try {
         res = await axios.post(`${API_BASE_URL}/Auth/admin-login`, {
-          email,
-          password,
+          Email: email,
+          Password: password,
         });
         data = res.data;
       } catch {
@@ -89,8 +89,8 @@ export const AuthProvider = ({ children }) => {
       if (!data.token) {
         try {
           res = await axios.post(`${API_BASE_URL}/Client/login`, {
-            email,
-            password,
+            Email: email,
+            Password: password,
           });
           data = res.data;
         } catch {
