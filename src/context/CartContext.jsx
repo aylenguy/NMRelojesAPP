@@ -69,16 +69,31 @@ export const CartProvider = ({ children }) => {
   };
 
   // Agregar producto
+  // Agregar producto (guest o user)
   const addToCart = async (productId, quantity = 1) => {
     try {
       const url = token
         ? `${API_URL}/add`
         : `${API_URL}/guest/add?guestId=${getGuestId()}`;
-      await axios.post(url, { productId, quantity }, { headers: getHeaders() });
+      const res = await axios.post(
+        url,
+        { productId, quantity },
+        { headers: getHeaders() }
+      );
 
-      const updatedCart = await fetchCart();
+      let data = res.data;
 
-      // 👇 Abrir sidebar automáticamente al agregar
+      // ⚠️ Si es invitado, tu API devuelve { guestId, cart }
+      if (!token && data.cart) {
+        data = data.cart;
+      }
+
+      // Refrescar carrito
+      const updatedCart = {
+        items: data.items || [],
+        total: data.total || 0,
+      };
+      setCart(updatedCart);
       setCartSidebarOpen(true);
 
       return updatedCart;
