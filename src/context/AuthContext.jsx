@@ -74,31 +74,49 @@ export const AuthProvider = ({ children }) => {
       let data = {};
       let res;
 
-      // 👉 primero admin
+      console.log("🔎 Intentando login...");
+      console.log("API_BASE_URL:", API_BASE_URL);
+      console.log("Credenciales enviadas:", { email, password });
+
+      // 👉 Intentar login como admin
       try {
         res = await axios.post(`${API_BASE_URL}/Auth/admin-login`, {
-          Email: email,
-          Password: password,
+          email,
+          password,
         });
+        console.log("✅ Respuesta admin-login:", res.data);
         data = res.data;
-      } catch {
+      } catch (err) {
+        console.warn(
+          "❌ Error admin-login:",
+          err.response?.status,
+          err.response?.data
+        );
         data = {};
       }
 
-      // 👉 si admin falló, probamos cliente
+      // 👉 Si no hubo token, probar cliente
       if (!data.token) {
         try {
           res = await axios.post(`${API_BASE_URL}/Client/login`, {
-            Email: email,
-            Password: password,
+            email,
+            password,
           });
+          console.log("✅ Respuesta client-login:", res.data);
           data = res.data;
-        } catch {
+        } catch (err) {
+          console.warn(
+            "❌ Error client-login:",
+            err.response?.status,
+            err.response?.data
+          );
           data = {};
         }
       }
 
+      // 👉 Si se obtuvo token
       if (data.token) {
+        console.log("🎉 Login exitoso, token recibido");
         const decoded = jwtDecode(data.token);
         const normalized = normalizeDecoded(decoded, data.userType);
 
@@ -107,22 +125,21 @@ export const AuthProvider = ({ children }) => {
         localStorage.setItem("token", data.token);
         localStorage.setItem("userType", normalized.role);
 
-        // 👉 Inyectar token a axios
         axios.defaults.headers.common["Authorization"] = `Bearer ${data.token}`;
 
         return { success: true, role: normalized.role };
       } else {
+        console.warn("⚠️ No se recibió token en la respuesta");
         return {
           success: false,
           error: data.error || data.Error || "login_failed",
         };
       }
     } catch (err) {
-      console.error("Error login:", err);
+      console.error("💥 Error inesperado en login:", err);
       return { success: false, error: "server_error" };
     }
   };
-
   // 🔹 Registro cliente
   const register = async (name, lastName, userName, email, password) => {
     setLoading(true);
