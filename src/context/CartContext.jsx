@@ -19,15 +19,14 @@ const getGuestId = () => {
 };
 
 export const CartProvider = ({ children }) => {
-  // 👇 Inicializamos como objeto con items + total
+  // Estado del carrito
   const [cart, setCart] = useState(null);
-
-  const [cartSidebarOpen, setCartSidebarOpen] = useState(false); // ✅ Estado sidebar
+  const [cartSidebarOpen, setCartSidebarOpen] = useState(false);
   const [token, setToken] = useState(localStorage.getItem("token"));
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Obtener headers
+  // Headers con token si existe
   const getHeaders = () => (token ? { Authorization: `Bearer ${token}` } : {});
 
   // Ajuste para HTTPS en imágenes
@@ -36,21 +35,19 @@ export const CartProvider = ({ children }) => {
     return url.startsWith("http://") ? url.replace("http://", "https://") : url;
   };
 
-  // Cargar carrito
+  // 🔹 Cargar carrito
   const fetchCart = async () => {
     setLoading(true);
     setError(null);
     try {
-      const url = token
-        ? `${API_URL}`
-        : `${API_URL}/guest?guestId=${getGuestId()}`;
+      const url = token ? `${API_URL}` : `${API_URL}/guest`;
 
-      const res = await axios.get(url, { headers: getHeaders() });
+      const res = token
+        ? await axios.get(url, { headers: getHeaders() })
+        : await axios.post(url, { guestId: getGuestId() });
 
-      // 👇 Tu backend devuelve { items, total }
       const { items = [], total = 0 } = res.data;
 
-      // Opcional: convertir todas las URLs de imagen a HTTPS
       const cartWithHttpsImages = items.map((item) => ({
         ...item,
         image: item.image ? fixImageUrl(item.image) : null,
@@ -62,40 +59,27 @@ export const CartProvider = ({ children }) => {
     } catch (err) {
       console.error("Error al obtener carrito:", err);
       setError(err.response?.data?.message || "No se pudo cargar el carrito");
-      setCart({ items: [], total: 0 }); // reset al fallar
+      setCart({ items: [], total: 0 });
     } finally {
       setLoading(false);
     }
   };
 
-  // Agregar producto
-  // Agregar producto (guest o user)
+  // 🔹 Agregar producto
   const addToCart = async (productId, quantity = 1) => {
     try {
-      const url = token
-        ? `${API_URL}/add`
-        : `${API_URL}/guest/add?guestId=${getGuestId()}`;
-      const res = await axios.post(
+      const url = token ? `${API_URL}/add` : `${API_URL}/guest/add`;
+
+      await axios.post(
         url,
-        { productId, quantity },
+        token
+          ? { productId, quantity }
+          : { guestId: getGuestId(), productId, quantity },
         { headers: getHeaders() }
       );
 
-      let data = res.data;
-
-      // ⚠️ Si es invitado, tu API devuelve { guestId, cart }
-      if (!token && data.cart) {
-        data = data.cart;
-      }
-
-      // Refrescar carrito
-      const updatedCart = {
-        items: data.items || [],
-        total: data.total || 0,
-      };
-      setCart(updatedCart);
-      setCartSidebarOpen(true);
-
+      const updatedCart = await fetchCart();
+      setCartSidebarOpen(true); // abrir sidebar
       return updatedCart;
     } catch (err) {
       console.error("Error al agregar producto:", err);
@@ -103,14 +87,19 @@ export const CartProvider = ({ children }) => {
     }
   };
 
-  // Eliminar producto
-  const removeFromCart = async (productId) => {
+  // 🔹 Eliminar producto
+  const removeFromCart = async (cartItemId) => {
     try {
       const url = token
-        ? `${API_URL}/item/${productId}`
-        : `${API_URL}/guest/item/${productId}?guestId=${getGuestId()}`;
+        ? `${API_URL}/item/${cartItemId}`
+        : `${API_URL}/guest/item/${cartItemId}`;
 
-      await axios.delete(url, { headers: getHeaders() });
+      if (token) {
+        await axios.delete(url, { headers: getHeaders() });
+      } else {
+        await axios.post(url, { guestId: getGuestId() });
+      }
+
       return await fetchCart();
     } catch (err) {
       console.error("Error al eliminar producto:", err);
@@ -120,13 +109,13 @@ export const CartProvider = ({ children }) => {
     }
   };
 
-  // Vaciar carrito
+  // 🔹 Vaciar carrito
   const clearCart = async () => {
     try {
       if (token) {
-        await axios.delete(`${API_URL}/clear`, { headers: getHeaders() });
+        await axios.post(`${API_URL}/clear`, {}, { headers: getHeaders() });
       } else {
-        await axios.post(`${API_URL}/guest/clear?guestId=${getGuestId()}`);
+        await axios.post(`${API_URL}/guest/clear`, { guestId: getGuestId() });
       }
       return await fetchCart();
     } catch (err) {
@@ -153,8 +142,8 @@ export const CartProvider = ({ children }) => {
     <CartContext.Provider
       value={{
         cart,
-        cartSidebarOpen, // ✅ Expuesto para Navbar/CartSidebar
-        setCartSidebarOpen, // ✅ Expuesto para Navbar/CartSidebar
+        cartSidebarOpen,
+        setCartSidebarOpen,
         loading,
         error,
         fetchCart,
