@@ -76,14 +76,13 @@ export const AuthProvider = ({ children }) => {
 
       console.log("🔎 Intentando login...");
       console.log("API_BASE_URL:", API_BASE_URL);
-      console.log("Credenciales enviadas:", { email, password });
 
       // 👉 Intentar login como admin
       try {
-        res = await axios.post(`${API_BASE_URL}/Auth/admin-login`, {
-          email,
-          password,
-        });
+        const adminBody = { username: email, password }; // ⚡ usar username
+        console.log("📤 Body admin-login:", adminBody);
+
+        res = await axios.post(`${API_BASE_URL}/Auth/admin-login`, adminBody);
         console.log("✅ Respuesta admin-login:", res.data);
         data = res.data;
       } catch (err) {
@@ -98,10 +97,13 @@ export const AuthProvider = ({ children }) => {
       // 👉 Si no hubo token, probar cliente
       if (!data.token) {
         try {
-          res = await axios.post(`${API_BASE_URL}/Authenticate/authenticate`, {
-            email,
-            password,
-          });
+          const clientBody = { email, password };
+          console.log("📤 Body client-login:", clientBody);
+
+          res = await axios.post(
+            `${API_BASE_URL}/Authenticate/authenticate`,
+            clientBody
+          );
           console.log("✅ Respuesta client-login:", res.data);
           data = res.data;
         } catch (err) {
@@ -140,6 +142,7 @@ export const AuthProvider = ({ children }) => {
       return { success: false, error: "server_error" };
     }
   };
+
   // 🔹 Registro cliente
   const register = async (name, lastName, userName, email, password) => {
     setLoading(true);
