@@ -67,18 +67,23 @@ export const CartProvider = ({ children }) => {
   // 🔹 Agregar producto
   const addToCart = async (productId, quantity = 1) => {
     try {
-      const url = token ? `${API_URL}/add` : `${API_URL}/guest/add`;
-
-      await axios.post(
-        url,
-        token
-          ? { productId, quantity }
-          : { guestId: getGuestId(), productId, quantity },
-        { headers: getHeaders() }
-      );
+      if (token) {
+        // Usuario logueado
+        await axios.post(
+          `${API_URL}/add`,
+          { productId, quantity },
+          { headers: getHeaders() }
+        );
+      } else {
+        // Invitado
+        await axios.post(`${API_URL}/guest/add?guestId=${getGuestId()}`, {
+          productId,
+          quantity,
+        });
+      }
 
       const updatedCart = await fetchCart();
-      setCartSidebarOpen(true); // abrir sidebar
+      setCartSidebarOpen(true); // abrir sidebar automáticamente
       return updatedCart;
     } catch (err) {
       console.error("Error al agregar producto:", err);
