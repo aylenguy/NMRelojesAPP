@@ -1,7 +1,7 @@
 // src/context/CartContext.jsx
 import { createContext, useContext, useEffect, useState } from "react";
 import axios from "axios";
-import { useAuth } from "./AuthContext"; // 👈 usamos directamente el AuthContext
+import { useAuth } from "./AuthContext";
 
 const CartContext = createContext();
 export const useCart = () => useContext(CartContext);
@@ -9,18 +9,8 @@ export const useCart = () => useContext(CartContext);
 // API base
 const API_URL = `${import.meta.env.VITE_API_URL}/Cart`;
 
-// Guest ID local (para carrito sin login)
-const getGuestId = () => {
-  let guestId = localStorage.getItem("guestId");
-  if (!guestId) {
-    guestId = crypto.randomUUID();
-    localStorage.setItem("guestId", guestId);
-  }
-  return guestId;
-};
-
 export const CartProvider = ({ children }) => {
-  const { token } = useAuth(); // 👈 tomamos el token del AuthContext
+  const { token } = useAuth();
   const [cart, setCart] = useState(null);
   const [cartSidebarOpen, setCartSidebarOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -41,16 +31,11 @@ export const CartProvider = ({ children }) => {
     setError(null);
     try {
       console.log("📦 FetchCart → token:", token ? "sí" : "no");
-      console.log(
-        "📦 FetchCart → URL:",
-        token ? API_URL : `${API_URL}/guest?guestId=${getGuestId()}`
-      );
+      console.log("📦 FetchCart → URL:", token ? API_URL : `${API_URL}/guest`);
 
       const res = token
         ? await axios.get(API_URL, { headers: getHeaders() })
-        : await axios.get(`${API_URL}/guest`, {
-            params: { guestId: getGuestId() },
-          });
+        : await axios.get(`${API_URL}/guest`);
 
       console.log("📦 Respuesta carrito:", res.data);
 
@@ -84,14 +69,14 @@ export const CartProvider = ({ children }) => {
           { headers: getHeaders() }
         );
       } else {
-        await axios.post(`${API_URL}/guest/add?guestId=${getGuestId()}`, {
+        await axios.post(`${API_URL}/guest/add`, {
           productId,
           quantity,
         });
       }
 
       const updatedCart = await fetchCart();
-      setCartSidebarOpen(true); // abrir sidebar automáticamente
+      setCartSidebarOpen(true);
       return updatedCart;
     } catch (err) {
       console.error("❌ Error al agregar producto:", err);
@@ -108,9 +93,7 @@ export const CartProvider = ({ children }) => {
           headers: getHeaders(),
         });
       } else {
-        await axios.delete(
-          `${API_URL}/guest/item/${cartItemId}?guestId=${getGuestId()}`
-        );
+        await axios.delete(`${API_URL}/guest/item/${cartItemId}`);
       }
 
       return await fetchCart();
@@ -129,7 +112,7 @@ export const CartProvider = ({ children }) => {
       if (token) {
         await axios.post(`${API_URL}/clear`, {}, { headers: getHeaders() });
       } else {
-        await axios.post(`${API_URL}/guest/clear`, { guestId: getGuestId() });
+        await axios.post(`${API_URL}/guest/clear`);
       }
       return await fetchCart();
     } catch (err) {
@@ -141,7 +124,7 @@ export const CartProvider = ({ children }) => {
   // Cargar carrito al inicio o si cambia el token
   useEffect(() => {
     fetchCart();
-  }, [token]); // 👈 ahora escucha directamente al token de AuthContext
+  }, [token]);
 
   return (
     <CartContext.Provider
