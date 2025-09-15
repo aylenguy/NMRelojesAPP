@@ -94,14 +94,16 @@ export const CartProvider = ({ children }) => {
   // 🔹 Eliminar producto
   const removeFromCart = async (cartItemId) => {
     try {
-      const url = token
-        ? `${API_URL}/item/${cartItemId}`
-        : `${API_URL}/guest/item/${cartItemId}`;
-
       if (token) {
-        await axios.delete(url, { headers: getHeaders() });
+        // Usuario logueado
+        await axios.delete(`${API_URL}/item/${cartItemId}`, {
+          headers: getHeaders(),
+        });
       } else {
-        await axios.post(url, { guestId: getGuestId() });
+        // Invitado
+        await axios.delete(
+          `${API_URL}/guest/item/${cartItemId}?guestId=${getGuestId()}`
+        );
       }
 
       return await fetchCart();
