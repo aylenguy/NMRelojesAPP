@@ -1,6 +1,7 @@
 // src/context/CartContext.jsx
 import { createContext, useContext, useEffect, useState } from "react";
 import axios from "axios";
+import { useAuth } from "./AuthContext"; // 👈 usamos directamente el AuthContext
 
 const CartContext = createContext();
 export const useCart = () => useContext(CartContext);
@@ -19,9 +20,9 @@ const getGuestId = () => {
 };
 
 export const CartProvider = ({ children }) => {
+  const { token } = useAuth(); // 👈 tomamos el token del AuthContext
   const [cart, setCart] = useState(null);
   const [cartSidebarOpen, setCartSidebarOpen] = useState(false);
-  const [token, setToken] = useState(localStorage.getItem("token"));
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -39,11 +40,19 @@ export const CartProvider = ({ children }) => {
     setLoading(true);
     setError(null);
     try {
+      console.log("📦 FetchCart → token:", token ? "sí" : "no");
+      console.log(
+        "📦 FetchCart → URL:",
+        token ? API_URL : `${API_URL}/guest?guestId=${getGuestId()}`
+      );
+
       const res = token
         ? await axios.get(API_URL, { headers: getHeaders() })
         : await axios.get(`${API_URL}/guest`, {
             params: { guestId: getGuestId() },
           });
+
+      console.log("📦 Respuesta carrito:", res.data);
 
       const { items = [], total = 0 } = res.data;
 
@@ -56,7 +65,7 @@ export const CartProvider = ({ children }) => {
       setCart(updatedCart);
       return updatedCart;
     } catch (err) {
-      console.error("Error al obtener carrito:", err);
+      console.error("❌ Error al obtener carrito:", err);
       setError(err.response?.data?.message || "No se pudo cargar el carrito");
       setCart({ items: [], total: 0 });
     } finally {
@@ -67,15 +76,14 @@ export const CartProvider = ({ children }) => {
   // 🔹 Agregar producto
   const addToCart = async (productId, quantity = 1) => {
     try {
+      console.log("➕ addToCart →", { productId, quantity, token: !!token });
       if (token) {
-        // Usuario logueado
         await axios.post(
           `${API_URL}/add`,
           { productId, quantity },
           { headers: getHeaders() }
         );
       } else {
-        // Invitado
         await axios.post(`${API_URL}/guest/add?guestId=${getGuestId()}`, {
           productId,
           quantity,
@@ -86,7 +94,7 @@ export const CartProvider = ({ children }) => {
       setCartSidebarOpen(true); // abrir sidebar automáticamente
       return updatedCart;
     } catch (err) {
-      console.error("Error al agregar producto:", err);
+      console.error("❌ Error al agregar producto:", err);
       setError(err.response?.data?.message || "No se pudo agregar el producto");
     }
   };
@@ -94,13 +102,12 @@ export const CartProvider = ({ children }) => {
   // 🔹 Eliminar producto
   const removeFromCart = async (cartItemId) => {
     try {
+      console.log("🗑 removeFromCart →", { cartItemId, token: !!token });
       if (token) {
-        // Usuario logueado
         await axios.delete(`${API_URL}/item/${cartItemId}`, {
           headers: getHeaders(),
         });
       } else {
-        // Invitado
         await axios.delete(
           `${API_URL}/guest/item/${cartItemId}?guestId=${getGuestId()}`
         );
@@ -108,7 +115,7 @@ export const CartProvider = ({ children }) => {
 
       return await fetchCart();
     } catch (err) {
-      console.error("Error al eliminar producto:", err);
+      console.error("❌ Error al eliminar producto:", err);
       setError(
         err.response?.data?.message || "No se pudo eliminar el producto"
       );
@@ -118,6 +125,7 @@ export const CartProvider = ({ children }) => {
   // 🔹 Vaciar carrito
   const clearCart = async () => {
     try {
+      console.log("🧹 clearCart →", { token: !!token });
       if (token) {
         await axios.post(`${API_URL}/clear`, {}, { headers: getHeaders() });
       } else {
@@ -125,7 +133,7 @@ export const CartProvider = ({ children }) => {
       }
       return await fetchCart();
     } catch (err) {
-      console.error("Error al vaciar carrito:", err);
+      console.error("❌ Error al vaciar carrito:", err);
       setError(err.response?.data?.message || "No se pudo vaciar el carrito");
     }
   };
@@ -133,16 +141,7 @@ export const CartProvider = ({ children }) => {
   // Cargar carrito al inicio o si cambia el token
   useEffect(() => {
     fetchCart();
-  }, [token]);
-
-  // Escuchar cambios de token en localStorage
-  useEffect(() => {
-    const handleStorageChange = () => {
-      setToken(localStorage.getItem("token"));
-    };
-    window.addEventListener("storage", handleStorageChange);
-    return () => window.removeEventListener("storage", handleStorageChange);
-  }, []);
+  }, [token]); // 👈 ahora escucha directamente al token de AuthContext
 
   return (
     <CartContext.Provider
