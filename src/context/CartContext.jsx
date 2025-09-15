@@ -5,7 +5,7 @@ import axios from "axios";
 const CartContext = createContext();
 export const useCart = () => useContext(CartContext);
 
-// API base (usando variable de entorno)
+// API base
 const API_URL = `${import.meta.env.VITE_API_URL}/Cart`;
 
 // Guest ID local (para carrito sin login)
@@ -19,7 +19,6 @@ const getGuestId = () => {
 };
 
 export const CartProvider = ({ children }) => {
-  // Estado del carrito
   const [cart, setCart] = useState(null);
   const [cartSidebarOpen, setCartSidebarOpen] = useState(false);
   const [token, setToken] = useState(localStorage.getItem("token"));
@@ -29,7 +28,7 @@ export const CartProvider = ({ children }) => {
   // Headers con token si existe
   const getHeaders = () => (token ? { Authorization: `Bearer ${token}` } : {});
 
-  // Ajuste para HTTPS en imágenes
+  // Fix HTTPS en imágenes
   const fixImageUrl = (url) => {
     if (!url) return null;
     return url.startsWith("http://") ? url.replace("http://", "https://") : url;
@@ -40,11 +39,11 @@ export const CartProvider = ({ children }) => {
     setLoading(true);
     setError(null);
     try {
-      const url = token ? `${API_URL}` : `${API_URL}/guest`;
-
       const res = token
-        ? await axios.get(url, { headers: getHeaders() })
-        : await axios.post(url, { guestId: getGuestId() });
+        ? await axios.get(API_URL, { headers: getHeaders() })
+        : await axios.get(`${API_URL}/guest`, {
+            params: { guestId: getGuestId() },
+          });
 
       const { items = [], total = 0 } = res.data;
 
