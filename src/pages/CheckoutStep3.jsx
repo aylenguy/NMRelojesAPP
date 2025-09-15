@@ -5,6 +5,7 @@ import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 import { addVenta, createFromCart } from "../api/orders";
 import LogoImg from "../assets/LogoMP.png";
+import api from "../api/api";
 
 export default function CheckoutStep3() {
   const { cart, fetchCart, clearCart, loading: cartLoading } = useCart();
