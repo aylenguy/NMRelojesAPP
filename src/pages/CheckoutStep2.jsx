@@ -173,9 +173,9 @@ export default function CheckoutStep2() {
       JSON.stringify({
         ...savedCheckout,
         ...formData,
-        customerName: formData.name,
-        customerLastname: formData.lastname,
-        customerEmail: token ? formData.email || user?.email : formData.email,
+        name: formData.name,
+        lastname: formData.lastname,
+        email: token ? formData.email || user?.email : formData.email,
         shippingOption: selectedOption,
         couponDiscount,
       })
