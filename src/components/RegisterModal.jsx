@@ -80,7 +80,7 @@ const RegisterModal = ({ show, onClose, onSwitchToLogin }) => {
       {/* Modal principal */}
       {!showSuccessModal && (
         <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50">
-          <div className="w-[360px] max-w-[90vw] bg-white p-6 rounded-3xl shadow-2xl flex flex-col">
+          <div className="w-[360px] max-w-[90vw] bg-white p-6 rounded-3xl shadow-2xl">
             {/* Barra tipo “notch” */}
             <div className="w-12 h-1.5 bg-gray-300 rounded-full mx-auto mb-4"></div>
 
@@ -98,7 +98,7 @@ const RegisterModal = ({ show, onClose, onSwitchToLogin }) => {
             </div>
 
             {/* Formulario */}
-            <form onSubmit={handleSubmit} className="space-y-3 flex-1">
+            <form onSubmit={handleSubmit} className="space-y-3">
               {/* Nombre */}
               <div>
                 <input
