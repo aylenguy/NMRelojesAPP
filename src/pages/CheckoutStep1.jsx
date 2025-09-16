@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import CheckoutProgress from "../components/CheckoutProgress";
 import { useAuth } from "../context/AuthContext";
@@ -7,7 +7,7 @@ import { useCart } from "../context/CartContext";
 const API_URL = import.meta.env.VITE_API_URL; // ✅ variable de entorno
 
 export default function CheckoutStep1() {
-  const { cart, fetchCart, loading: cartLoading } = useCart();
+  const { cart, loading: cartLoading } = useCart();
   const { user, token } = useAuth();
   const [errors, setErrors] = useState({});
   const [couponCode, setCouponCode] = useState("");
@@ -17,10 +17,6 @@ export default function CheckoutStep1() {
 
   const savedCheckout = JSON.parse(localStorage.getItem("checkoutData")) || {};
   const savedShipping = JSON.parse(localStorage.getItem("shippingData")) || {};
-  const guestCart = JSON.parse(localStorage.getItem("guestCart")) || {
-    items: [],
-    total: 0,
-  };
 
   const [email, setEmail] = useState(user?.email || savedCheckout.email || "");
   const [postalCode, setPostalCode] = useState(
@@ -28,13 +24,9 @@ export default function CheckoutStep1() {
   );
   const [shippingOption] = useState(savedShipping.shippingOption || null);
 
-  const currentCart = token ? cart : guestCart;
+  const currentCart = cart;
   const subtotal = currentCart?.total || 0;
   const total = subtotal - couponDiscount;
-
-  useEffect(() => {
-    if (token) fetchCart();
-  }, [token, fetchCart]);
 
   const handleNext = () => {
     if (cartLoading) return;
@@ -60,7 +52,6 @@ export default function CheckoutStep1() {
     }
 
     setErrors({});
-    if (!token) localStorage.setItem("guestCart", JSON.stringify(currentCart));
 
     const checkoutPayload = {
       email: token ? user.email : email,
@@ -115,7 +106,7 @@ export default function CheckoutStep1() {
     return brand ? `${brand} ${name}` : name;
   };
 
-  if (token && cartLoading) {
+  if (cartLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <p className="text-gray-500 text-lg">Cargando carrito...</p>
@@ -169,7 +160,6 @@ export default function CheckoutStep1() {
               pattern="[0-9]*"
               value={postalCode}
               onChange={(e) => {
-                // Solo permitir números
                 const value = e.target.value.replace(/\D/g, "");
                 setPostalCode(value);
                 setErrors((prev) => ({ ...prev, postalCode: null }));
@@ -235,7 +225,7 @@ export default function CheckoutStep1() {
               >
                 <div className="flex items-center gap-4">
                   <img
-                    src={item.image || item.imageUrl || "/placeholder.jpg"}
+                    src={item.imageUrl || "/placeholder.jpg"}
                     alt={item.productName || item.name}
                     className="w-16 h-16 object-cover rounded-lg border"
                   />
@@ -244,7 +234,7 @@ export default function CheckoutStep1() {
                       {getItemFullName(item)}
                     </p>
                     <p className="text-sm text-gray-500">
-                      {item.quantity || item.cantidad} unidad
+                      {item.quantity} unidad
                     </p>
                   </div>
                 </div>

@@ -19,7 +19,7 @@ const getGuestId = () => {
 };
 
 export const CartProvider = ({ children }) => {
-  const [cart, setCart] = useState(null);
+  const [cart, setCart] = useState({ items: [], total: 0 });
   const [cartSidebarOpen, setCartSidebarOpen] = useState(false);
   const [token, setToken] = useState(localStorage.getItem("token"));
   const [loading, setLoading] = useState(false);
@@ -40,16 +40,17 @@ export const CartProvider = ({ children }) => {
     setError(null);
     try {
       const res = token
-        ? await axios.get(API_URL, { headers: getHeaders() })
+        ? await axios.get(API_URL, { headers: getHeaders(), timeout: 10000 })
         : await axios.get(`${API_URL}/guest`, {
             params: { guestId: getGuestId() },
+            timeout: 10000,
           });
 
       const { items = [], total = 0 } = res.data;
 
       const cartWithHttpsImages = items.map((item) => ({
         ...item,
-        image: item.image ? fixImageUrl(item.image) : null,
+        imageUrl: item.imageUrl ? fixImageUrl(item.imageUrl) : null,
       }));
 
       const updatedCart = { items: cartWithHttpsImages, total };
@@ -95,17 +96,14 @@ export const CartProvider = ({ children }) => {
   const removeFromCart = async (cartItemId) => {
     try {
       if (token) {
-        // Usuario logueado
         await axios.delete(`${API_URL}/item/${cartItemId}`, {
           headers: getHeaders(),
         });
       } else {
-        // Invitado
         await axios.delete(
           `${API_URL}/guest/item/${cartItemId}?guestId=${getGuestId()}`
         );
       }
-
       return await fetchCart();
     } catch (err) {
       console.error("Error al eliminar producto:", err);
