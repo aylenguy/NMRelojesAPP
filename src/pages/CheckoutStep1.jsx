@@ -240,7 +240,7 @@ export default function CheckoutStep1() {
                   </div>
                 </div>
                 <span className="font-semibold text-sm sm:text-base text-gray-900">
-                  ${item.subtotal?.toLocaleString() || 0}
+                  ${item.subtotal?.toLocaleString("es-AR") || 0}
                 </span>
               </div>
             ))
@@ -295,7 +295,7 @@ export default function CheckoutStep1() {
 
           <div className="mt-4 sm:mt-6 flex justify-between font-bold text-lg sm:text-xl text-gray-900">
             <span>Total</span>
-            <span>${total.toLocaleString() || 0}</span>
+            <span>${total.toLocaleString("es-AR") || 0}</span>
           </div>
         </div>
       </div>

@@ -246,7 +246,7 @@ export default function CheckoutStep2() {
               e.preventDefault();
               handleContinue();
             }}
-            className="bg-white p-12 rounded-2xl shadow-sm border-2 border-gray-300 transition-all duration-300 hover:shadow-lg hover:bg-gray-50"
+            className="bg-white p-6 sm:p-8 md:p-12 rounded-2xl shadow-sm border-2 border-gray-300 transition-all duration-300 hover:shadow-lg hover:bg-gray-50"
           >
             <h2 className="text-2xl font-bold mb-3">Método de envío</h2>
             {/* Código postal */}
@@ -266,7 +266,7 @@ export default function CheckoutStep2() {
                 }}
                 placeholder="Ingrese su código postal"
                 data-error={!!errors.postalCode}
-                className={`w-full p-2 text-sm border rounded-xl focus:outline-none focus:ring-2 ${
+                className={`w-full p-2 sm:p-3 text-sm sm:text-base border rounded-xl focus:outline-none focus:ring-2 ${
                   errors.postalCode
                     ? "border-[#005f73] focus:ring-[#005f73]"
                     : "border-gray-300 focus:ring-black"
@@ -337,8 +337,8 @@ export default function CheckoutStep2() {
                       onChange={handleChange}
                       placeholder="Ingresa tu nombre"
                       data-error={!!errors.name}
-                      className={`w-full p-2 text-sm border rounded-xl focus:outline-none focus:ring-2 ${
-                        errors.name
+                      className={`w-full p-2 sm:p-3 text-sm sm:text-base border rounded-xl focus:outline-none focus:ring-2 ${
+                        errors.postalCode
                           ? "border-[#005f73] focus:ring-[#005f73]"
                           : "border-gray-300 focus:ring-black"
                       }`}
@@ -360,8 +360,8 @@ export default function CheckoutStep2() {
                       onChange={handleChange}
                       placeholder="Ingresa tu apellido"
                       data-error={!!errors.lastname}
-                      className={`w-full p-2 text-sm border rounded-xl focus:outline-none focus:ring-2 ${
-                        errors.lastname
+                      className={`w-full p-2 sm:p-3 text-sm sm:text-base border rounded-xl focus:outline-none focus:ring-2 ${
+                        errors.postalCode
                           ? "border-[#005f73] focus:ring-[#005f73]"
                           : "border-gray-300 focus:ring-black"
                       }`}
@@ -387,8 +387,8 @@ export default function CheckoutStep2() {
                       onChange={handleChange}
                       placeholder="Ingresa tu email"
                       data-error={!!errors.email}
-                      className={`w-full p-2 text-sm border rounded-xl focus:outline-none focus:ring-2 ${
-                        errors.email
+                      className={`w-full p-2 sm:p-3 text-sm sm:text-base border rounded-xl focus:outline-none focus:ring-2 ${
+                        errors.postalCode
                           ? "border-[#005f73] focus:ring-[#005f73]"
                           : "border-gray-300 focus:ring-black"
                       }`}
@@ -414,8 +414,8 @@ export default function CheckoutStep2() {
                       onChange={handleChange}
                       placeholder="Ej: 1122334455"
                       data-error={!!errors.phone}
-                      className={`w-full p-2 text-sm border rounded-xl focus:outline-none focus:ring-2 ${
-                        errors.phone
+                      className={`w-full p-2 sm:p-3 text-sm sm:text-base border rounded-xl focus:outline-none focus:ring-2 ${
+                        errors.postalCode
                           ? "border-[#005f73] focus:ring-[#005f73]"
                           : "border-gray-300 focus:ring-black"
                       }`}
@@ -437,8 +437,8 @@ export default function CheckoutStep2() {
                       onChange={handleChange}
                       placeholder="Ingresa tu DNI o CUIL"
                       data-error={!!errors.dni}
-                      className={`w-full p-2 text-sm border rounded-xl focus:outline-none focus:ring-2 ${
-                        errors.dni
+                      className={`w-full p-2 sm:p-3 text-sm sm:text-base border rounded-xl focus:outline-none focus:ring-2 ${
+                        errors.postalCode
                           ? "border-[#005f73] focus:ring-[#005f73]"
                           : "border-gray-300 focus:ring-black"
                       }`}
@@ -464,8 +464,8 @@ export default function CheckoutStep2() {
                     onChange={handleChange}
                     placeholder="Ingresa tu calle"
                     data-error={!!errors.street}
-                    className={`w-full p-2 text-sm border rounded-xl focus:outline-none focus:ring-2 ${
-                      errors.street
+                    className={`w-full p-2 sm:p-3 text-sm sm:text-base border rounded-xl focus:outline-none focus:ring-2 ${
+                      errors.postalCode
                         ? "border-[#005f73] focus:ring-[#005f73]"
                         : "border-gray-300 focus:ring-black"
                     }`}
@@ -489,8 +489,8 @@ export default function CheckoutStep2() {
                       onChange={handleChange}
                       placeholder="Número"
                       data-error={!!errors.number}
-                      className={`w-full p-2 text-sm border rounded-xl focus:outline-none focus:ring-2 ${
-                        errors.number
+                      className={`w-full p-2 sm:p-3 text-sm sm:text-base border rounded-xl focus:outline-none focus:ring-2 ${
+                        errors.postalCode
                           ? "border-[#005f73] focus:ring-[#005f73]"
                           : "border-gray-300 focus:ring-black"
                       }`}
@@ -541,8 +541,8 @@ export default function CheckoutStep2() {
                       onChange={handleChange}
                       placeholder="Ciudad"
                       data-error={!!errors.city}
-                      className={`w-full p-2 text-sm border rounded-xl focus:outline-none focus:ring-2 ${
-                        errors.city
+                      className={`w-full p-2 sm:p-3 text-sm sm:text-base border rounded-xl focus:outline-none focus:ring-2 ${
+                        errors.postalCode
                           ? "border-[#005f73] focus:ring-[#005f73]"
                           : "border-gray-300 focus:ring-black"
                       }`}
@@ -564,8 +564,8 @@ export default function CheckoutStep2() {
                       onChange={handleChange}
                       placeholder="Provincia"
                       data-error={!!errors.province}
-                      className={`w-full p-2 text-sm border rounded-xl focus:outline-none focus:ring-2 ${
-                        errors.province
+                      className={`w-full p-2 sm:p-3 text-sm sm:text-base border rounded-xl focus:outline-none focus:ring-2 ${
+                        errors.postalCode
                           ? "border-[#005f73] focus:ring-[#005f73]"
                           : "border-gray-300 focus:ring-black"
                       }`}
@@ -600,7 +600,7 @@ export default function CheckoutStep2() {
           </form>
 
           {/* DERECHA */}
-          <div className="bg-white p-8 rounded-2xl shadow-sm border-2 border-gray-300 transition-all duration-300 hover:shadow-lg hover:bg-gray-50 h-fit">
+          <div className="bg-white p-8 sm:p-10 md:p-12 rounded-2xl shadow-sm border-2 border-gray-300 transition-all duration-300 hover:shadow-lg hover:bg-gray-50 h-fit">
             <h2 className="text-xl font-bold mb-6">Resumen del pedido</h2>
             <div className="flex flex-col gap-2 max-h-60 overflow-y-auto">
               {currentCart?.items?.length > 0 ? (
