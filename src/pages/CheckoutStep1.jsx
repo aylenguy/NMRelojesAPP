@@ -136,7 +136,7 @@ export default function CheckoutStep1() {
                 setErrors((prev) => ({ ...prev, email: null }));
               }}
               placeholder="Ingresa tu email"
-              className={`w-full p-2 sm:p-3 text-sm sm:text-base border rounded-xl focus:outline-none focus:ring-2 ${
+              className={`w-full sm:w-full md:w-2/3 lg:w-1/2 px-3 py-1.5 sm:px-4 sm:py-1.5 text-sm sm:text-base border rounded-xl focus:outline-none focus:ring-2 transition ${
                 errors.email
                   ? "border-[#005f73] focus:ring-[#005f73]"
                   : "border-gray-300 focus:ring-black"
@@ -164,7 +164,7 @@ export default function CheckoutStep1() {
                 setErrors((prev) => ({ ...prev, postalCode: null }));
               }}
               placeholder="Ingrese su código postal"
-              className={`w-full p-2 sm:p-3 text-sm sm:text-base border rounded-xl focus:outline-none focus:ring-2 ${
+              className={`w-full sm:w-full md:w-2/3 lg:w-1/2 px-3 py-1.5 sm:px-4 sm:py-1.5 text-sm sm:text-base border rounded-xl focus:outline-none focus:ring-2 transition ${
                 errors.postalCode
                   ? "border-[#005f73] focus:ring-[#005f73]"
                   : "border-gray-300 focus:ring-black"
@@ -205,7 +205,7 @@ export default function CheckoutStep1() {
             <button
               onClick={handleNext}
               disabled={cartLoading}
-              className="py-2 px-6 sm:px-9 bg-black text-white rounded-2xl hover:bg-gray-800 shadow transition-all text-sm sm:text-base"
+              className="py-2 px-7 md:px-9 bg-black text-white rounded-2xl hover:bg-gray-800 shadow transition-all text-sm md:text-base"
             >
               Continuar con el envío
             </button>
@@ -264,7 +264,7 @@ export default function CheckoutStep1() {
                   setCouponError("");
                 }}
                 placeholder="Ingresa tu cupón"
-                className={`w-full sm:w-full md:w-2/3 lg:w-1/2 px-3 py-2 sm:px-4 sm:py-2 text-sm sm:text-base border rounded-xl focus:outline-none focus:ring-2 transition ${
+                className={`w-full sm:w-full md:w-2/3 lg:w-1/2 px-3 py-1.5 sm:px-4 sm:py-1.5 text-sm sm:text-base border rounded-xl focus:outline-none focus:ring-2 transition ${
                   couponError
                     ? "border-[#005f73] focus:ring-[#005f73]"
                     : "border-gray-300 focus:ring-black"
@@ -273,7 +273,7 @@ export default function CheckoutStep1() {
               <button
                 type="button"
                 onClick={applyCoupon}
-                className="w-full sm:w-auto py-2 px-5 sm:px-7 bg-black text-white rounded-2xl hover:bg-gray-800 shadow transition-all text-sm sm:text-base"
+                className="w-full sm:w-auto py-2 px-7 md:px-9 bg-black text-white rounded-2xl hover:bg-gray-800 shadow transition-all text-sm md:text-base"
               >
                 Aplicar
               </button>
