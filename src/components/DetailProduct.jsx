@@ -267,51 +267,45 @@ const DetailProduct = () => {
           )}
 
           {/* Cantidad + Botón */}
-          <div className="flex flex-col gap-3 mb-6">
-            {stock > 0 ? (
-              <>
+          {stock > 0 ? (
+            <div className="flex flex-col gap-3 mb-6">
+              <div className="flex flex-col sm:flex-row items-center gap-3">
                 {/* Selector de cantidad */}
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center border rounded-md overflow-hidden">
-                    <button
-                      onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                      className="px-3 py-1 bg-gray-200 hover:bg-gray-300 text-sm sm:text-base"
-                    >
-                      -
-                    </button>
-                    <span className="px-5 text-base sm:text-lg">
-                      {quantity}
-                    </span>
-                    <button
-                      onClick={() => setQuantity((q) => q + 1)}
-                      className="px-3 py-1 bg-gray-200 hover:bg-gray-300 text-sm sm:text-base"
-                    >
-                      +
-                    </button>
-                  </div>
+                <div className="flex items-center border rounded-md overflow-hidden w-32">
+                  <button
+                    onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                    className="px-3 py-1 bg-gray-200 hover:bg-gray-300 text-sm sm:text-base"
+                  >
+                    -
+                  </button>
+                  <span className="px-5 text-base sm:text-lg">{quantity}</span>
+                  <button
+                    onClick={() => setQuantity((q) => q + 1)}
+                    className="px-3 py-1 bg-gray-200 hover:bg-gray-300 text-sm sm:text-base"
+                  >
+                    +
+                  </button>
                 </div>
 
                 {/* Botón Agregar al carrito */}
                 <button
                   onClick={handleAddToCart}
-                  className="w-full py-2 px-6 bg-[#005f73] text-white rounded-2xl hover:bg-gray-800 shadow transition-all text-sm"
+                  className="flex-1 py-2 px-6 bg-[#005f73] text-white rounded-2xl hover:bg-gray-800 shadow transition-all text-sm"
                 >
                   Agregar al carrito
                 </button>
+              </div>
 
-                {/* Mensaje de error */}
-                {error && (
-                  <p className="text-red-600 font-medium text-sm mt-1">
-                    {error}
-                  </p>
-                )}
-              </>
-            ) : (
-              <button disabled className="text-red-500 font-medium">
-                SIN STOCK
-              </button>
-            )}
-          </div>
+              {/* Mensaje de error */}
+              {error && (
+                <p className="text-red-600 font-medium text-sm mt-1">{error}</p>
+              )}
+            </div>
+          ) : (
+            <button disabled className="text-red-500 font-medium">
+              SIN STOCK
+            </button>
+          )}
 
           {/* Envío */}
           <div className="border rounded-lg p-3 mb-4 text-sm sm:text-base">

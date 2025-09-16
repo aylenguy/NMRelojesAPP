@@ -276,7 +276,7 @@ const CartSidebar = () => {
                   />
                   <button
                     onClick={handleCalculateShipping}
-                    className="w-28 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-all text-sm font-medium"
+                    className="py-2 px-7 bg-black text-white rounded-2xl hover:bg-gray-800 shadow transition-all text-sm"
                   >
                     Calcular
                   </button>
@@ -341,7 +341,8 @@ const CartSidebar = () => {
                     }}
                     className="py-2 px-6 bg-[#005f73] text-white rounded-2xl hover:bg-gray-800 shadow transition-all text-sm"
                   >
-                    Ver más productos <span>→</span>
+                    <span>←</span>
+                    Ver más productos
                   </button>
                 </div>
               </div>
