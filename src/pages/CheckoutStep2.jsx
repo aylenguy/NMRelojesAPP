@@ -236,10 +236,11 @@ export default function CheckoutStep2() {
   const totalConDescuento = (currentCart?.total || 0) - couponDiscount;
 
   return (
-    <div className="min-h-screen py-8">
+    <div className="min-h-screen py-8 px-4 sm:px-6">
       <div className="py-4">
         <CheckoutProgress step={2} />
-        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-[2fr_1fr] gap-8">
+        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-[1fr_350px] gap-6 md:gap-10">
+          {" "}
           {/* IZQUIERDA */}
           <form
             onSubmit={(e) => {
@@ -598,9 +599,8 @@ export default function CheckoutStep2() {
               </button>
             </div>
           </form>
-
           {/* DERECHA */}
-          <div className="bg-white p-8 sm:p-10 md:p-12 rounded-2xl shadow-sm border-2 border-gray-300 transition-all duration-300 hover:shadow-lg hover:bg-gray-50 h-fit">
+          <div className="bg-white p-4 sm:p-6 md:p-8 rounded-2xl shadow-sm border-2 border-gray-300 transition-all duration-300 hover:shadow-lg hover:bg-gray-50 h-fit">
             <h2 className="text-xl font-bold mb-6">Resumen del pedido</h2>
             <div className="flex flex-col gap-2 max-h-60 overflow-y-auto">
               {currentCart?.items?.length > 0 ? (

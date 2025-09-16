@@ -223,11 +223,11 @@ export default function CheckoutStep3() {
   ];
 
   return (
-    <div className="min-h-screen py-8">
+    <div className="min-h-screen py-8 px-4 sm:px-6">
       <CheckoutProgress step={3} />
-      <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-[1fr_350px] gap-8">
+      <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-[1fr_350px] gap-6 md:gap-10">
         {/* IZQUIERDA */}
-        <div className="bg-white p-12 rounded-2xl shadow-sm border-2 border-gray-300 transition-all duration-300 hover:shadow-lg hover:bg-gray-50">
+        <div className="bg-white p-6 sm:p-8 md:p-12 rounded-2xl shadow-sm border-2 border-gray-300 transition-all duration-300 hover:shadow-lg hover:bg-gray-50">
           <h3 className="text-xl font-bold mb-4">Método de pago</h3>
           <div className="space-y-4">
             {paymentOptions.map((option) => (
@@ -276,7 +276,7 @@ export default function CheckoutStep3() {
         </div>
 
         {/* DERECHA */}
-        <div className="bg-white p-8 rounded-2xl shadow-sm border-2 border-gray-300 transition-all duration-300 hover:shadow-lg hover:bg-gray-50 h-fit">
+        <div className="bg-white p-4 sm:p-6 md:p-8 rounded-2xl shadow-sm border-2 border-gray-300 transition-all duration-300 hover:shadow-lg hover:bg-gray-50 h-fit">
           <h3 className="text-xl font-bold mb-4">Mi pedido</h3>
           {currentCart?.items?.length > 0 ? (
             currentCart.items.map((item) => (
