@@ -136,8 +136,8 @@ export default function CheckoutStep1() {
                 setErrors((prev) => ({ ...prev, email: null }));
               }}
               placeholder="Ingresa tu email"
-              className={`w-full sm:w-full md:w-2/3 lg:w-1/2 px-3 py-1.5 sm:px-4 sm:py-1.5 text-sm sm:text-base border rounded-xl focus:outline-none focus:ring-2 transition ${
-                errors.email
+              className={`w-full px-3 py-1.5 sm:px-4 sm:py-1 text-sm sm:text-base border rounded-xl focus:outline-none focus:ring-2 transition ${
+                errors.postalCode
                   ? "border-[#005f73] focus:ring-[#005f73]"
                   : "border-gray-300 focus:ring-black"
               }`}
@@ -164,7 +164,7 @@ export default function CheckoutStep1() {
                 setErrors((prev) => ({ ...prev, postalCode: null }));
               }}
               placeholder="Ingrese su código postal"
-              className={`w-full sm:w-full md:w-2/3 lg:w-1/2 px-3 py-1.5 sm:px-4 sm:py-1.5 text-sm sm:text-base border rounded-xl focus:outline-none focus:ring-2 transition ${
+              className={`w-full px-3 py-1.5 sm:px-4 sm:py-1 text-sm sm:text-base border rounded-xl focus:outline-none focus:ring-2 transition ${
                 errors.postalCode
                   ? "border-[#005f73] focus:ring-[#005f73]"
                   : "border-gray-300 focus:ring-black"
@@ -264,7 +264,7 @@ export default function CheckoutStep1() {
                   setCouponError("");
                 }}
                 placeholder="Ingresa tu cupón"
-                className={`w-full sm:w-full md:w-2/3 lg:w-1/2 px-3 py-1.5 sm:px-4 sm:py-1.5 text-sm sm:text-base border rounded-xl focus:outline-none focus:ring-2 transition ${
+                className={`w-full px-3 py-1.5 sm:px-4 sm:py-1 text-sm sm:text-base border rounded-xl focus:outline-none focus:ring-2 transition ${
                   couponError
                     ? "border-[#005f73] focus:ring-[#005f73]"
                     : "border-gray-300 focus:ring-black"
