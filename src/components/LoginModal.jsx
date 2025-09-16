@@ -88,13 +88,13 @@ const LoginModal = ({ show, onClose, onSwitchToRegister }) => {
 
       {/* Modal */}
       <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50">
-        <div className="w-[360px] max-w-[90vw] bg-white p-6 rounded-3xl shadow-2xl">
+        <div className="w-[360px] max-w-[90vw] bg-white p-4 sm:p-6 rounded-3xl shadow-2xl">
+          {" "}
           {/* Barra tipo “notch” */}
           <div className="w-12 h-1.5 bg-gray-300 rounded-full mx-auto mb-4"></div>
-
           {/* Header */}
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-bold text-gray-900 font-poppins">
+            <h2 className="text-lg sm:text-xl font-bold text-gray-900 font-poppins">
               Iniciar Sesión
             </h2>
             <button
@@ -104,7 +104,6 @@ const LoginModal = ({ show, onClose, onSwitchToRegister }) => {
               &times;
             </button>
           </div>
-
           {/* Formulario */}
           <form onSubmit={handleSubmit} className="space-y-3">
             <div>
@@ -170,7 +169,6 @@ const LoginModal = ({ show, onClose, onSwitchToRegister }) => {
               </p>
             )}
           </form>
-
           {/* Footer */}
           <div className="mt-4 text-center text-sm text-gray-600 space-y-1">
             <p>

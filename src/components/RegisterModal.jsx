@@ -80,13 +80,13 @@ const RegisterModal = ({ show, onClose, onSwitchToLogin }) => {
       {/* Modal principal */}
       {!showSuccessModal && (
         <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50">
-          <div className="w-[360px] max-w-[90vw] bg-white p-6 rounded-3xl shadow-2xl">
+          <div className="w-[360px] max-w-[90vw] bg-white p-4 sm:p-6 rounded-3xl shadow-2xl">
             {/* Barra tipo “notch” */}
             <div className="w-12 h-1.5 bg-gray-300 rounded-full mx-auto mb-4"></div>
 
             {/* Header */}
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold text-gray-900 font-poppins">
+              <h2 className="text-lg sm:text-xl font-bold text-gray-900 font-poppins">
                 Registrarse
               </h2>
               <button
@@ -224,8 +224,8 @@ const RegisterModal = ({ show, onClose, onSwitchToLogin }) => {
       {/* Modal de éxito */}
       {showSuccessModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="bg-white w-[360px] max-w-[90vw] p-6 rounded-3xl shadow-2xl text-center">
-            <h2 className="text-2xl font-bold mb-4">Crear cuenta</h2>
+          <div className="bg-white w-[360px] max-w-[90vw] p-4 sm:p-6 rounded-3xl shadow-2xl text-center">
+            <h2 className="text-xl sm:text-2xl font-bold mb-4">Crear cuenta</h2>
             <p className="mb-6">
               ¡Bienvenido a N&M Relojes! Tu registro fue exitoso.
             </p>
