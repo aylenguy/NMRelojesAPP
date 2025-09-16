@@ -288,10 +288,7 @@ const DetailProduct = () => {
                       +
                     </button>
                   </div>
-                  <button
-                    onClick={handleAddToCart}
-                    className="w-full sm:w-80 lg:w-[28rem] bg-[#005f73] text-white py-2 px-4 sm:px-6 rounded-md hover:bg-[#0a9396] transition text-base sm:text-lg"
-                  >
+                  <button className="py-2 px-7 bg-black text-white rounded-2xl hover:bg-gray-800 shadow transition-all text-sm w-full">
                     Agregar al carrito
                   </button>
                 </div>
