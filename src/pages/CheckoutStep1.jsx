@@ -255,7 +255,6 @@ export default function CheckoutStep1() {
             <label className="block text-sm sm:text-base font-semibold text-gray-800 mb-1 sm:mb-2">
               Cupón de descuento
             </label>
-
             <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3">
               <input
                 type="text"
@@ -265,7 +264,7 @@ export default function CheckoutStep1() {
                   setCouponError("");
                 }}
                 placeholder="Ingresa tu cupón"
-                className={`flex-1 px-3 py-2 sm:px-4 sm:py-2 text-sm sm:text-base border rounded-xl focus:outline-none focus:ring-2 transition ${
+                className={`w-full sm:w-full md:w-2/3 lg:w-1/2 px-3 py-2 sm:px-4 sm:py-2 text-sm sm:text-base border rounded-xl focus:outline-none focus:ring-2 transition ${
                   couponError
                     ? "border-[#005f73] focus:ring-[#005f73]"
                     : "border-gray-300 focus:ring-black"
@@ -274,7 +273,7 @@ export default function CheckoutStep1() {
               <button
                 type="button"
                 onClick={applyCoupon}
-                className="py-2 px-5 sm:px-7 bg-black text-white rounded-2xl hover:bg-gray-800 shadow transition-all text-sm sm:text-base"
+                className="w-full sm:w-auto py-2 px-5 sm:px-7 bg-black text-white rounded-2xl hover:bg-gray-800 shadow transition-all text-sm sm:text-base"
               >
                 Aplicar
               </button>
