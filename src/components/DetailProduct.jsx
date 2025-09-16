@@ -271,7 +271,7 @@ const DetailProduct = () => {
             <div className="flex flex-col gap-3 mb-6">
               <div className="flex flex-col sm:flex-row items-center gap-3">
                 {/* Selector de cantidad */}
-                <div className="flex items-center border rounded-md overflow-hidden w-32">
+                <div className="flex items-center border rounded-md overflow-hidden">
                   <button
                     onClick={() => setQuantity((q) => Math.max(1, q - 1))}
                     className="px-3 py-1 bg-gray-200 hover:bg-gray-300 text-sm sm:text-base"
