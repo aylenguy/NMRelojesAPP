@@ -68,15 +68,14 @@ const CartSidebar = () => {
   const handleDecrease = (item) => {
     const cantidad = getItemCantidad(item);
     if (cantidad > 1) {
-      console.log("Disminuir cantidad de", item.id);
+      addToCart(item.id, -1); // decrementar 1
     } else {
       removeFromCart(item.id);
     }
   };
 
   const handleIncrease = (item) => {
-    const cantidad = getItemCantidad(item);
-    console.log("Aumentar cantidad de", item.id, "a", cantidad + 1);
+    addToCart(item.id, 1); // aumentar 1
   };
 
   // Envío
@@ -341,8 +340,7 @@ const CartSidebar = () => {
                     }}
                     className="py-2 px-6 bg-[#005f73] text-white rounded-2xl hover:bg-gray-800 shadow transition-all text-sm"
                   >
-                    <span>←</span>
-                    Ver más productos
+                    <span className="mr-1">←</span> Ver más productos
                   </button>
                 </div>
               </div>
