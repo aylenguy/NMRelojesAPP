@@ -69,7 +69,7 @@ const Home = ({ onProductClick, searchText }) => {
         <h2 className="md:text-3xl font-bold text-center tracking-wide mb-6 font-poppins">
           Nuestros Productos
         </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {filteredProducts.map((product) => {
             const stock = product.stock ?? 0;
             const sinStock = stock <= 0;

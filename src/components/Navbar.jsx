@@ -7,6 +7,7 @@ import LogoImg from "../assets/Logo.jpeg";
 import RegisterModal from "./RegisterModal";
 import LoginModal from "./LoginModal";
 import CartSidebar from "./CartSidebar";
+import { FaSearch } from "react-icons/fa";
 
 const Navbar = ({ searchText, setSearchText }) => {
   const { user, isAuthenticated, logout } = useAuth();
@@ -18,6 +19,7 @@ const Navbar = ({ searchText, setSearchText }) => {
   const [showRegister, setShowRegister] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showSearch, setShowSearch] = useState(false); // ✅ nuevo estado
 
   const role = user?.role?.toLowerCase();
 
@@ -44,7 +46,8 @@ const Navbar = ({ searchText, setSearchText }) => {
   useEffect(() => {
     setShowLogin(false);
     setShowRegister(false);
-    setMobileMenuOpen(false); // cerrar menú al cambiar ruta
+    setMobileMenuOpen(false);
+    setShowSearch(false); // ✅ cerrar búsqueda al cambiar ruta
   }, [location.pathname]);
 
   useEffect(() => {
@@ -54,9 +57,16 @@ const Navbar = ({ searchText, setSearchText }) => {
         setShowRegister(false);
         setCartSidebarOpen(false);
         setMobileMenuOpen(false);
+        setShowSearch(false);
       }
     };
-    if (showLogin || showRegister || cartSidebarOpen || mobileMenuOpen) {
+    if (
+      showLogin ||
+      showRegister ||
+      cartSidebarOpen ||
+      mobileMenuOpen ||
+      showSearch
+    ) {
       window.addEventListener("keydown", onEsc);
     }
     return () => window.removeEventListener("keydown", onEsc);
@@ -65,6 +75,7 @@ const Navbar = ({ searchText, setSearchText }) => {
     showRegister,
     cartSidebarOpen,
     mobileMenuOpen,
+    showSearch,
     setCartSidebarOpen,
   ]);
 
@@ -131,7 +142,7 @@ const Navbar = ({ searchText, setSearchText }) => {
           />
         </div>
 
-        {/* Usuario / Carrito / Hamburguesa */}
+        {/* Usuario / Carrito / Íconos mobile */}
         <div className="flex items-center gap-4">
           {isAuthenticated ? (
             <>
@@ -139,7 +150,6 @@ const Navbar = ({ searchText, setSearchText }) => {
                 {user?.name} {user?.lastName}
               </span>
 
-              {/* Perfil */}
               <Link
                 to="/profilepage"
                 className="flex items-center gap-2 text-gray-700 hover:text-black"
@@ -148,12 +158,10 @@ const Navbar = ({ searchText, setSearchText }) => {
                 <span className="hidden md:inline">Mi perfil</span>
               </Link>
 
-              {/* Carrito */}
               {role === "client" && (
                 <button
                   onClick={() => setCartSidebarOpen(!cartSidebarOpen)}
                   className="relative flex items-center justify-center text-gray-700 hover:text-black"
-                  aria-label="Abrir carrito"
                 >
                   <FaShoppingCart className="text-xl" />
                   {cartCount > 0 && (
@@ -164,11 +172,9 @@ const Navbar = ({ searchText, setSearchText }) => {
                 </button>
               )}
 
-              {/* Logout */}
               <button
                 onClick={handleLogout}
                 className="text-red-600 hover:text-red-800"
-                aria-label="Cerrar sesión"
               >
                 <FaSignOutAlt className="text-xl" />
               </button>
@@ -178,7 +184,6 @@ const Navbar = ({ searchText, setSearchText }) => {
               <button
                 onClick={() => setShowLogin(true)}
                 className="flex items-center gap-2 text-gray-700 hover:text-gray-900"
-                aria-label="Iniciar sesión"
               >
                 <span className="hidden md:inline font-poppins">
                   Iniciar sesión
@@ -186,11 +191,9 @@ const Navbar = ({ searchText, setSearchText }) => {
                 <FaUser className="text-xl" />
               </button>
 
-              {/* Carrito visible si no está logueado */}
               <button
                 onClick={() => setCartSidebarOpen(true)}
                 className="relative flex items-center justify-center text-gray-700 hover:text-black"
-                aria-label="Abrir carrito"
               >
                 <FaShoppingCart className="text-xl" />
                 {cartCount > 0 && (
@@ -202,7 +205,16 @@ const Navbar = ({ searchText, setSearchText }) => {
             </>
           )}
 
-          {/* Botón hamburguesa solo en mobile */}
+          {/* Botón búsqueda mobile */}
+          {/* Botón de búsqueda (mobile) */}
+          <button
+            className="md:hidden text-xl text-gray-700"
+            onClick={() => setShowSearch(!showSearch)}
+          >
+            <FaSearch />
+          </button>
+
+          {/* Botón hamburguesa */}
           <button
             className="md:hidden text-2xl text-gray-700"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -211,6 +223,19 @@ const Navbar = ({ searchText, setSearchText }) => {
           </button>
         </div>
       </div>
+
+      {/* Input búsqueda en mobile */}
+      {showSearch && (
+        <div className="md:hidden px-4 py-2 bg-white border-t border-gray-200">
+          <input
+            type="text"
+            placeholder="¿Qué buscás?"
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
+            className="w-full px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black"
+          />
+        </div>
+      )}
 
       {/* Links de navegación (desktop) */}
       <div className="hidden md:block bg-gray-50 border-t border-gray-200">
@@ -226,16 +251,6 @@ const Navbar = ({ searchText, setSearchText }) => {
       {/* Menú móvil */}
       {mobileMenuOpen && (
         <div className="md:hidden bg-gray-50 border-t border-gray-200 px-4 py-3 space-y-4">
-          {/* Buscador en mobile */}
-          <input
-            type="text"
-            placeholder="¿Qué buscás?"
-            value={searchText}
-            onChange={(e) => setSearchText(e.target.value)}
-            className="w-full px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black"
-          />
-
-          {/* Links */}
           <div className="flex flex-col gap-3">
             {navLinks.map((link) => (
               <Link
