@@ -290,7 +290,7 @@ const DetailProduct = () => {
                   </div>
                   <button
                     onClick={handleAddToCart}
-                    className="w-full sm:w-80 lg:w-96 bg-[#005f73] text-white py-2 px-4 sm:px-6 rounded-md hover:bg-[#0a9396] transition text-base sm:text-lg"
+                    className="w-full sm:w-80 lg:w-[28rem] bg-[#005f73] text-white py-2 px-4 sm:px-6 rounded-md hover:bg-[#0a9396] transition text-base sm:text-lg"
                   >
                     Agregar al carrito
                   </button>
@@ -321,11 +321,11 @@ const DetailProduct = () => {
                   setPostalCode(e.target.value);
                   setError("");
                 }}
-                className="border rounded-md px-3 py-2 flex-1 focus:outline-none focus:ring-1 focus:ring-black"
+                className={`w-full px-3 py-1.5 sm:px-4 sm:py-1.5 text-sm sm:text-base border rounded-xl focus:outline-none focus:ring-2 focus:ring-black transition`}
               />
               <button
                 onClick={handleCalculateShipping}
-                className="py-2 px-4 sm:px-6 bg-black text-white rounded-xl hover:bg-gray-800 shadow-sm transition-all"
+                className="py-2 px-7 bg-black text-white rounded-2xl hover:bg-gray-800 shadow transition-all text-sm"
               >
                 Calcular
               </button>
