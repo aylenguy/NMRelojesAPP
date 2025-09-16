@@ -13,8 +13,13 @@ const BASE_URL = API_URL.replace("/api", "").replace("http://", "https://");
 const CartSidebar = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { cart, removeFromCart, cartSidebarOpen, setCartSidebarOpen } =
-    useCart();
+  const {
+    cart,
+    removeFromCart,
+    cartSidebarOpen,
+    setCartSidebarOpen,
+    addToCart,
+  } = useCart();
 
   const [postalCode, setPostalCode] = useState("");
   const [error, setError] = useState("");
