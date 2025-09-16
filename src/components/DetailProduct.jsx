@@ -110,7 +110,6 @@ const DetailProduct = () => {
     const availableStock = product.stock ?? product.Stock ?? 0;
     const productId = product.id || product.Id;
 
-    // 🔹 Buscar si ya está en el carrito y sumar cantidades
     const existingItem = JSON.parse(localStorage.getItem("cart") || "[]").find(
       (item) => item.id === productId
     );
@@ -127,13 +126,12 @@ const DetailProduct = () => {
       return;
     }
 
-    // ✅ Si pasa la validación, agregar al carrito
     addToCart(productId, quantity);
     setShowNotification(true);
-    setError(""); // Limpiamos el error
+    setError("");
     setTimeout(() => setShowNotification(false), 2000);
   };
-  // Cálculo de envío real
+
   const handleCalculateShipping = async () => {
     if (!postalCode.match(/^\d{4}$/)) {
       setError("Ingresá un código postal válido (4 dígitos).");
@@ -146,7 +144,6 @@ const DetailProduct = () => {
     try {
       let res;
       try {
-        // 🔹 ahora usamos la variable de entorno
         res = await axios.post(
           `${API_BASE_URL}/shipping/calculate`,
           { postalCode },
@@ -191,41 +188,41 @@ const DetailProduct = () => {
   }
 
   return (
-    <div className="bg-white min-h-screen p-6 relative">
-      <div className="max-w-6xl mx-auto flex flex-col md:flex-row gap-12">
+    <div className="bg-white min-h-screen p-4 sm:p-6">
+      <div className="max-w-6xl mx-auto flex flex-col md:flex-row gap-6 md:gap-12">
         {/* Imagen */}
         <div className="w-full md:w-1/2 flex justify-center items-start">
           <img
             src={image}
             alt={name}
-            className="rounded-lg w-full max-w-2xl h-[650px] object-cover border border-gray-200 shadow"
+            className="rounded-lg w-full h-auto max-h-[650px] object-cover border border-gray-200 shadow"
           />
         </div>
 
         {/* Info */}
-        <div className="w-full md:w-1/2">
-          <h1 className="text-4xl font-poppins  font-bold text-gray-900 mb-6">
+        <div className="w-full md:w-1/2 flex flex-col">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4 sm:mb-6">
             {getTitulo(product)}
           </h1>
 
           {/* Precio */}
-          <div className="text-3xl font-bold text-[#006d77] mb-2">
+          <div className="text-2xl sm:text-3xl md:text-3xl font-bold text-[#006d77] mb-2">
             ${totalPrice.toLocaleString("es-AR")}
           </div>
 
-          {/* Stock disponible */}
+          {/* Stock */}
           {stock > 0 ? (
-            <p className=" font-medium mb-4">
+            <p className="font-medium mb-4 text-sm sm:text-base">
               Stock disponible: {stock} {stock === 1 ? "unidad" : "unidades"}
             </p>
           ) : (
-            <p className="text-red-600 font-medium mb-4">
+            <p className="text-red-600 font-medium mb-4 text-sm sm:text-base">
               Sin stock disponible
             </p>
           )}
 
           {/* Cuotas y descuentos */}
-          <div className="text-lg text-gray-600 mb-2 space-y-2">
+          <div className="text-sm sm:text-base md:text-base text-gray-600 mb-2 space-y-1">
             <p>
               <span className="text-[#005f73] font-semibold">
                 Hasta {installmentCount} cuotas sin interés
@@ -246,17 +243,17 @@ const DetailProduct = () => {
             </p>
           </div>
 
-          {/* Botón ver más detalles */}
+          {/* Ver más detalles */}
           <p
             onClick={() => setShowDetails(true)}
-            className="text-[#005f73] cursor-pointer underline hover:text-[#003f4a] mb-6"
+            className="text-[#005f73] cursor-pointer underline hover:text-[#003f4a] mb-4 sm:mb-6 text-sm sm:text-base"
           >
             Ver más detalles
           </p>
 
           {/* Color */}
           {color && (
-            <div className="flex items-center gap-3 mb-8">
+            <div className="flex items-center gap-3 mb-6 text-sm sm:text-base">
               <span className="font-semibold">Color:</span>
               <span className="text-gray-600">{color}</span>
             </div>
@@ -264,7 +261,7 @@ const DetailProduct = () => {
 
           {/* Descripción */}
           {description && (
-            <p className="text-lg text-gray-700 mb-8 leading-relaxed">
+            <p className="text-sm sm:text-base md:text-base text-gray-700 mb-6 leading-relaxed">
               {description}
             </p>
           )}
@@ -273,34 +270,36 @@ const DetailProduct = () => {
           <div className="flex flex-col gap-3 mb-6">
             {stock > 0 ? (
               <>
-                <div className="flex items-center gap-3">
-                  {/* Controles de cantidad */}
+                <div className="flex flex-col sm:flex-row items-center gap-3">
                   <div className="flex items-center border rounded-md overflow-hidden">
                     <button
                       onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                      className="px-3 py-1.5 bg-gray-200 hover:bg-gray-300 text-base"
+                      className="px-3 py-2 bg-gray-200 hover:bg-gray-300 text-base sm:text-lg"
                     >
                       -
                     </button>
-                    <span className="px-5 text-lg">{quantity}</span>
+                    <span className="px-5 text-base sm:text-lg">
+                      {quantity}
+                    </span>
                     <button
                       onClick={() => setQuantity((q) => q + 1)}
-                      className="px-3 py-1.5 bg-gray-200 hover:bg-gray-300 text-base"
+                      className="px-3 py-2 bg-gray-200 hover:bg-gray-300 text-base sm:text-lg"
                     >
                       +
                     </button>
                   </div>
-
                   <button
                     onClick={handleAddToCart}
-                    className="w-full bg-[#005f73] text-white py-2 rounded-md hover:bg-[#0a9396] transition text-base"
+                    className="w-full sm:w-auto bg-[#005f73] text-white py-2 px-4 sm:px-6 rounded-md hover:bg-[#0a9396] transition text-base sm:text-lg"
                   >
                     Agregar al carrito
                   </button>
                 </div>
 
                 {error && (
-                  <p className="text-red-600 font-medium text-sm">{error}</p>
+                  <p className="text-red-600 font-medium text-sm mt-1">
+                    {error}
+                  </p>
                 )}
               </>
             ) : (
@@ -311,11 +310,9 @@ const DetailProduct = () => {
           </div>
 
           {/* Envío */}
-          <div className="border rounded-lg p-3 mb-4">
-            <h3 className="font-medium mb-2 text-sm text-gray-800">
-              Calculá tu envío
-            </h3>
-            <div className="flex gap-2">
+          <div className="border rounded-lg p-3 mb-4 text-sm sm:text-base">
+            <h3 className="font-medium mb-2 text-gray-800">Calculá tu envío</h3>
+            <div className="flex gap-2 flex-col sm:flex-row">
               <input
                 type="text"
                 placeholder="Código postal"
@@ -324,29 +321,29 @@ const DetailProduct = () => {
                   setPostalCode(e.target.value);
                   setError("");
                 }}
-                className="border rounded-md px-3 py-1.5 flex-1 text-sm focus:outline-none focus:ring-1 focus:ring-black"
+                className="border rounded-md px-3 py-2 flex-1 focus:outline-none focus:ring-1 focus:ring-black"
               />
               <button
                 onClick={handleCalculateShipping}
-                className="py-1.5 px-6 bg-black text-white rounded-xl hover:bg-gray-800 shadow-sm transition-all text-sm"
+                className="py-2 px-4 sm:px-6 bg-black text-white rounded-xl hover:bg-gray-800 shadow-sm transition-all"
               >
                 Calcular
               </button>
             </div>
 
             {shippingOptions.length > 0 && (
-              <div className="mt-3 space-y-2">
+              <div className="mt-3 space-y-2 text-sm sm:text-base">
                 <p className="text-gray-700">
                   Opciones de envío para CP <b>{postalCode}</b>:
                 </p>
                 {shippingOptions.map((option, idx) => (
                   <div
                     key={idx}
-                    className="flex flex-col border rounded p-2 bg-gray-50 text-sm"
+                    className="flex flex-col border rounded p-2 bg-gray-50"
                   >
                     <span className="font-semibold">{option.name}</span>
                     <span className="text-gray-600">{option.description}</span>
-                    <span className="text-gray-900 font-bold">
+                    <span className="font-bold text-gray-900">
                       {option.cost === 0
                         ? "Gratis"
                         : `$${option.cost.toLocaleString("es-AR")}`}
@@ -360,13 +357,13 @@ const DetailProduct = () => {
       </div>
 
       {/* Productos relacionados */}
-      <div className="max-w-6xl mx-auto mt-16">
-        <h2 className="text-2xl font-poppins font-bold mb-6">
+      <div className="max-w-6xl mx-auto mt-12">
+        <h2 className="text-xl sm:text-2xl font-bold mb-4">
           También te puede interesar
         </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
           {relatedProducts
-            .filter((item) => (item.stock ?? item.Stock ?? 0) > 0) // 🔹 solo mostrar con stock
+            .filter((item) => (item.stock ?? item.Stock ?? 0) > 0)
             .map((item) => (
               <div
                 key={item.id || item.Id}
@@ -383,13 +380,13 @@ const DetailProduct = () => {
                     "/placeholder.png"
                   }
                   alt={item.name || item.Name || item.nombre}
-                  className="w-full h-48 object-cover"
+                  className="w-full h-40 sm:h-48 object-cover"
                 />
-                <div className="p-4">
-                  <h3 className="font-semibold text-lg mb-2">
-                    {getTitulo(item)} {/* 🔹 usar getTitulo */}
+                <div className="p-3 sm:p-4">
+                  <h3 className="font-semibold text-base sm:text-lg mb-1">
+                    {getTitulo(item)}
                   </h3>
-                  <p className="text-[#005f73] font-bold">
+                  <p className="text-[#005f73] font-bold text-base sm:text-lg">
                     $
                     {item.price?.toLocaleString("es-AR") ||
                       item.Price?.toLocaleString("es-AR") ||
@@ -403,7 +400,7 @@ const DetailProduct = () => {
 
       {/* Modal de detalles de pago */}
       {showDetails && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4">
           <div className="bg-white rounded-lg p-6 max-w-lg w-full relative">
             <button
               onClick={() => setShowDetails(false)}
@@ -411,7 +408,9 @@ const DetailProduct = () => {
             >
               ✖
             </button>
-            <h2 className="text-2xl font-bold mb-4">Medios de pago</h2>
+            <h2 className="text-xl sm:text-2xl font-bold mb-4">
+              Medios de pago
+            </h2>
             <p className="mb-2">
               <strong>Mercado Pago:</strong> Hasta {installmentCount} cuotas sin
               interés de ${installmentValue.toLocaleString("es-AR")}.
@@ -424,7 +423,7 @@ const DetailProduct = () => {
               <strong>Efectivo:</strong> $
               {discountPrice.toLocaleString("es-AR")} (20% de descuento)
             </p>
-            <p className="mt-4 text-sm text-gray-600">
+            <p className="mt-2 text-sm text-gray-600">
               Cuando termines la compra vas a ver la información de pago en
               relación a esta opción.
             </p>

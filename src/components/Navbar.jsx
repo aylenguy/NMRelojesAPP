@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { FaShoppingCart, FaUser, FaSignOutAlt } from "react-icons/fa";
+import { FaShoppingCart, FaUser, FaSignOutAlt, FaSearch } from "react-icons/fa";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
@@ -7,7 +7,6 @@ import LogoImg from "../assets/Logo.jpeg";
 import RegisterModal from "./RegisterModal";
 import LoginModal from "./LoginModal";
 import CartSidebar from "./CartSidebar";
-import { FaSearch } from "react-icons/fa";
 
 const Navbar = ({ searchText, setSearchText }) => {
   const { user, isAuthenticated, logout } = useAuth();
@@ -15,11 +14,12 @@ const Navbar = ({ searchText, setSearchText }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
+  const [showProductosSubmenu, setShowProductosSubmenu] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [showSearch, setShowSearch] = useState(false); // ✅ nuevo estado
+  const [showSearch, setShowSearch] = useState(false);
 
   const role = user?.role?.toLowerCase();
 
@@ -43,11 +43,13 @@ const Navbar = ({ searchText, setSearchText }) => {
     ];
   }, [role]);
 
+  const marcas = ["Rolex", "Casio", "Seiko", "Citizen", "Fossil"];
+
   useEffect(() => {
     setShowLogin(false);
     setShowRegister(false);
     setMobileMenuOpen(false);
-    setShowSearch(false); // ✅ cerrar búsqueda al cambiar ruta
+    setShowSearch(false);
   }, [location.pathname]);
 
   useEffect(() => {
@@ -102,7 +104,7 @@ const Navbar = ({ searchText, setSearchText }) => {
         </div>
       )}
 
-      {/* Barra superior promo animada */}
+      {/* Barra superior promo */}
       <div className="bg-yellow-100 text-gray-800 text-sm font-medium overflow-hidden relative h-6">
         <div className="absolute whitespace-nowrap flex animate-marquee">
           <span className="mr-8">
@@ -122,16 +124,24 @@ const Navbar = ({ searchText, setSearchText }) => {
 
       {/* Barra principal */}
       <div className="max-w-7xl mx-auto flex items-center justify-between px-4 py-3 md:px-6 md:py-4 gap-4">
-        {/* Logo */}
-        <Link to="/" className="flex-shrink-0">
-          <img
-            src={LogoImg}
-            alt="Logo"
-            className="h-16 md:h-24 cursor-pointer"
-          />
-        </Link>
+        {/* Logo + hamburguesa */}
+        <div className="flex items-center gap-2">
+          <Link to="/" className="flex-shrink-0">
+            <img
+              src={LogoImg}
+              alt="Logo"
+              className="h-16 md:h-24 cursor-pointer"
+            />
+          </Link>
+          <button
+            className="md:hidden text-2xl text-gray-700"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          >
+            ☰
+          </button>
+        </div>
 
-        {/* Buscador (solo desktop) */}
+        {/* Buscador desktop */}
         <div className="hidden md:flex flex-1 max-w-lg">
           <input
             type="text"
@@ -142,7 +152,7 @@ const Navbar = ({ searchText, setSearchText }) => {
           />
         </div>
 
-        {/* Usuario / Carrito / Íconos mobile */}
+        {/* Usuario / Carrito */}
         <div className="flex items-center gap-4">
           {isAuthenticated ? (
             <>
@@ -152,7 +162,7 @@ const Navbar = ({ searchText, setSearchText }) => {
 
               <Link
                 to="/profilepage"
-                className="flex items-center gap-2 text-gray-700 hover:text-black"
+                className="flex items-center gap-2 text-gray-700 hover:text-black hidden md:flex"
               >
                 <FaUser className="text-xl" />
                 <span className="hidden md:inline">Mi perfil</span>
@@ -181,14 +191,13 @@ const Navbar = ({ searchText, setSearchText }) => {
             </>
           ) : (
             <>
+              {/* 🔹 Mostrar iniciar sesión con icono solo en desktop */}
               <button
                 onClick={() => setShowLogin(true)}
-                className="flex items-center gap-2 text-gray-700 hover:text-gray-900"
+                className="hidden md:flex items-center gap-2 text-gray-700 hover:text-black"
               >
-                <span className="hidden md:inline font-poppins">
-                  Iniciar sesión
-                </span>
                 <FaUser className="text-xl" />
+                <span>Iniciar sesión</span>
               </button>
 
               <button
@@ -206,25 +215,16 @@ const Navbar = ({ searchText, setSearchText }) => {
           )}
 
           {/* Botón búsqueda mobile */}
-          {/* Botón de búsqueda (mobile) */}
           <button
             className="md:hidden text-xl text-gray-700"
             onClick={() => setShowSearch(!showSearch)}
           >
             <FaSearch />
           </button>
-
-          {/* Botón hamburguesa */}
-          <button
-            className="md:hidden text-2xl text-gray-700"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          >
-            ☰
-          </button>
         </div>
       </div>
 
-      {/* Input búsqueda en mobile */}
+      {/* Input búsqueda mobile */}
       {showSearch && (
         <div className="md:hidden px-4 py-2 bg-white border-t border-gray-200">
           <input
@@ -237,7 +237,7 @@ const Navbar = ({ searchText, setSearchText }) => {
         </div>
       )}
 
-      {/* Links de navegación (desktop) */}
+      {/* Links navegación desktop */}
       <div className="hidden md:block bg-gray-50 border-t border-gray-200">
         <div className="max-w-7xl mx-auto flex items-center gap-8 py-3 pl-12 text-gray-700 text-base font-poppins">
           {navLinks.map((link) => (
@@ -253,14 +253,80 @@ const Navbar = ({ searchText, setSearchText }) => {
         <div className="md:hidden bg-gray-50 border-t border-gray-200 px-4 py-3 space-y-4">
           <div className="flex flex-col gap-3">
             {navLinks.map((link) => (
-              <Link
-                key={link.to}
-                to={link.to}
-                className="text-gray-700 hover:text-black"
-              >
-                {link.label}
-              </Link>
+              <div key={link.to}>
+                <button
+                  className="w-full text-left text-gray-700 hover:text-black flex justify-between items-center"
+                  onClick={() => {
+                    if (link.label === "Productos") {
+                      setShowProductosSubmenu(!showProductosSubmenu);
+                    } else {
+                      setMobileMenuOpen(false);
+                      navigate(link.to);
+                    }
+                  }}
+                >
+                  {link.label}
+                  {link.label === "Productos" && (
+                    <span className="ml-2">
+                      {showProductosSubmenu ? "▲" : "▼"}
+                    </span>
+                  )}
+                </button>
+
+                {/* Submenú marcas */}
+                {link.label === "Productos" && showProductosSubmenu && (
+                  <div className="flex flex-col pl-4 mt-1 space-y-1">
+                    <Link
+                      to="/producto"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="block text-sm pl-4 py-2 rounded text-gray-700 hover:text-gray-900"
+                    >
+                      Ver todos los productos
+                    </Link>
+
+                    {marcas.map((marca) => {
+                      const linkTo = `/producto?marca=${encodeURIComponent(
+                        marca
+                      )}`;
+                      return (
+                        <Link
+                          key={marca}
+                          to={linkTo}
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="block text-sm pl-4 py-2 rounded text-gray-600 hover:text-gray-900"
+                        >
+                          {marca}
+                        </Link>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
             ))}
+
+            {/* Opciones login/registro en mobile */}
+            {!isAuthenticated && (
+              <div className="flex flex-col gap-1 mt-4 border-t pt-3 text-center">
+                <button
+                  onClick={() => {
+                    setShowLogin(true);
+                    setMobileMenuOpen(false);
+                  }}
+                  className="text-black text-sm hover:underline"
+                >
+                  Iniciar sesión
+                </button>
+                <button
+                  onClick={() => {
+                    setShowRegister(true);
+                    setMobileMenuOpen(false);
+                  }}
+                  className="text-black text-sm hover:underline"
+                >
+                  Registrarse
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -288,7 +354,7 @@ const Navbar = ({ searchText, setSearchText }) => {
         </>
       )}
 
-      {/* Sidebar */}
+      {/* Sidebar carrito */}
       <CartSidebar
         isOpen={cartSidebarOpen}
         onClose={() => setCartSidebarOpen(false)}
