@@ -205,7 +205,7 @@ export default function CheckoutStep1() {
             <button
               onClick={handleNext}
               disabled={cartLoading}
-              className="py-2 px-7 md:px-9 bg-black text-white rounded-2xl hover:bg-gray-800 shadow transition-all text-sm md:text-base"
+              className="py-2 px-7 bg-black text-white rounded-2xl hover:bg-gray-800 shadow transition-all text-sm"
             >
               Continuar con el envío
             </button>
@@ -273,7 +273,7 @@ export default function CheckoutStep1() {
               <button
                 type="button"
                 onClick={applyCoupon}
-                className="w-full sm:w-auto py-2 px-7 md:px-9 bg-black text-white rounded-2xl hover:bg-gray-800 shadow transition-all text-sm md:text-base"
+                className="py-2 px-7 bg-black text-white rounded-2xl hover:bg-gray-800 shadow transition-all text-sm"
               >
                 Aplicar
               </button>
