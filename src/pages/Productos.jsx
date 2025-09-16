@@ -143,15 +143,15 @@ const Productos = ({ searchText }) => {
   const marcasUnicas = [...new Set(productos.map(getMarca))];
 
   return (
-    <div className="min-h-screen p-8">
-      <h2 className="text-3xl font-bold mb-6 text-center text-gray-800 font-poppins">
+    <div className="min-h-screen p-4 sm:p-8">
+      <h2 className="text-2xl sm:text-3xl font-bold mb-6 text-center text-gray-800 font-poppins">
         Todos los Productos
       </h2>
 
       {/* Selector de orden */}
       <div className="flex justify-end mb-6">
         <select
-          className="p-2 border rounded-md shadow-sm"
+          className="p-2 border rounded-md shadow-sm text-sm sm:text-base"
           value={sortOption}
           onChange={(e) => setSortOption(e.target.value)}
         >
@@ -163,15 +163,15 @@ const Productos = ({ searchText }) => {
         </select>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[250px_1fr] gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-[250px_1fr] gap-6 lg:gap-8">
         {/* Sidebar filtros */}
-        <aside className="bg-white p-4 rounded-lg shadow-md border">
-          <h2 className="text-xl font-bold mb-6 text-center text-[#005f73] font-poppins">
+        <aside className="bg-white p-4 rounded-lg shadow-md border hidden lg:block">
+          <h2 className="text-lg sm:text-xl font-bold mb-6 text-center text-[#005f73] font-poppins">
             Filtrar por
           </h2>
 
           {/* Colores */}
-          <h3 className="text-lg font-poppin font-poppins mb-4 mt-6">Color</h3>
+          <h3 className="text-base sm:text-lg font-poppins mb-4 mt-6">Color</h3>
           <div className="flex flex-col gap-2">
             {coloresUnicos.map((color) => (
               <label
@@ -183,13 +183,15 @@ const Productos = ({ searchText }) => {
                   checked={coloresSeleccionados.includes(color)}
                   onChange={() => toggleColor(color)}
                 />
-                <span className="text-gray-700">{color}</span>
+                <span className="text-gray-700 text-sm sm:text-base">
+                  {color}
+                </span>
               </label>
             ))}
           </div>
 
           {/* Marcas */}
-          <h3 className="text-lg font-poppins mb-4 mt-6">Marca</h3>
+          <h3 className="text-base sm:text-lg font-poppins mb-4 mt-6">Marca</h3>
           <div className="flex flex-col gap-2">
             {marcasUnicas.map((marca) => (
               <label
@@ -201,7 +203,9 @@ const Productos = ({ searchText }) => {
                   checked={marcasSeleccionadas.includes(marca)}
                   onChange={() => toggleMarca(marca)}
                 />
-                <span className="text-gray-700">{marca}</span>
+                <span className="text-gray-700 text-sm sm:text-base">
+                  {marca}
+                </span>
               </label>
             ))}
           </div>
@@ -209,7 +213,7 @@ const Productos = ({ searchText }) => {
 
         {/* Grid productos con overlay de spinner */}
         <div className="relative">
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 sm:gap-8">
             {sorted.map((producto) => {
               const stock = producto.stock ?? 0;
               const sinStock = stock <= 0;
@@ -232,11 +236,11 @@ const Productos = ({ searchText }) => {
                       {getMarca(producto)}
                     </span>
 
-                    {/* Imagen con hover scale */}
+                    {/* Imagen */}
                     <img
                       src={getImagen(producto)}
                       alt={getNombre(producto)}
-                      className="w-full h-80 object-cover transform transition-transform duration-300 group-hover:scale-105"
+                      className="w-full h-60 sm:h-80 object-cover transform transition-transform duration-300 group-hover:scale-105"
                     />
 
                     {sinStock && (
@@ -258,16 +262,16 @@ const Productos = ({ searchText }) => {
                     )}
                   </div>
 
-                  <div className="p-5 text-center">
-                    <h3 className="text-lg font-bold font-poppins mb-1">
+                  <div className="p-4 sm:p-5 text-center">
+                    <h3 className="text-base sm:text-lg font-bold font-poppins mb-1">
                       {getTitulo(producto)}
                     </h3>
-                    <p className="text-gray-800 font-medium text-lg">
+                    <p className="text-gray-800 font-medium text-base sm:text-lg">
                       ${getPrecio(producto).toLocaleString("es-AR")}
                     </p>
-                    <p className="text-sm text-[#005f73] font-poppins mt-1">
+                    <p className="text-xs sm:text-sm text-[#005f73] font-poppins mt-1">
                       TRANSFERENCIA O EFECTIVO{" "}
-                      <span className="block font-semibold text-[#005f73] text-base">
+                      <span className="block font-semibold text-[#005f73] text-sm sm:text-base">
                         $
                         {Math.round(getPrecio(producto) * 0.8).toLocaleString(
                           "es-AR"
@@ -275,11 +279,11 @@ const Productos = ({ searchText }) => {
                       </span>
                     </p>
                     {!sinStock ? (
-                      <p className="text-sm font-poppins mt-2">
+                      <p className="text-xs sm:text-sm font-poppins mt-2">
                         Stock disponible: {stock}
                       </p>
                     ) : (
-                      <p className="text-sm text-red-600 mt-2 font-bold">
+                      <p className="text-xs sm:text-sm text-red-600 mt-2 font-bold">
                         Agotado
                       </p>
                     )}
@@ -295,7 +299,6 @@ const Productos = ({ searchText }) => {
             )}
           </div>
 
-          {/* Overlay spinner mientras filtra */}
           {/* Overlay spinner mientras filtra */}
           {filtering && (
             <div className="absolute inset-0 bg-white flex justify-center items-center z-10">

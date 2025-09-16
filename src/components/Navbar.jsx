@@ -17,10 +17,10 @@ const Navbar = ({ searchText, setSearchText }) => {
   const [showLogin, setShowLogin] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const role = user?.role?.toLowerCase();
 
-  // ✅ misma lógica que en CartSidebar
   const getItemCantidad = (item) =>
     item.cantidad || item.Cantidad || item.quantity || 1;
 
@@ -44,6 +44,7 @@ const Navbar = ({ searchText, setSearchText }) => {
   useEffect(() => {
     setShowLogin(false);
     setShowRegister(false);
+    setMobileMenuOpen(false); // cerrar menú al cambiar ruta
   }, [location.pathname]);
 
   useEffect(() => {
@@ -52,13 +53,20 @@ const Navbar = ({ searchText, setSearchText }) => {
         setShowLogin(false);
         setShowRegister(false);
         setCartSidebarOpen(false);
+        setMobileMenuOpen(false);
       }
     };
-    if (showLogin || showRegister || cartSidebarOpen) {
+    if (showLogin || showRegister || cartSidebarOpen || mobileMenuOpen) {
       window.addEventListener("keydown", onEsc);
     }
     return () => window.removeEventListener("keydown", onEsc);
-  }, [showLogin, showRegister, cartSidebarOpen, setCartSidebarOpen]);
+  }, [
+    showLogin,
+    showRegister,
+    cartSidebarOpen,
+    mobileMenuOpen,
+    setCartSidebarOpen,
+  ]);
 
   const handleLogout = async () => {
     setLoggingOut(true);
@@ -102,14 +110,18 @@ const Navbar = ({ searchText, setSearchText }) => {
       </div>
 
       {/* Barra principal */}
-      <div className="max-w-7xl mx-auto flex items-center justify-between px-6 py-4 gap-6">
+      <div className="max-w-7xl mx-auto flex items-center justify-between px-4 py-3 md:px-6 md:py-4 gap-4">
         {/* Logo */}
         <Link to="/" className="flex-shrink-0">
-          <img src={LogoImg} alt="Logo" className="h-24 cursor-pointer" />
+          <img
+            src={LogoImg}
+            alt="Logo"
+            className="h-16 md:h-24 cursor-pointer"
+          />
         </Link>
 
-        {/* Buscador */}
-        <div className="flex-1 max-w-lg">
+        {/* Buscador (solo desktop) */}
+        <div className="hidden md:flex flex-1 max-w-lg">
           <input
             type="text"
             placeholder="¿Qué buscás?"
@@ -119,8 +131,8 @@ const Navbar = ({ searchText, setSearchText }) => {
           />
         </div>
 
-        {/* Usuario / Carrito */}
-        <div className="flex items-center gap-5">
+        {/* Usuario / Carrito / Hamburguesa */}
+        <div className="flex items-center gap-4">
           {isAuthenticated ? (
             <>
               <span className="font-medium text-gray-700 hidden md:block font-poppins">
@@ -174,7 +186,7 @@ const Navbar = ({ searchText, setSearchText }) => {
                 <FaUser className="text-xl" />
               </button>
 
-              {/* Carrito visible también si no está logueado */}
+              {/* Carrito visible si no está logueado */}
               <button
                 onClick={() => setCartSidebarOpen(true)}
                 className="relative flex items-center justify-center text-gray-700 hover:text-black"
@@ -189,11 +201,19 @@ const Navbar = ({ searchText, setSearchText }) => {
               </button>
             </>
           )}
+
+          {/* Botón hamburguesa solo en mobile */}
+          <button
+            className="md:hidden text-2xl text-gray-700"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          >
+            ☰
+          </button>
         </div>
       </div>
 
-      {/* Links de navegación */}
-      <div className="bg-gray-50 border-t border-gray-200">
+      {/* Links de navegación (desktop) */}
+      <div className="hidden md:block bg-gray-50 border-t border-gray-200">
         <div className="max-w-7xl mx-auto flex items-center gap-8 py-3 pl-12 text-gray-700 text-base font-poppins">
           {navLinks.map((link) => (
             <Link key={link.to} to={link.to} className="hover:text-black">
@@ -202,6 +222,33 @@ const Navbar = ({ searchText, setSearchText }) => {
           ))}
         </div>
       </div>
+
+      {/* Menú móvil */}
+      {mobileMenuOpen && (
+        <div className="md:hidden bg-gray-50 border-t border-gray-200 px-4 py-3 space-y-4">
+          {/* Buscador en mobile */}
+          <input
+            type="text"
+            placeholder="¿Qué buscás?"
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
+            className="w-full px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black"
+          />
+
+          {/* Links */}
+          <div className="flex flex-col gap-3">
+            {navLinks.map((link) => (
+              <Link
+                key={link.to}
+                to={link.to}
+                className="text-gray-700 hover:text-black"
+              >
+                {link.label}
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Modales */}
       {location.pathname !== "/login" && location.pathname !== "/register" && (
