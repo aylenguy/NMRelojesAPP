@@ -33,10 +33,10 @@ const CartSidebar = () => {
     }
   }, [cart?.items, cartSidebarOpen]);
 
-  // Helpers para obtener datos de productos
+  // Helpers
   const getItemImagen = (item) => {
     if (!item) return `${BASE_URL}/uploads/placeholder.png`;
-    const img = item.imageUrl || item.ImageUrl; // ✅ usar el nombre del DTO
+    const img = item.imageUrl || item.ImageUrl;
     if (!img) return `${BASE_URL}/uploads/placeholder.png`;
     return img.startsWith("http") ? img : `${BASE_URL}/uploads/${img}`;
   };
@@ -68,7 +68,6 @@ const CartSidebar = () => {
   const handleDecrease = (item) => {
     const cantidad = getItemCantidad(item);
     if (cantidad > 1) {
-      // TODO: implementar updateItem en tu CartContext si lo querés usar
       console.log("Disminuir cantidad de", item.id);
     } else {
       removeFromCart(item.id);
@@ -77,11 +76,10 @@ const CartSidebar = () => {
 
   const handleIncrease = (item) => {
     const cantidad = getItemCantidad(item);
-    // TODO: implementar updateItem en tu CartContext si lo querés usar
     console.log("Aumentar cantidad de", item.id, "a", cantidad + 1);
   };
 
-  // Calcular envío
+  // Envío
   const handleCalculateShipping = async () => {
     if (!postalCode.match(/^\d{4}$/)) {
       setShippingOptions([]);
@@ -178,12 +176,12 @@ const CartSidebar = () => {
 
       {/* Sidebar */}
       <div
-        className={`fixed top-0 right-0 h-full w-96 bg-white shadow-2xl transform z-50 flex flex-col transition-transform duration-500 ease-in-out ${
+        className={`fixed top-0 right-0 h-full bg-white shadow-2xl transform z-50 flex flex-col transition-transform duration-500 ease-in-out w-full sm:w-96 ${
           cartSidebarOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b bg-white">
+        <div className="flex items-center justify-between p-4 border-b">
           <h2 className="text-xl font-bold flex items-center gap-2">
             Mi carrito
           </h2>

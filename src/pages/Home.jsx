@@ -104,14 +104,14 @@ const Home = ({ onProductClick, searchText }) => {
                     </span>
                   )}
 
-                  {/* Botón carrito SIEMPRE visible */}
+                  {/* Botón carrito SIEMPRE visible, centrado horizontal */}
                   {!sinStock && (
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
                         handleAddToCart(product);
                       }}
-                      className="absolute bottom-3 right-3 bg-white p-2 rounded-full shadow-lg hover:bg-gray-100 transition"
+                      className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-white p-2 rounded-full shadow-lg hover:bg-gray-100 transition"
                       title="Agregar al carrito"
                     >
                       <FaShoppingCart className="text-gray-800 text-sm sm:text-lg" />
