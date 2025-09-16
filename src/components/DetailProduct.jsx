@@ -270,7 +270,8 @@ const DetailProduct = () => {
           <div className="flex flex-col gap-3 mb-6">
             {stock > 0 ? (
               <>
-                <div className="flex flex-col sm:flex-row items-center gap-3">
+                {/* Selector de cantidad */}
+                <div className="flex items-center gap-3">
                   <div className="flex items-center border rounded-md overflow-hidden">
                     <button
                       onClick={() => setQuantity((q) => Math.max(1, q - 1))}
@@ -288,11 +289,17 @@ const DetailProduct = () => {
                       +
                     </button>
                   </div>
-                  <button className="py-2 px-6 bg-[#005f73] text-white rounded-2xl hover:bg-gray-800 shadow transition-all text-sm">
-                    Agregar al carrito
-                  </button>
                 </div>
 
+                {/* Botón Agregar al carrito */}
+                <button
+                  onClick={handleAddToCart}
+                  className="w-full py-2 px-6 bg-[#005f73] text-white rounded-2xl hover:bg-gray-800 shadow transition-all text-sm"
+                >
+                  Agregar al carrito
+                </button>
+
+                {/* Mensaje de error */}
                 {error && (
                   <p className="text-red-600 font-medium text-sm mt-1">
                     {error}

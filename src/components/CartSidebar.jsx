@@ -325,21 +325,25 @@ const CartSidebar = () => {
                     "es-AR"
                   )}
                 </p>
-                <button
-                  onClick={handleFinalizePurchase}
-                  className="py-2 px-6 bg-[#005f73] text-white rounded-2xl hover:bg-gray-800 shadow transition-all text-sm"
-                >
-                  Finalizar compra
-                </button>
-                <button
-                  onClick={() => {
-                    setCartSidebarOpen(false);
-                    navigate("/");
-                  }}
-                  className="py-2 px-6 bg-[#005f73] text-white rounded-2xl hover:bg-gray-800 shadow transition-all text-sm"
-                >
-                  Ver más productos <span>→</span>
-                </button>
+
+                <div className="flex flex-col gap-2">
+                  <button
+                    onClick={handleFinalizePurchase}
+                    className="py-2 px-6 bg-[#005f73] text-white rounded-2xl hover:bg-gray-800 shadow transition-all text-sm"
+                  >
+                    Finalizar compra
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setCartSidebarOpen(false);
+                      navigate("/");
+                    }}
+                    className="py-2 px-6 bg-[#005f73] text-white rounded-2xl hover:bg-gray-800 shadow transition-all text-sm"
+                  >
+                    Ver más productos <span>→</span>
+                  </button>
+                </div>
               </div>
             </>
           )}
