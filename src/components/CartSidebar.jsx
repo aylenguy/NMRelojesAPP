@@ -25,6 +25,10 @@ const CartSidebar = () => {
   const [error, setError] = useState("");
   const [shippingOptions, setShippingOptions] = useState([]);
   const [selectedShipping, setSelectedShipping] = useState(null);
+  // Descuento del 20%
+  const discountRate = 0.2;
+  const totalWithShipping = total + (selectedShipping?.cost ?? 0);
+  const discountedPrice = totalWithShipping * (1 - discountRate);
 
   const total = cart?.total ?? 0;
   const itemsContainerRef = useRef(null);
@@ -328,6 +332,15 @@ const CartSidebar = () => {
                   {(total + (selectedShipping?.cost ?? 0)).toLocaleString(
                     "es-AR"
                   )}
+                </p>
+
+                {/* Precios con descuento */}
+                <p className="text-sm text-gray-700">
+                  ${discountedPrice.toLocaleString("es-AR")} pagando con
+                  Transferencia o depósito bancario
+                </p>
+                <p className="text-sm text-gray-700">
+                  ${discountedPrice.toLocaleString("es-AR")} pagando en Efectivo
                 </p>
 
                 <div className="flex flex-col gap-2">
