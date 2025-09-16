@@ -7,7 +7,7 @@ import { useCart } from "../context/CartContext";
 
 const Home = ({ onProductClick, searchText }) => {
   const navigate = useNavigate();
-  const { addToCart } = useCart(); // <-- Traemos addToCart del contexto
+  const { addToCart } = useCart();
   const [products, setProducts] = useState([]);
   const [showNotification, setShowNotification] = useState(false);
 
@@ -46,7 +46,7 @@ const Home = ({ onProductClick, searchText }) => {
   });
 
   return (
-    <div className=" min-h-screen relative">
+    <div className="min-h-screen relative">
       {/* Hero */}
       <section className="relative h-[450px] text-white flex items-center justify-center mb-16">
         <img
@@ -79,9 +79,9 @@ const Home = ({ onProductClick, searchText }) => {
                 key={product.id || product.Id}
                 className="relative bg-white rounded-lg shadow-md hover:shadow-lg transition overflow-hidden border"
               >
-                {/* Imagen con botón de carrito flotante */}
+                {/* Imagen con proporción 4:5 para controlar altura */}
                 <div
-                  className="relative cursor-pointer group"
+                  className="relative cursor-pointer group aspect-[4/5]"
                   onClick={() => {
                     onProductClick(product);
                     navigate(`/producto/${product.id || product.Id}`, {
@@ -97,7 +97,7 @@ const Home = ({ onProductClick, searchText }) => {
                       "/placeholder.png"
                     }
                     alt={product.name || product.Name || product.nombre}
-                    className="w-full h-80 object-cover transform transition-transform duration-300 group-hover:scale-105"
+                    className="w-full h-full object-cover transform transition-transform duration-300 group-hover:scale-105"
                   />
 
                   {/* Etiqueta SIN STOCK */}
@@ -152,9 +152,8 @@ const Home = ({ onProductClick, searchText }) => {
                     </span>
                   </p>
 
-                  {/* Mostrar stock o mensaje agotado */}
                   {!sinStock ? (
-                    <p className="text-sm  font-poppins mt-2">
+                    <p className="text-sm font-poppins mt-2">
                       Stock disponible: {stock}
                     </p>
                   ) : (
