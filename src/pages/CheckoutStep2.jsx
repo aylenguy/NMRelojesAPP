@@ -337,7 +337,7 @@ export default function CheckoutStep2() {
                       onChange={handleChange}
                       placeholder="Ingresa tu nombre"
                       data-error={!!errors.name}
-                      className={`w-full p-2 sm:p-3 text-sm sm:text-base border rounded-xl focus:outline-none focus:ring-2 ${
+                      className={`w-full px-3 py-1.5 sm:px-4 sm:py-1.5 text-sm sm:text-base border rounded-xl focus:outline-none focus:ring-2 transition ${
                         errors.postalCode
                           ? "border-[#005f73] focus:ring-[#005f73]"
                           : "border-gray-300 focus:ring-black"
@@ -360,7 +360,7 @@ export default function CheckoutStep2() {
                       onChange={handleChange}
                       placeholder="Ingresa tu apellido"
                       data-error={!!errors.lastname}
-                      className={`w-full p-2 sm:p-3 text-sm sm:text-base border rounded-xl focus:outline-none focus:ring-2 ${
+                      className={`w-full px-3 py-1.5 sm:px-4 sm:py-1.5 text-sm sm:text-base border rounded-xl focus:outline-none focus:ring-2 transition ${
                         errors.postalCode
                           ? "border-[#005f73] focus:ring-[#005f73]"
                           : "border-gray-300 focus:ring-black"
@@ -387,7 +387,7 @@ export default function CheckoutStep2() {
                       onChange={handleChange}
                       placeholder="Ingresa tu email"
                       data-error={!!errors.email}
-                      className={`w-full p-2 sm:p-3 text-sm sm:text-base border rounded-xl focus:outline-none focus:ring-2 ${
+                      className={`w-full px-3 py-1.5 sm:px-4 sm:py-1.5 text-sm sm:text-base border rounded-xl focus:outline-none focus:ring-2 transition ${
                         errors.postalCode
                           ? "border-[#005f73] focus:ring-[#005f73]"
                           : "border-gray-300 focus:ring-black"
@@ -414,7 +414,7 @@ export default function CheckoutStep2() {
                       onChange={handleChange}
                       placeholder="Ej: 1122334455"
                       data-error={!!errors.phone}
-                      className={`w-full p-2 sm:p-3 text-sm sm:text-base border rounded-xl focus:outline-none focus:ring-2 ${
+                      className={`w-full px-3 py-1.5 sm:px-4 sm:py-1.5 text-sm sm:text-base border rounded-xl focus:outline-none focus:ring-2 transition ${
                         errors.postalCode
                           ? "border-[#005f73] focus:ring-[#005f73]"
                           : "border-gray-300 focus:ring-black"
@@ -437,7 +437,7 @@ export default function CheckoutStep2() {
                       onChange={handleChange}
                       placeholder="Ingresa tu DNI o CUIL"
                       data-error={!!errors.dni}
-                      className={`w-full p-2 sm:p-3 text-sm sm:text-base border rounded-xl focus:outline-none focus:ring-2 ${
+                      className={`w-full px-3 py-1.5 sm:px-4 sm:py-1.5 text-sm sm:text-base border rounded-xl focus:outline-none focus:ring-2 transition ${
                         errors.postalCode
                           ? "border-[#005f73] focus:ring-[#005f73]"
                           : "border-gray-300 focus:ring-black"
@@ -464,7 +464,7 @@ export default function CheckoutStep2() {
                     onChange={handleChange}
                     placeholder="Ingresa tu calle"
                     data-error={!!errors.street}
-                    className={`w-full p-2 sm:p-3 text-sm sm:text-base border rounded-xl focus:outline-none focus:ring-2 ${
+                    className={`w-full px-3 py-1.5 sm:px-4 sm:py-1.5 text-sm sm:text-base border rounded-xl focus:outline-none focus:ring-2 transition ${
                       errors.postalCode
                         ? "border-[#005f73] focus:ring-[#005f73]"
                         : "border-gray-300 focus:ring-black"
@@ -489,7 +489,7 @@ export default function CheckoutStep2() {
                       onChange={handleChange}
                       placeholder="Número"
                       data-error={!!errors.number}
-                      className={`w-full p-2 sm:p-3 text-sm sm:text-base border rounded-xl focus:outline-none focus:ring-2 ${
+                      className={`w-full px-3 py-1.5 sm:px-4 sm:py-1.5 text-sm sm:text-base border rounded-xl focus:outline-none focus:ring-2 transition ${
                         errors.postalCode
                           ? "border-[#005f73] focus:ring-[#005f73]"
                           : "border-gray-300 focus:ring-black"
@@ -541,7 +541,7 @@ export default function CheckoutStep2() {
                       onChange={handleChange}
                       placeholder="Ciudad"
                       data-error={!!errors.city}
-                      className={`w-full p-2 sm:p-3 text-sm sm:text-base border rounded-xl focus:outline-none focus:ring-2 ${
+                      className={`w-full px-3 py-1.5 sm:px-4 sm:py-1.5 text-sm sm:text-base border rounded-xl focus:outline-none focus:ring-2 transition ${
                         errors.postalCode
                           ? "border-[#005f73] focus:ring-[#005f73]"
                           : "border-gray-300 focus:ring-black"
@@ -564,7 +564,7 @@ export default function CheckoutStep2() {
                       onChange={handleChange}
                       placeholder="Provincia"
                       data-error={!!errors.province}
-                      className={`w-full p-2 sm:p-3 text-sm sm:text-base border rounded-xl focus:outline-none focus:ring-2 ${
+                      className={`w-full px-3 py-1.5 sm:px-4 sm:py-1.5 text-sm sm:text-base border rounded-xl focus:outline-none focus:ring-2 transition ${
                         errors.postalCode
                           ? "border-[#005f73] focus:ring-[#005f73]"
                           : "border-gray-300 focus:ring-black"
