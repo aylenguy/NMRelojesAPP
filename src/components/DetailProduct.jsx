@@ -288,7 +288,7 @@ const DetailProduct = () => {
                       +
                     </button>
                   </div>
-                  <button className="py-2 px-7 bg-black text-white rounded-2xl hover:bg-gray-800 shadow transition-all text-sm w-full">
+                  <button className="py-2 px-5 bg-[#005f73] text-white rounded-2xl hover:bg-gray-800 shadow transition-all text-sm">
                     Agregar al carrito
                   </button>
                 </div>
@@ -427,16 +427,6 @@ const DetailProduct = () => {
           </div>
         </div>
       )}
-
-      {/* WhatsApp */}
-      <a
-        href={`https://wa.me/5491123456789?text=Hola! Estoy interesado en el producto ${name}`}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="fixed bottom-6 right-6 bg-green-500 text-white p-4 rounded-full shadow-lg hover:bg-green-600 transition text-2xl"
-      >
-        💬
-      </a>
     </div>
   );
 };

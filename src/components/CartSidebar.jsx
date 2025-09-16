@@ -13,13 +13,8 @@ const BASE_URL = API_URL.replace("/api", "").replace("http://", "https://");
 const CartSidebar = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const {
-    cart,
-    removeFromCart,
-    cartSidebarOpen,
-    setCartSidebarOpen,
-    addToCart,
-  } = useCart();
+  const { cart, removeFromCart, cartSidebarOpen, setCartSidebarOpen } =
+    useCart();
 
   const [postalCode, setPostalCode] = useState("");
   const [error, setError] = useState("");
@@ -70,36 +65,18 @@ const CartSidebar = () => {
   };
 
   // Modificar cantidades
-  const handleDecrease = async (item) => {
-    const productId = item.id;
-    const currentQty = getItemCantidad(item);
-
-    try {
-      if (currentQty > 1) {
-        // Restamos 1 unidad usando el endpoint de addToCart con cantidad negativa
-        // ⚠️ Si tu backend no acepta cantidad negativa, se puede crear un endpoint updateQuantity
-        await addToCart(productId, -1);
-      } else {
-        // Si es 1, lo eliminamos del carrito
-        await removeFromCart(productId);
-      }
-    } catch (err) {
-      console.error("Error al disminuir cantidad:", err);
-      setError("No se pudo disminuir la cantidad. Intenta de nuevo.");
+  const handleDecrease = (item) => {
+    const cantidad = getItemCantidad(item);
+    if (cantidad > 1) {
+      console.log("Disminuir cantidad de", item.id);
+    } else {
+      removeFromCart(item.id);
     }
   };
 
-  const handleIncrease = async (item) => {
-    const productId = item.id;
-    const currentQty = getItemCantidad(item);
-
-    try {
-      // Llamamos a addToCart para sumar 1 unidad
-      await addToCart(productId, 1);
-    } catch (err) {
-      console.error("Error al aumentar cantidad:", err);
-      setError("No se pudo aumentar la cantidad. Intenta de nuevo.");
-    }
+  const handleIncrease = (item) => {
+    const cantidad = getItemCantidad(item);
+    console.log("Aumentar cantidad de", item.id, "a", cantidad + 1);
   };
 
   // Envío
