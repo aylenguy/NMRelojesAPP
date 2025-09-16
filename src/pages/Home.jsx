@@ -9,7 +9,6 @@ const Home = ({ onProductClick, searchText }) => {
   const navigate = useNavigate();
   const { addToCart } = useCart();
   const [products, setProducts] = useState([]);
-  const [showNotification, setShowNotification] = useState(false);
 
   useEffect(() => {
     api
@@ -23,8 +22,6 @@ const Home = ({ onProductClick, searchText }) => {
 
   const handleAddToCart = async (product) => {
     await addToCart(product.id || product.Id, 1);
-    setShowNotification(true);
-    setTimeout(() => setShowNotification(false), 2000);
   };
 
   const filteredProducts = products.filter((product) =>
@@ -65,11 +62,11 @@ const Home = ({ onProductClick, searchText }) => {
       </section>
 
       {/* Productos */}
-      <section className="container mx-auto px-6">
-        <h2 className="md:text-3xl font-bold text-center tracking-wide mb-6 font-poppins">
+      <section className="container mx-auto px-4 sm:px-6">
+        <h2 className="md:text-3xl text-2xl font-bold text-center tracking-wide mb-6 font-poppins">
           Nuestros Productos
         </h2>
-        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
           {filteredProducts.map((product) => {
             const stock = product.stock ?? 0;
             const sinStock = stock <= 0;
@@ -79,9 +76,9 @@ const Home = ({ onProductClick, searchText }) => {
                 key={product.id || product.Id}
                 className="relative bg-white rounded-lg shadow-md hover:shadow-lg transition overflow-hidden border"
               >
-                {/* Imagen con proporción 4:5 para controlar altura */}
+                {/* Imagen */}
                 <div
-                  className="relative cursor-pointer group aspect-[4/5]"
+                  className="relative cursor-pointer group aspect-square"
                   onClick={() => {
                     onProductClick(product);
                     navigate(`/producto/${product.id || product.Id}`, {
@@ -102,35 +99,35 @@ const Home = ({ onProductClick, searchText }) => {
 
                   {/* Etiqueta SIN STOCK */}
                   {sinStock && (
-                    <span className="absolute top-3 left-3 bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-md shadow-md">
+                    <span className="absolute top-2 left-2 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-md shadow-md">
                       SIN STOCK
                     </span>
                   )}
 
-                  {/* Botón carrito solo si hay stock */}
+                  {/* Botón carrito SIEMPRE visible */}
                   {!sinStock && (
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
                         handleAddToCart(product);
                       }}
-                      className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-white p-3 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition hover:bg-gray-100"
+                      className="absolute bottom-3 right-3 bg-white p-2 rounded-full shadow-lg hover:bg-gray-100 transition"
                       title="Agregar al carrito"
                     >
-                      <FaShoppingCart className="text-gray-800 text-lg" />
+                      <FaShoppingCart className="text-gray-800 text-sm sm:text-lg" />
                     </button>
                   )}
                 </div>
 
                 {/* Información del producto */}
-                <div className="p-4 text-center">
-                  <h3 className="text-lg font-bold font-poppins mb-1">
+                <div className="p-3 sm:p-4 text-center">
+                  <h3 className="text-sm sm:text-base font-bold font-poppins mb-1 truncate">
                     {product.brand
                       ? `${product.brand} ${product.name}`
                       : product.name}
                   </h3>
 
-                  <p className="text-gray-800 font-medium text-lg">
+                  <p className="text-sm sm:text-base text-gray-800 font-medium">
                     $
                     {(
                       product.price ||
@@ -139,9 +136,9 @@ const Home = ({ onProductClick, searchText }) => {
                       0
                     ).toLocaleString("es-AR")}
                   </p>
-                  <p className="text-sm text-[#005f73] font-poppins mt-1">
+                  <p className="text-xs sm:text-sm text-[#005f73] font-poppins mt-1">
                     TRANSFERENCIA O EFECTIVO{" "}
-                    <span className="block font-semibold text-[#005f73] text-base">
+                    <span className="block font-semibold text-xs sm:text-sm text-[#005f73]">
                       $
                       {Math.round(
                         (product.price ||
@@ -152,11 +149,8 @@ const Home = ({ onProductClick, searchText }) => {
                     </span>
                   </p>
 
-                  {!sinStock ? (
-                    <p className="text-sm font-poppins mt-2">
-                      Stock disponible: {stock}
-                    </p>
-                  ) : (
+                  {/* Solo mostrar "Agotado" si no hay stock */}
+                  {sinStock && (
                     <p className="text-sm text-red-600 mt-2 font-bold">
                       Agotado
                     </p>
