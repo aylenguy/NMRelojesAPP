@@ -327,7 +327,7 @@ const CartSidebar = () => {
                 </p>
                 <button
                   onClick={handleFinalizePurchase}
-                  className="mt-2 w-full bg-[#005f73] hover:bg-[#0a4a4a] text-white py-3 rounded-lg font-semibold transition-all"
+                  className="py-2 px-6 bg-[#005f73] text-white rounded-2xl hover:bg-gray-800 shadow transition-all text-sm"
                 >
                   Finalizar compra
                 </button>
@@ -336,7 +336,7 @@ const CartSidebar = () => {
                     setCartSidebarOpen(false);
                     navigate("/");
                   }}
-                  className="mt-3 w-full border border-[#005f73] text-[#005f73] py-3 rounded-lg font-semibold transition-all flex items-center justify-center gap-1"
+                  className="py-2 px-6 bg-[#005f73] text-white rounded-2xl hover:bg-gray-800 shadow transition-all text-sm"
                 >
                   Ver más productos <span>→</span>
                 </button>

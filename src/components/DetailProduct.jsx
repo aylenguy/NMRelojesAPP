@@ -288,7 +288,7 @@ const DetailProduct = () => {
                       +
                     </button>
                   </div>
-                  <button className="py-2 px-5 bg-[#005f73] text-white rounded-2xl hover:bg-gray-800 shadow transition-all text-sm">
+                  <button className="py-2 px-6 bg-[#005f73] text-white rounded-2xl hover:bg-gray-800 shadow transition-all text-sm">
                     Agregar al carrito
                   </button>
                 </div>
