@@ -22,10 +22,6 @@ export default function CheckoutStep3() {
 
   const API_BASE = import.meta.env.VITE_API_URL.replace("/api", "");
 
-  useEffect(() => {
-    if (token) fetchCart();
-  }, [token, fetchCart]);
-
   const handleConfirmOrder = async () => {
     try {
       setLoading(true);

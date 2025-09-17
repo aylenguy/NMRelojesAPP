@@ -77,7 +77,7 @@ export default function CheckoutStep1() {
     }
 
     try {
-      const response = await fetch(`${API_URL}/api/coupon/apply`, {
+      const response = await fetch(`${API_URL}/Coupon/apply`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ code: couponCode, total: subtotal }),
