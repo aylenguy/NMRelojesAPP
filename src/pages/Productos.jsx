@@ -209,13 +209,6 @@ const Productos = ({ searchText }) => {
               </label>
             ))}
           </div>
-
-          <button
-            className="mt-6 w-full bg-[#005f73] text-white py-2 rounded-md font-semibold"
-            onClick={() => setShowFilters(false)}
-          >
-            Aplicar filtros
-          </button>
         </aside>
 
         {/* Grid productos */}

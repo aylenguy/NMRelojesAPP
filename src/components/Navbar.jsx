@@ -3,6 +3,7 @@ import { FaShoppingCart, FaUser, FaSignOutAlt, FaSearch } from "react-icons/fa";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
+import api from "../api/api"; // <-- Importar tu API
 import LogoImg from "../assets/Logo.jpeg";
 import RegisterModal from "./RegisterModal";
 import LoginModal from "./LoginModal";
@@ -20,6 +21,7 @@ const Navbar = ({ searchText, setSearchText }) => {
   const [loggingOut, setLoggingOut] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
+  const [marcas, setMarcas] = useState([]); // <-- marcas dinámicas
 
   const role = user?.role?.toLowerCase();
 
@@ -43,7 +45,26 @@ const Navbar = ({ searchText, setSearchText }) => {
     ];
   }, [role]);
 
-  const marcas = ["Rolex", "Casio", "Seiko", "Citizen", "Fossil"];
+  // ⚡ Traer productos para extraer marcas dinámicamente
+  useEffect(() => {
+    const fetchMarcas = async () => {
+      try {
+        const res = await api.get("/Product/GetAllProducts");
+        const productos = res.data;
+        const marcasUnicas = [
+          ...new Set(
+            productos.map(
+              (p) => p.brand ?? p.Brand ?? p.marca ?? p.Marca ?? "Sin marca"
+            )
+          ),
+        ];
+        setMarcas(marcasUnicas);
+      } catch (err) {
+        console.error("No se pudieron cargar las marcas", err);
+      }
+    };
+    fetchMarcas();
+  }, []);
 
   useEffect(() => {
     setShowLogin(false);
@@ -273,7 +294,7 @@ const Navbar = ({ searchText, setSearchText }) => {
                   )}
                 </button>
 
-                {/* Submenú marcas */}
+                {/* Submenú marcas dinámico */}
                 {link.label === "Productos" && showProductosSubmenu && (
                   <div className="flex flex-col pl-4 mt-1 space-y-1">
                     <Link
