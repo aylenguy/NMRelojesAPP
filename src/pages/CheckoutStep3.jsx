@@ -54,7 +54,6 @@ export default function CheckoutStep3() {
         customerName: checkoutData.name || "Cliente",
         customerLastname: checkoutData.lastname || "",
         externalReference,
-        couponCode: checkoutData.couponCode || "",
         shippingAddress: checkoutData.street || "Sin dirección",
         postalCode: checkoutData.postalCode || "",
         paymentMethod,
@@ -66,16 +65,21 @@ export default function CheckoutStep3() {
         description: checkoutData.description || "",
         street: checkoutData.street || "",
         number: checkoutData.number || "",
-        notes: orderNotes || "",
+
+        // 🔹 Guardamos cupón y descuento en Notes para no romper la entidad
+        notes: `[CUPON:${
+          checkoutData.couponCode || "NINGUNO"
+        } - DESCUENTO:${couponDiscount}] ${orderNotes || ""}`,
+
         items: currentCart.items.map((i) => ({
           productId: i.productId || i.id,
           quantity: i.quantity || 1,
           unitPrice: i.unitPrice || 0,
           subtotal: i.subtotal ?? i.quantity * i.unitPrice,
         })),
+
         total: totalFinal,
-        couponDiscount,
-        paymentDiscount,
+        paymentDiscount, // este sí lo mandamos porque ya existe en tu backend
       };
 
       let newVenta;
