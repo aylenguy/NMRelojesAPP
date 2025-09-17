@@ -59,9 +59,10 @@ const RegisterModal = ({ show, onClose, onSwitchToLogin }) => {
       await login(formData.email, formData.password);
       setShowSuccessModal(true);
     } catch (err) {
+      console.log("Respuesta del backend:", err.response); // 👈 para debug
       setErrors({
         api:
-          err.response?.data?.Message ||
+          err.response?.data?.message || // 👈 ahora en minúscula
           "Error al registrarse. Intente de nuevo.",
       });
     }
