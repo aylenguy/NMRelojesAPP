@@ -72,7 +72,6 @@ const Productos = ({ searchText }) => {
   const getColor = (p) => p.color ?? p.Color ?? "Sin color";
   const getMarca = (p) =>
     p.brand ?? p.Brand ?? p.marca ?? p.Marca ?? "Sin marca";
-
   const getImagen = (p) => {
     const path = p.image ?? p.Image ?? p.imagen ?? "placeholder.png";
     if (path.startsWith("http")) return path;
@@ -214,7 +213,7 @@ const Productos = ({ searchText }) => {
         {/* Grid productos con overlay de spinner */}
         <div className="relative">
           <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-            {products.map((product) => {
+            {sorted.map((product) => {
               const stock = product.stock ?? 0;
               const sinStock = stock <= 0;
 
@@ -233,8 +232,8 @@ const Productos = ({ searchText }) => {
                     }
                   >
                     <img
-                      src={product.image || "/placeholder.png"}
-                      alt={product.name}
+                      src={getImagen(product)}
+                      alt={getNombre(product)}
                       className="w-full h-full object-cover transform transition-transform duration-300 group-hover:scale-105"
                     />
 
@@ -263,20 +262,18 @@ const Productos = ({ searchText }) => {
                   {/* Info del producto */}
                   <div className="p-3 sm:p-4 text-center">
                     <h3 className="text-sm sm:text-base font-bold font-poppins mb-1 truncate">
-                      {product.brand
-                        ? `${product.brand} ${product.name}`
-                        : product.name}
+                      {getTitulo(product)}
                     </h3>
 
                     <p className="text-sm sm:text-base text-gray-800 font-medium">
-                      ${(product.price || 0).toLocaleString("es-AR")}
+                      ${getPrecio(product).toLocaleString("es-AR")}
                     </p>
 
                     <p className="text-xs sm:text-sm text-[#005f73] font-poppins mt-1">
                       TRANSFERENCIA O EFECTIVO{" "}
                       <span className="block font-semibold text-xs sm:text-sm text-[#005f73]">
                         $
-                        {Math.round((product.price || 0) * 0.8).toLocaleString(
+                        {Math.round(getPrecio(product) * 0.8).toLocaleString(
                           "es-AR"
                         )}
                       </span>
@@ -291,7 +288,7 @@ const Productos = ({ searchText }) => {
                 </div>
               );
             })}
-            {products.length === 0 && (
+            {sorted.length === 0 && (
               <p className="text-center col-span-full text-gray-500">
                 No se encontraron productos.
               </p>
