@@ -8,7 +8,9 @@ const Footer = () => {
   const [showModal, setShowModal] = useState(false);
 
   return (
-    <footer className="bg-black text-white py-12">
+    <footer className="bg-black text-white py-12 mt-16">
+      {" "}
+      {/* 👈 margen superior */}
       <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between gap-12">
         {/* Marca + slogan */}
         <div className="flex flex-col items-center md:items-start gap-3 md:w-1/3">
@@ -66,12 +68,10 @@ const Footer = () => {
           </div>
         </div>
       </div>
-
       {/* Derechos reservados */}
       <div className="mt-12 text-center text-gray-500 text-sm">
         © {new Date().getFullYear()} N&M Relojes. Todos los derechos reservados.
       </div>
-
       {/* Información legal y botón de arrepentimiento */}
       <div className="mt-2 text-center text-gray-400 text-xs flex flex-wrap justify-center items-center gap-2">
         <span>
@@ -93,7 +93,6 @@ const Footer = () => {
           Botón de arrepentimiento
         </button>
       </div>
-
       {/* Modal */}
       {showModal && (
         <ArrepentimientoModal onClose={() => setShowModal(false)} />

@@ -99,7 +99,7 @@ const ArrepentimientoModal = ({ onClose }) => {
           en el artículo 1116 del Código Civil y Comercial de la Nación.
         </p>
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <input
             type="text"
             name="nombre"
@@ -107,7 +107,7 @@ const ArrepentimientoModal = ({ onClose }) => {
             value={formData.nombre}
             onChange={handleChange}
             required
-            className="border rounded px-3 py-2 focus:outline-none text-black focus:ring-2 focus:ring-gray-400"
+            className="w-full border border-gray-300 rounded-md shadow-sm px-4 py-2 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent text-black"
           />
           <input
             type="tel"
@@ -116,7 +116,7 @@ const ArrepentimientoModal = ({ onClose }) => {
             value={formData.telefono}
             onChange={handleChange}
             required
-            className="border rounded px-3 py-2 focus:outline-none text-black focus:ring-2 focus:ring-gray-400"
+            className="w-full border border-gray-300 rounded-md shadow-sm px-4 py-2 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent text-black"
           />
           <input
             type="email"
@@ -125,7 +125,7 @@ const ArrepentimientoModal = ({ onClose }) => {
             value={formData.email}
             onChange={handleChange}
             required
-            className="border rounded px-3 py-2 focus:outline-none text-black focus:ring-2 focus:ring-gray-400"
+            className="w-full border border-gray-300 rounded-md shadow-sm px-4 py-2 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent text-black"
           />
           <input
             type="text"
@@ -134,7 +134,7 @@ const ArrepentimientoModal = ({ onClose }) => {
             value={formData.NumeroPedido}
             onChange={handleChange}
             required
-            className="border rounded px-3 py-2 focus:outline-none text-black focus:ring-2 focus:ring-gray-400"
+            className="w-full border border-gray-300 rounded-md shadow-sm px-4 py-2 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent text-black"
           />
           <textarea
             name="inconveniente"
@@ -142,38 +142,40 @@ const ArrepentimientoModal = ({ onClose }) => {
             value={formData.inconveniente}
             onChange={handleChange}
             required
-            className="border rounded px-3 py-2 focus:outline-none text-black focus:ring-2 focus:ring-gray-400"
+            rows="4"
+            className="w-full border border-gray-300 rounded-md shadow-sm px-4 py-2 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent text-black resize-none"
           ></textarea>
 
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className={`bg-black text-white py-2 rounded-2xl hover:bg-gray-800 transition flex items-center justify-center gap-2 ${
-              isSubmitting ? "opacity-70 cursor-not-allowed" : ""
-            }`}
-          >
-            {isSubmitting ? (
-              <>
-                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                Enviando...
-              </>
-            ) : (
-              "Enviar"
-            )}
-          </button>
-
-          {/* Mensaje de estado debajo del botón */}
-          {status && (
-            <div
-              className={`mt-3 px-4 py-2 rounded-md text-center font-medium ${
-                statusType === "success"
-                  ? "border-[#005f73] focus:ring-[#005f73]"
-                  : "border-gray-300 focus:ring-black"
+          {/* Botón y mensaje de estado */}
+          <div className="text-center">
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className={`py-2 px-9 bg-black text-white rounded-2xl hover:bg-gray-800 text-center shadow transition-all text-base flex items-center justify-center gap-2 min-w-[200px] mx-auto ${
+                isSubmitting ? "opacity-70 cursor-not-allowed" : ""
               }`}
             >
-              {status}
-            </div>
-          )}
+              {isSubmitting ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  Enviando...
+                </>
+              ) : (
+                "Enviar"
+              )}
+            </button>
+
+            {/* Mensaje debajo del botón */}
+            {status && (
+              <div
+                className={`mt-4 px-4 py-2 rounded-md text-center font-medium ${
+                  statusType === "success" ? "text-[#005f73]" : "text-red-600"
+                }`}
+              >
+                {status}
+              </div>
+            )}
+          </div>
         </form>
       </div>
     </div>
