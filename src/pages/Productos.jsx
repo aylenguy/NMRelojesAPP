@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaShoppingCart } from "react-icons/fa";
 import api from "../api/api";
-import { useCart } from "../context/CartContext"; // Contexto del carrito
+import { useCart } from "../context/CartContext";
 
 const Productos = ({ searchText }) => {
   const [productos, setProductos] = useState([]);
@@ -19,7 +19,6 @@ const Productos = ({ searchText }) => {
   const navigate = useNavigate();
   const { addToCart } = useCart();
 
-  // Cargar productos
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -37,10 +36,9 @@ const Productos = ({ searchText }) => {
 
   const triggerFilter = () => {
     setFiltering(true);
-    setTimeout(() => setFiltering(false), 500); // 0.5 seg de "carga"
+    setTimeout(() => setFiltering(false), 500);
   };
 
-  // Toggle filtros
   const toggleCategoria = (categoria) => {
     setCategoriasSeleccionadas((prev) =>
       prev.includes(categoria)
@@ -64,7 +62,6 @@ const Productos = ({ searchText }) => {
     triggerFilter();
   };
 
-  // Funciones auxiliares
   const getPrecio = (p) => p.price ?? p.Price ?? p.precio ?? 0;
   const getNombre = (p) =>
     p.name ?? p.Name ?? p.nombre ?? "Producto sin nombre";
@@ -78,14 +75,12 @@ const Productos = ({ searchText }) => {
     if (path.startsWith("http")) return path;
     return `${import.meta.env.VITE_API_URL}/uploads/${path}`;
   };
-
   const getTitulo = (p) => {
     const nombre = getNombre(p);
     const marca = getMarca(p);
     return marca && marca !== "Sin marca" ? `${marca} ${nombre}` : nombre;
   };
 
-  // Filtrar productos
   const filtered = productos.filter((p) => {
     const nombre = getNombre(p).toLowerCase();
     const coincideBusqueda = nombre.includes(searchText?.toLowerCase() || "");
@@ -98,13 +93,11 @@ const Productos = ({ searchText }) => {
     const coincideMarca =
       marcasSeleccionadas.length === 0 ||
       marcasSeleccionadas.includes(getMarca(p));
-
     return (
       coincideBusqueda && coincideCategoria && coincideColor && coincideMarca
     );
   });
 
-  // Ordenar productos
   const sorted = [...filtered].sort((a, b) => {
     if (sortOption === "precio-asc") return getPrecio(a) - getPrecio(b);
     if (sortOption === "precio-desc") return getPrecio(b) - getPrecio(a);
@@ -115,7 +108,6 @@ const Productos = ({ searchText }) => {
     return 0;
   });
 
-  // Agregar al carrito
   const handleAddToCart = async (producto) => {
     try {
       await addToCart(producto.id ?? producto.Id);
@@ -148,15 +140,18 @@ const Productos = ({ searchText }) => {
         Todos los Productos
       </h2>
 
-      {/* Selector de orden */}
-      <div className="flex justify-end mb-6">
-        {/* Botón filtros solo en mobile */}
+      {/* Botón filtros mobile */}
+      <div className="flex justify-end mb-6 lg:hidden">
         <button
-          className="lg:hidden px-4 py-2 border rounded-md text-sm bg-white shadow"
+          className="px-4 py-2 border rounded-md text-sm bg-white shadow"
           onClick={() => setShowFilters(true)}
         >
           Filtros
         </button>
+      </div>
+
+      {/* Selector de orden desktop */}
+      <div className="flex justify-end mb-6 hidden lg:flex">
         <select
           className="p-2 border rounded-md shadow-sm text-sm sm:text-base"
           value={sortOption}
@@ -171,13 +166,12 @@ const Productos = ({ searchText }) => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-[250px_1fr] gap-6 lg:gap-8">
-        {/* Sidebar filtros */}
+        {/* Sidebar desktop */}
         <aside className="bg-white p-4 rounded-lg shadow-md border hidden lg:block">
           <h2 className="text-lg sm:text-xl font-bold mb-6 text-center text-[#005f73] font-poppins">
             Filtrar por
           </h2>
 
-          {/* Colores */}
           <h3 className="text-base sm:text-lg font-poppins mb-4 mt-6">Color</h3>
           <div className="flex flex-col gap-2">
             {coloresUnicos.map((color) => (
@@ -197,7 +191,6 @@ const Productos = ({ searchText }) => {
             ))}
           </div>
 
-          {/* Marcas */}
           <h3 className="text-base sm:text-lg font-poppins mb-4 mt-6">Marca</h3>
           <div className="flex flex-col gap-2">
             {marcasUnicas.map((marca) => (
@@ -216,6 +209,7 @@ const Productos = ({ searchText }) => {
               </label>
             ))}
           </div>
+
           <button
             className="mt-6 w-full bg-[#005f73] text-white py-2 rounded-md font-semibold"
             onClick={() => setShowFilters(false)}
@@ -224,7 +218,7 @@ const Productos = ({ searchText }) => {
           </button>
         </aside>
 
-        {/* Grid productos con overlay de spinner */}
+        {/* Grid productos */}
         <div className="relative">
           <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
             {sorted.map((product) => {
@@ -236,7 +230,6 @@ const Productos = ({ searchText }) => {
                   key={product.id || product.Id}
                   className="relative bg-white rounded-lg shadow-md hover:shadow-lg transition overflow-hidden border"
                 >
-                  {/* Imagen */}
                   <div
                     className="relative cursor-pointer group aspect-square"
                     onClick={() =>
@@ -251,14 +244,12 @@ const Productos = ({ searchText }) => {
                       className="w-full h-full object-cover transform transition-transform duration-300 group-hover:scale-105"
                     />
 
-                    {/* SIN STOCK */}
                     {sinStock && (
                       <span className="absolute top-2 left-2 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-md shadow-md">
                         SIN STOCK
                       </span>
                     )}
 
-                    {/* Botón carrito */}
                     {!sinStock && (
                       <button
                         onClick={(e) => {
@@ -273,16 +264,13 @@ const Productos = ({ searchText }) => {
                     )}
                   </div>
 
-                  {/* Info del producto */}
                   <div className="p-3 sm:p-4 text-center">
                     <h3 className="text-sm sm:text-base font-bold font-poppins mb-1 truncate">
                       {getTitulo(product)}
                     </h3>
-
                     <p className="text-sm sm:text-base text-gray-800 font-medium">
                       ${getPrecio(product).toLocaleString("es-AR")}
                     </p>
-
                     <p className="text-xs sm:text-sm text-[#005f73] font-poppins mt-1">
                       TRANSFERENCIA O EFECTIVO{" "}
                       <span className="block font-semibold text-xs sm:text-sm text-[#005f73]">
@@ -292,7 +280,6 @@ const Productos = ({ searchText }) => {
                         )}
                       </span>
                     </p>
-
                     {sinStock && (
                       <p className="text-sm text-red-600 mt-2 font-bold">
                         Agotado
@@ -309,7 +296,6 @@ const Productos = ({ searchText }) => {
             )}
           </div>
 
-          {/* Overlay spinner mientras filtra */}
           {filtering && (
             <div className="absolute inset-0 bg-white flex justify-center items-center z-10">
               <div className="animate-spin rounded-full h-10 w-10 border-4 border-gray-300 border-t-gray-600"></div>
@@ -317,6 +303,81 @@ const Productos = ({ searchText }) => {
           )}
         </div>
       </div>
+
+      {/* Modal filtros mobile */}
+      {showFilters && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-start pt-20 lg:hidden">
+          <div className="bg-white rounded-lg shadow-lg p-6 w-11/12 max-w-md relative">
+            <button
+              className="absolute top-2 right-2 text-gray-600 text-lg font-bold"
+              onClick={() => setShowFilters(false)}
+            >
+              ✕
+            </button>
+
+            <h2 className="text-lg font-bold mb-4 text-center">Filtros</h2>
+
+            {/* Ordenar por */}
+            <div className="mb-4">
+              <label className="block font-semibold mb-2">Ordenar por</label>
+              <select
+                className="p-2 border rounded-md w-full"
+                value={sortOption}
+                onChange={(e) => setSortOption(e.target.value)}
+              >
+                <option value="">Ordenar por...</option>
+                <option value="precio-asc">Precio: Menor a Mayor</option>
+                <option value="precio-desc">Precio: Mayor a Menor</option>
+                <option value="nombre-asc">A-Z</option>
+                <option value="nombre-desc">Z-A</option>
+              </select>
+            </div>
+
+            {/* Colores */}
+            <h3 className="font-semibold mb-2">Color</h3>
+            <div className="flex flex-col gap-2 mb-4">
+              {coloresUnicos.map((color) => (
+                <label
+                  key={color}
+                  className="flex items-center gap-2 cursor-pointer"
+                >
+                  <input
+                    type="checkbox"
+                    checked={coloresSeleccionados.includes(color)}
+                    onChange={() => toggleColor(color)}
+                  />
+                  <span>{color}</span>
+                </label>
+              ))}
+            </div>
+
+            {/* Marcas */}
+            <h3 className="font-semibold mb-2">Marca</h3>
+            <div className="flex flex-col gap-2">
+              {marcasUnicas.map((marca) => (
+                <label
+                  key={marca}
+                  className="flex items-center gap-2 cursor-pointer"
+                >
+                  <input
+                    type="checkbox"
+                    checked={marcasSeleccionadas.includes(marca)}
+                    onChange={() => toggleMarca(marca)}
+                  />
+                  <span>{marca}</span>
+                </label>
+              ))}
+            </div>
+
+            <button
+              className="mt-6 w-full bg-[#005f73] text-white py-2 rounded-md font-semibold"
+              onClick={() => setShowFilters(false)}
+            >
+              Aplicar filtros
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
