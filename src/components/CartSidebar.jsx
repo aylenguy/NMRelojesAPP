@@ -338,10 +338,7 @@ const CartSidebar = () => {
                 {/* Precios con descuento */}
                 <p className="text-sm text-gray-700">
                   ${discountedPrice.toLocaleString("es-AR")} pagando con
-                  Transferencia o depósito bancario
-                </p>
-                <p className="text-sm text-gray-700">
-                  ${discountedPrice.toLocaleString("es-AR")} pagando en Efectivo
+                  Transferencia o depósito bancario o efectivo
                 </p>
 
                 <div className="flex flex-col gap-2">

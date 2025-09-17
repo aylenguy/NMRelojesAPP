@@ -14,6 +14,7 @@ const Productos = ({ searchText }) => {
   const [marcasSeleccionadas, setMarcasSeleccionadas] = useState([]);
   const [sortOption, setSortOption] = useState("");
   const [filtering, setFiltering] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
 
   const navigate = useNavigate();
   const { addToCart } = useCart();
@@ -149,6 +150,13 @@ const Productos = ({ searchText }) => {
 
       {/* Selector de orden */}
       <div className="flex justify-end mb-6">
+        {/* Botón filtros solo en mobile */}
+        <button
+          className="lg:hidden px-4 py-2 border rounded-md text-sm bg-white shadow"
+          onClick={() => setShowFilters(true)}
+        >
+          Filtros
+        </button>
         <select
           className="p-2 border rounded-md shadow-sm text-sm sm:text-base"
           value={sortOption}
@@ -208,6 +216,12 @@ const Productos = ({ searchText }) => {
               </label>
             ))}
           </div>
+          <button
+            className="mt-6 w-full bg-[#005f73] text-white py-2 rounded-md font-semibold"
+            onClick={() => setShowFilters(false)}
+          >
+            Aplicar filtros
+          </button>
         </aside>
 
         {/* Grid productos con overlay de spinner */}
