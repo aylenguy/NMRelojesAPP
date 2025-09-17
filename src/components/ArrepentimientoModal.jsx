@@ -91,6 +91,15 @@ const ArrepentimientoModal = ({ onClose }) => {
             required
             className="border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-400"
           />
+          <input
+            type="text"
+            name="NúmeroPedido"
+            placeholder="Número de pedido"
+            value={formData.NumeroPedido}
+            onChange={handleChange}
+            required
+            className="border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-400"
+          />
 
           <textarea
             name="inconveniente"
