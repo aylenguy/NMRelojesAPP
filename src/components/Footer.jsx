@@ -18,28 +18,27 @@ const Footer = () => {
         {/* Redes Sociales */}
         <div className="flex justify-center gap-6 mb-8">
           <a
-            href="https://www.instagram.com/"
+            href="https://www.instagram.com/nm_relojes/"
             target="_blank"
             rel="noopener noreferrer"
             className="w-10 h-10 flex items-center justify-center rounded-full bg-white text-black hover:bg-pink-500 hover:text-white transition"
           >
             <FaInstagram />
           </a>
+
           <a
-            href="https://www.facebook.com/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="w-10 h-10 flex items-center justify-center rounded-full bg-white text-black hover:bg-blue-600 hover:text-white transition"
-          >
-            <FaFacebook />
-          </a>
-          <a
-            href="https://wa.me/549XXXXXXXXXX"
+            href="https://wa.me/5493416000927"
             target="_blank"
             rel="noopener noreferrer"
             className="w-10 h-10 flex items-center justify-center rounded-full bg-white text-black hover:bg-green-500 hover:text-white transition"
           >
             <FaWhatsapp />
+          </a>
+          <a
+            href="mailto:nmrelojes@hotmail.com"
+            className="w-10 h-10 flex items-center justify-center rounded-full bg-white text-black hover:bg-blue-500 hover:text-white transition"
+          >
+            <FaEnvelope />
           </a>
         </div>
 
