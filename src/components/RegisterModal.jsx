@@ -62,7 +62,8 @@ const RegisterModal = ({ show, onClose, onSwitchToLogin }) => {
       console.log("Respuesta del backend:", err.response); // 👈 para debug
       setErrors({
         api:
-          err.response?.data?.message || // 👈 ahora en minúscula
+          err.response?.data?.message || // en minúscula
+          err.response?.data?.Message || // fallback en mayúscula
           "Error al registrarse. Intente de nuevo.",
       });
     }
