@@ -80,8 +80,8 @@ const RegisterModal = ({ show, onClose, onSwitchToLogin }) => {
       {/* Modal principal */}
       {!showSuccessModal && (
         <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50">
-          <div className="w-[360px] max-w-[90vw] bg-white p-4 sm:p-6 rounded-3xl shadow-2xl">
-            {/* Barra tipo “notch” */}
+          <div className="w-[360px] max-w-[90vw] bg-white p-4 sm:p-6 rounded-3xl shadow-2xl relative">
+            {/* Barra notch */}
             <div className="w-12 h-1.5 bg-gray-300 rounded-full mx-auto mb-4"></div>
 
             {/* Header */}
@@ -92,6 +92,7 @@ const RegisterModal = ({ show, onClose, onSwitchToLogin }) => {
               <button
                 onClick={onClose}
                 className="text-gray-500 hover:text-gray-800 text-xl font-bold"
+                disabled={loading}
               >
                 &times;
               </button>
@@ -107,6 +108,7 @@ const RegisterModal = ({ show, onClose, onSwitchToLogin }) => {
                   placeholder="Nombre"
                   value={formData.name}
                   onChange={handleChange}
+                  disabled={loading}
                   className={`w-full p-2 text-sm border rounded-xl focus:outline-none focus:ring-2 ${
                     errors.name
                       ? "border-[#005f73] focus:ring-[#005f73]"
@@ -128,6 +130,7 @@ const RegisterModal = ({ show, onClose, onSwitchToLogin }) => {
                   placeholder="Apellido"
                   value={formData.lastName}
                   onChange={handleChange}
+                  disabled={loading}
                   className={`w-full p-2 text-sm border rounded-xl focus:outline-none focus:ring-2 ${
                     errors.lastName
                       ? "border-[#005f73] focus:ring-[#005f73]"
@@ -149,6 +152,7 @@ const RegisterModal = ({ show, onClose, onSwitchToLogin }) => {
                   placeholder="Correo electrónico"
                   value={formData.email}
                   onChange={handleChange}
+                  disabled={loading}
                   className={`w-full p-2 text-sm border rounded-xl focus:outline-none focus:ring-2 ${
                     errors.email
                       ? "border-[#005f73] focus:ring-[#005f73]"
@@ -170,6 +174,7 @@ const RegisterModal = ({ show, onClose, onSwitchToLogin }) => {
                   placeholder="Contraseña"
                   value={formData.password}
                   onChange={handleChange}
+                  disabled={loading}
                   className={`w-full p-2 text-sm border rounded-xl focus:outline-none focus:ring-2 ${
                     errors.password
                       ? "border-[#005f73] focus:ring-[#005f73]"
@@ -189,16 +194,24 @@ const RegisterModal = ({ show, onClose, onSwitchToLogin }) => {
                 </p>
               )}
 
+              {/* Botón con spinner */}
               <button
                 type="submit"
                 disabled={!isFormFilled || loading}
-                className={`w-full py-2 rounded-xl shadow text-sm transition-all ${
-                  isFormFilled
+                className={`w-full py-2 rounded-xl shadow text-sm transition-all flex items-center justify-center gap-2 ${
+                  isFormFilled && !loading
                     ? "bg-black text-white hover:bg-gray-800"
                     : "bg-gray-300 text-gray-500 cursor-not-allowed"
                 }`}
               >
-                {loading ? "Cargando..." : "Registrarse"}
+                {loading ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    Cargando...
+                  </>
+                ) : (
+                  "Registrarse"
+                )}
               </button>
             </form>
 
@@ -212,6 +225,7 @@ const RegisterModal = ({ show, onClose, onSwitchToLogin }) => {
                     onSwitchToLogin();
                   }}
                   className="text-gray-900 underline"
+                  disabled={loading}
                 >
                   Iniciar sesión
                 </button>
