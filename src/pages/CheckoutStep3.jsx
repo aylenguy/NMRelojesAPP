@@ -13,21 +13,19 @@ export default function CheckoutStep3() {
   const navigate = useNavigate();
 
   const checkoutData = JSON.parse(localStorage.getItem("checkoutData") || "{}");
-  const guestCart = JSON.parse(localStorage.getItem("guestCart")) || {
-    items: [],
-    total: 0,
-  };
+  const guestCart = JSON.parse(localStorage.getItem("guestCart") || "{}");
+  const currentCart = token ? cart : guestCart;
 
-  const [paymentMethod, setPaymentMethod] = useState("vendedor"); // Por defecto "Acordar con el vendedor"
+  const [paymentMethod, setPaymentMethod] = useState("vendedor");
   const [loading, setLoading] = useState(false);
   const [orderNotes, setOrderNotes] = useState("");
 
-  const currentCart = token ? cart : guestCart;
-  const API_BASE = import.meta.env.VITE_API_URL.replace("/api", ""); // para imágenes
+  const API_BASE = import.meta.env.VITE_API_URL.replace("/api", "");
 
   useEffect(() => {
     if (token) fetchCart();
   }, [token, fetchCart]);
+
   const handleConfirmOrder = async () => {
     try {
       setLoading(true);
@@ -38,28 +36,22 @@ export default function CheckoutStep3() {
         return;
       }
 
-      // 🔹 Generar referencia externa
       const externalReference = `pedido-${Date.now()}`;
       localStorage.setItem("lastExternalReference", externalReference);
 
-      // 🔹 Calcular subtotal y total
       const subtotal = currentCart.items.reduce(
         (acc, it) => acc + (it.subtotal ?? it.quantity * it.unitPrice),
         0
       );
-
       const shippingCost = checkoutData.shippingOption?.cost || 0;
       const couponDiscount = checkoutData.couponDiscount || 0;
-
       const paymentDiscount =
         paymentMethod === "efectivo" || paymentMethod === "transferencia"
           ? 0.2 * subtotal
           : 0;
-
       const totalFinal =
         subtotal + shippingCost - couponDiscount - paymentDiscount;
 
-      // 🔹 Preparar payload de venta
       const ventaPayload = {
         clientId: checkoutData.clientId || 1,
         customerEmail: checkoutData.email || "sin-email@ejemplo.com",
@@ -92,7 +84,6 @@ export default function CheckoutStep3() {
 
       let newVenta;
 
-      // 🔹 Si es Mercado Pago, crear la preferencia primero
       if (paymentMethod === "mercadopago") {
         const mpResponse = await api.post("/Payment/create-checkout", {
           Description: "Compra en NM Relojes",
@@ -105,18 +96,16 @@ export default function CheckoutStep3() {
             UnitPrice: i.unitPrice || 0,
           })),
           BackUrls: {
-            Success: "https://nm-relojes.vercel.app/checkout/success", // 👈 tu dominio en Vercel
+            Success: "https://nm-relojes.vercel.app/checkout/success",
             Failure: "https://nm-relojes.vercel.app/checkout/failure",
             Pending: "https://nm-relojes.vercel.app/checkout/pending",
           },
           NotificationUrl:
-            "https://nmrelojesapi.onrender.com/api/Payment/webhook", // 👈 Render
+            "https://nmrelojesapi.onrender.com/api/Payment/webhook",
         });
 
         const mpData = mpResponse.data;
-
         if (mpData?.initPoint) {
-          // Guardar la venta pendiente
           localStorage.setItem("ventaPendiente", JSON.stringify(ventaPayload));
           window.location.href = mpData.initPoint;
           return;
@@ -125,14 +114,12 @@ export default function CheckoutStep3() {
         }
       }
 
-      // 🔹 Crear la venta directamente (otros métodos)
       if (token) {
         newVenta = await createFromCart(ventaPayload, token);
       } else {
         newVenta = await addVenta(ventaPayload);
       }
 
-      // 🔹 Transformar venta para CheckoutSuccess
       const clientAddress = [
         newVenta.street,
         newVenta.number,
@@ -169,7 +156,6 @@ export default function CheckoutStep3() {
         notes: newVenta.notes || "",
       };
 
-      // 🔹 Limpiar carrito y checkout
       clearCart();
       localStorage.removeItem("checkoutData");
       if (!token) localStorage.removeItem("guestCart");
@@ -196,10 +182,8 @@ export default function CheckoutStep3() {
       (acc, it) => acc + (it.subtotal ?? it.quantity * it.unitPrice),
       0
     ) || 0;
-
   const shippingCost = checkoutData.shippingOption?.cost || 0;
   const couponDiscount = checkoutData.couponDiscount || 0;
-
   const paymentDiscount =
     paymentMethod === "efectivo" || paymentMethod === "transferencia"
       ? 0.2 * subtotal

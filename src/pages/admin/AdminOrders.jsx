@@ -98,21 +98,9 @@ export default function AdminOrders() {
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {orders.map((o) => {
             // 🔹 Calcular subtotal, descuentos y total final
-            const subtotal =
-              o.items?.reduce(
-                (acc, i) => acc + (i.subtotal ?? i.quantity * i.price),
-                0
-              ) || 0;
-
-            const method = (o.paymentMethod || "").toLowerCase();
             const paymentDiscount = o.paymentDiscount || 0;
             const couponDiscount = o.couponDiscount || 0;
-
-            const totalFinal =
-              subtotal -
-              paymentDiscount -
-              couponDiscount +
-              (o.shippingCost || 0);
+            const totalFinal = o.totalConDescuento || o.total;
 
             return (
               <div
