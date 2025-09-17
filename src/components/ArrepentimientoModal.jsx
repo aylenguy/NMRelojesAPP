@@ -101,7 +101,7 @@ const ArrepentimientoModal = ({ onClose }) => {
           />
           <input
             type="text"
-            name="NúmeroPedido"
+            name="NumeroPedido"
             placeholder="Número de pedido"
             value={formData.NumeroPedido}
             onChange={handleChange}
