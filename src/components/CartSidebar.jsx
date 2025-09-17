@@ -26,11 +26,12 @@ const CartSidebar = () => {
   const [shippingOptions, setShippingOptions] = useState([]);
   const [selectedShipping, setSelectedShipping] = useState(null);
   // Descuento del 20%
+
+  const total = cart?.total ?? 0;
   const discountRate = 0.2;
   const totalWithShipping = total + (selectedShipping?.cost ?? 0);
   const discountedPrice = totalWithShipping * (1 - discountRate);
 
-  const total = cart?.total ?? 0;
   const itemsContainerRef = useRef(null);
 
   useEffect(() => {
