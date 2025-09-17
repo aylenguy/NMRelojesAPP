@@ -155,14 +155,27 @@ export const AuthProvider = ({ children }) => {
       if (res.status !== 200 && res.status !== 201) {
         return {
           success: false,
-          message: res.data?.message || "Error en el registro",
+          message:
+            res.data?.message ||
+            res.data?.Message || // por si el backend manda con M mayúscula
+            "Error en el registro",
         };
       }
 
-      return { success: true };
+      return {
+        success: true,
+        message: res.data?.message || "Registro exitoso",
+      };
     } catch (err) {
-      console.error("Error registro:", err);
-      return { success: false, message: "Error de conexión con el servidor" };
+      console.error("Error registro:", err.response?.data || err);
+
+      return {
+        success: false,
+        message:
+          err.response?.data?.message ||
+          err.response?.data?.Message || // fallback si backend usa mayúscula
+          "Error al registrarse. Intente de nuevo.",
+      };
     } finally {
       setLoading(false);
     }

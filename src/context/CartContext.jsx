@@ -40,10 +40,10 @@ export const CartProvider = ({ children }) => {
     setError(null);
     try {
       const res = token
-        ? await axios.get(API_URL, { headers: getHeaders(), timeout: 10000 })
+        ? await axios.get(API_URL, { headers: getHeaders(), timeout: 20000 })
         : await axios.get(`${API_URL}/guest`, {
             params: { guestId: getGuestId() },
-            timeout: 10000,
+            timeout: 20000,
           });
 
       const { items = [], total = 0 } = res.data;
