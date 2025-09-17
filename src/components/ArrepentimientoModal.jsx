@@ -6,7 +6,7 @@ const ArrepentimientoModal = ({ onClose }) => {
     nombre: "",
     telefono: "",
     email: "",
-    codigoCompra: "",
+    NumeroPedido: "",
     inconveniente: "",
   });
 
