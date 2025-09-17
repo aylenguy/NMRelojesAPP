@@ -17,11 +17,19 @@ const ArrepentimientoModal = ({ onClose }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await fetch("/api/arrepentimiento", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/Arrepentimiento`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formData),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Error al enviar la solicitud");
+      }
+
       alert("Tu solicitud de arrepentimiento ha sido enviada.");
       onClose();
     } catch (error) {
@@ -71,7 +79,7 @@ const ArrepentimientoModal = ({ onClose }) => {
             value={formData.nombre}
             onChange={handleChange}
             required
-            className="border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-400"
+            className="border rounded px-3 py-2 focus:outline-none text-black focus:ring-2 focus:ring-gray-400"
           />
           <input
             type="tel"
@@ -80,7 +88,7 @@ const ArrepentimientoModal = ({ onClose }) => {
             value={formData.telefono}
             onChange={handleChange}
             required
-            className="border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-400"
+            className="border rounded px-3 py-2 focus:outline-none text-black focus:ring-2 focus:ring-gray-400"
           />
           <input
             type="email"
@@ -89,7 +97,7 @@ const ArrepentimientoModal = ({ onClose }) => {
             value={formData.email}
             onChange={handleChange}
             required
-            className="border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-400"
+            className="border rounded px-3 py-2 focus:outline-none text-black focus:ring-2 focus:ring-gray-400"
           />
           <input
             type="text"
@@ -98,7 +106,7 @@ const ArrepentimientoModal = ({ onClose }) => {
             value={formData.NumeroPedido}
             onChange={handleChange}
             required
-            className="border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-400"
+            className="border rounded px-3 py-2 focus:outline-none text-black focus:ring-2 focus:ring-gray-400"
           />
 
           <textarea
@@ -107,7 +115,7 @@ const ArrepentimientoModal = ({ onClose }) => {
             value={formData.inconveniente}
             onChange={handleChange}
             required
-            className="border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-400"
+            className="border rounded px-3 py-2 focus:outline-none text-black focus:ring-2 focus:ring-gray-400"
           ></textarea>
 
           <button
