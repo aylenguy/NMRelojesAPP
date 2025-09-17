@@ -1,18 +1,16 @@
-// src/components/ArrepentimientoModal.jsx
 import { useState, useEffect } from "react";
 
-const ArrepentimientoModal = ({ onClose }) => {
+const Contacto = () => {
   const [formData, setFormData] = useState({
     nombre: "",
-    telefono: "",
     email: "",
-    NumeroPedido: "",
-    inconveniente: "",
+    telefono: "",
+    mensaje: "",
   });
 
-  const [status, setStatus] = useState(null); // Mensaje de estado
+  const [status, setStatus] = useState(null);
   const [statusType, setStatusType] = useState(null); // "success" o "error"
-  const [isSubmitting, setIsSubmitting] = useState(false); // Spinner
+  const [isSubmitting, setIsSubmitting] = useState(false); // controla el spinner
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -20,30 +18,20 @@ const ArrepentimientoModal = ({ onClose }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsSubmitting(true);
+    setIsSubmitting(true); // activar spinner
 
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/Arrepentimiento`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(formData),
-        }
-      );
-
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/contacto`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
       if (response.ok) {
-        setStatus("¡Solicitud enviada correctamente!");
+        setStatus("¡Mensaje enviado correctamente!");
         setStatusType("success");
-        setFormData({
-          nombre: "",
-          telefono: "",
-          email: "",
-          NumeroPedido: "",
-          inconveniente: "",
-        });
+        setFormData({ nombre: "", email: "", telefono: "", mensaje: "" });
       } else {
-        setStatus("Error al enviar la solicitud.");
+        setStatus("Error al enviar el mensaje.");
         setStatusType("error");
       }
     } catch (error) {
@@ -51,11 +39,11 @@ const ArrepentimientoModal = ({ onClose }) => {
       setStatus("Error de conexión con el servidor.");
       setStatusType("error");
     } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(false); // desactivar spinner
     }
   };
 
-  // Ocultar mensaje automáticamente después de 5 segundos
+  // Ocultar mensaje automáticamente después de 5s
   useEffect(() => {
     if (status) {
       const timer = setTimeout(() => {
@@ -67,117 +55,102 @@ const ArrepentimientoModal = ({ onClose }) => {
   }, [status]);
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-      <div className="bg-white rounded-2xl w-full max-w-md p-6 relative shadow-lg">
-        {/* Botón cerrar */}
-        <button
-          onClick={onClose}
-          className="absolute top-3 right-3 text-gray-500 hover:text-gray-800"
-        >
-          ✕
-        </button>
+    <div className="min-h-screen px-4 py-10">
+      <div className="max-w-2xl mx-auto">
+        <h1 className="text-4xl font-bold font-poppins text-center text-gray-800 mb-10">
+          Contacto
+        </h1>
 
-        {/* Título del modal */}
-        <h2 className="text-gray-600 text-xl mb-4">
-          Arrepentimiento de compra
-        </h2>
+        <form className="space-y-6" onSubmit={handleSubmit}>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Nombre y Apellido
+            </label>
+            <input
+              type="text"
+              name="nombre"
+              value={formData.nombre}
+              onChange={handleChange}
+              required
+              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm px-4 py-2 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+            />
+          </div>
 
-        {/* Texto informativo */}
-        <p className="text-gray-600 text-sm mb-4">
-          La solicitud es válida si se realiza dentro de los plazos establecidos
-          en la{" "}
-          <a
-            href="https://www.boletinoficial.gob.ar/detalleAviso/primera/235729/20201005"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="font-semibold text-gray-500 hover:text-gray-800"
-          >
-            <strong>Resolución 424/2020</strong>
-          </a>{" "}
-          del Ministerio de Comercio Interior y no se traten de productos que
-          estén exentos como productos personalizados y todos los comprendidos
-          en el artículo 1116 del Código Civil y Comercial de la Nación.
-        </p>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              E-mail
+            </label>
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              required
+              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm px-4 py-2 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+            />
+          </div>
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-          <input
-            type="text"
-            name="nombre"
-            placeholder="Nombre completo"
-            value={formData.nombre}
-            onChange={handleChange}
-            required
-            className="border rounded px-3 py-2 focus:outline-none text-black focus:ring-2 focus:ring-gray-400"
-          />
-          <input
-            type="tel"
-            name="telefono"
-            placeholder="Teléfono"
-            value={formData.telefono}
-            onChange={handleChange}
-            required
-            className="border rounded px-3 py-2 focus:outline-none text-black focus:ring-2 focus:ring-gray-400"
-          />
-          <input
-            type="email"
-            name="email"
-            placeholder="Email"
-            value={formData.email}
-            onChange={handleChange}
-            required
-            className="border rounded px-3 py-2 focus:outline-none text-black focus:ring-2 focus:ring-gray-400"
-          />
-          <input
-            type="text"
-            name="NumeroPedido"
-            placeholder="Número de pedido"
-            value={formData.NumeroPedido}
-            onChange={handleChange}
-            required
-            className="border rounded px-3 py-2 focus:outline-none text-black focus:ring-2 focus:ring-gray-400"
-          />
-          <textarea
-            name="inconveniente"
-            placeholder="Describa el inconveniente"
-            value={formData.inconveniente}
-            onChange={handleChange}
-            required
-            className="border rounded px-3 py-2 focus:outline-none text-black focus:ring-2 focus:ring-gray-400"
-          ></textarea>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Teléfono
+            </label>
+            <input
+              type="tel"
+              name="telefono"
+              value={formData.telefono}
+              onChange={handleChange}
+              required
+              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm px-4 py-2 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+            />
+          </div>
 
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className={`bg-black text-white py-2 rounded-2xl hover:bg-gray-800 transition flex items-center justify-center gap-2 ${
-              isSubmitting ? "opacity-70 cursor-not-allowed" : ""
-            }`}
-          >
-            {isSubmitting ? (
-              <>
-                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                Enviando...
-              </>
-            ) : (
-              "Enviar"
-            )}
-          </button>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Mensaje <span className="text-gray-400">(opcional)</span>
+            </label>
+            <textarea
+              name="mensaje"
+              value={formData.mensaje}
+              onChange={handleChange}
+              rows="5"
+              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm px-4 py-2 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent resize-none"
+            ></textarea>
+          </div>
 
-          {/* Mensaje de estado debajo del botón */}
-          {status && (
-            <div
-              className={`mt-3 px-4 py-2 rounded-md text-center font-medium ${
-                statusType === "success"
-                  ? "border-[#005f73] focus:ring-[#005f73]"
-                  : "border-gray-300 focus:ring-black"
-              }`}
-            >
-              {status}
+          <div className="text-center">
+            <div className="text-center">
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className={`py-2 px-9 bg-black text-white rounded-2xl hover:bg-gray-800 text-center shadow transition-all text-base flex items-center justify-center gap-2 min-w-[200px] mx-auto ${
+                  isSubmitting ? "opacity-70 cursor-not-allowed" : ""
+                }`}
+              >
+                {isSubmitting ? (
+                  <>
+                    {/* Spinner básico */}
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    Enviando...
+                  </>
+                ) : (
+                  "Enviar mensaje"
+                )}
+              </button>
             </div>
-          )}
+
+            {/* Mensaje debajo del botón */}
+            {status && (
+              <div
+                className={`mt-4 px-4 py-2 rounded-md text-center font-medium text-[#005f73]`}
+              >
+                {status}
+              </div>
+            )}
+          </div>
         </form>
       </div>
     </div>
   );
 };
 
-export default ArrepentimientoModal;
+export default Contacto;

@@ -1,5 +1,5 @@
 // src/components/ArrepentimientoModal.jsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const ArrepentimientoModal = ({ onClose }) => {
   const [formData, setFormData] = useState({
@@ -10,12 +10,18 @@ const ArrepentimientoModal = ({ onClose }) => {
     inconveniente: "",
   });
 
+  const [status, setStatus] = useState(null); // Mensaje de estado
+  const [statusType, setStatusType] = useState(null); // "success" o "error"
+  const [isSubmitting, setIsSubmitting] = useState(false); // Spinner
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
+
     try {
       const response = await fetch(
         `${import.meta.env.VITE_API_URL}/Arrepentimiento`,
@@ -26,17 +32,39 @@ const ArrepentimientoModal = ({ onClose }) => {
         }
       );
 
-      if (!response.ok) {
-        throw new Error("Error al enviar la solicitud");
+      if (response.ok) {
+        setStatus("¡Solicitud enviada correctamente!");
+        setStatusType("success");
+        setFormData({
+          nombre: "",
+          telefono: "",
+          email: "",
+          NumeroPedido: "",
+          inconveniente: "",
+        });
+      } else {
+        setStatus("Error al enviar la solicitud.");
+        setStatusType("error");
       }
-
-      alert("Tu solicitud de arrepentimiento ha sido enviada.");
-      onClose();
     } catch (error) {
       console.error(error);
-      alert("Hubo un error al enviar la solicitud.");
+      setStatus("Error de conexión con el servidor.");
+      setStatusType("error");
+    } finally {
+      setIsSubmitting(false);
     }
   };
+
+  // Ocultar mensaje automáticamente después de 5 segundos
+  useEffect(() => {
+    if (status) {
+      const timer = setTimeout(() => {
+        setStatus(null);
+        setStatusType(null);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [status]);
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
@@ -108,7 +136,6 @@ const ArrepentimientoModal = ({ onClose }) => {
             required
             className="border rounded px-3 py-2 focus:outline-none text-black focus:ring-2 focus:ring-gray-400"
           />
-
           <textarea
             name="inconveniente"
             placeholder="Describa el inconveniente"
@@ -120,10 +147,33 @@ const ArrepentimientoModal = ({ onClose }) => {
 
           <button
             type="submit"
-            className="bg-black text-white py-2 rounded-2xl hover:bg-gray-800 transition"
+            disabled={isSubmitting}
+            className={`bg-black text-white py-2 rounded-2xl hover:bg-gray-800 transition flex items-center justify-center gap-2 ${
+              isSubmitting ? "opacity-70 cursor-not-allowed" : ""
+            }`}
           >
-            Enviar
+            {isSubmitting ? (
+              <>
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                Enviando...
+              </>
+            ) : (
+              "Enviar"
+            )}
           </button>
+
+          {/* Mensaje de estado debajo del botón */}
+          {status && (
+            <div
+              className={`mt-3 px-4 py-2 rounded-md text-center font-medium ${
+                statusType === "success"
+                  ? "border-[#005f73] focus:ring-[#005f73]"
+                  : "border-gray-300 focus:ring-black"
+              }`}
+            >
+              {status}
+            </div>
+          )}
         </form>
       </div>
     </div>
