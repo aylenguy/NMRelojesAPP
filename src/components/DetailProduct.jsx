@@ -98,8 +98,11 @@ const DetailProduct = () => {
   const description =
     product?.description || product?.Description || product?.descripcion || "";
 
-  const Specs =
-    product?.Specs || product?.specs || product?.Specifications || "";
+  const Specs = product?.caracteristicas
+    ? Array.isArray(product.caracteristicas)
+      ? product.caracteristicas.join("\n") // lo une en líneas
+      : product.caracteristicas
+    : "";
   const color = product?.color || product?.Color || "";
   const totalPrice = price;
   const installmentCount = 6;
@@ -355,13 +358,10 @@ const DetailProduct = () => {
           )}
         </div>
 
-        {/* Specs */}
         {Specs && (
           <div className="border rounded-lg p-4 text-sm sm:text-base md:text-base text-gray-700 leading-relaxed">
             <h3 className="font-semibold mb-2">Especificaciones:</h3>
-            <p style={{ whiteSpace: "pre-line" }}>
-              <span className="font-semibold">{Specs}</span>
-            </p>
+            <p style={{ whiteSpace: "pre-line" }}>{Specs}</p>
           </div>
         )}
       </div>
