@@ -62,11 +62,11 @@ const Home = ({ onProductClick, searchText }) => {
       </section>
 
       {/* Productos */}
-      <section className="container mx-auto px-4 sm:px-6">
+      <section className="container mx-auto px-4 sm:px-6 max-w-6xl">
         <h2 className="md:text-3xl text-2xl font-bold text-center tracking-wide mb-6 font-poppins">
           Nuestros Productos
         </h2>
-        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8">
           {filteredProducts.map((product) => {
             const stock = product.stock ?? 0;
             const sinStock = stock <= 0;
@@ -104,7 +104,7 @@ const Home = ({ onProductClick, searchText }) => {
                     </span>
                   )}
 
-                  {/* Botón carrito SIEMPRE visible, centrado horizontal */}
+                  {/* Botón carrito */}
                   {!sinStock && (
                     <button
                       onClick={(e) => {
@@ -121,13 +121,14 @@ const Home = ({ onProductClick, searchText }) => {
 
                 {/* Información del producto */}
                 <div className="p-3 sm:p-4 text-center">
-                  <h3 className="text-sm sm:text-base font-bold font-poppins mb-1 truncate">
+                  <h3 className="text-sm sm:text-base font-bold font-poppins mb-2 truncate">
                     {product.brand
                       ? `${product.brand} ${product.name}`
                       : product.name}
                   </h3>
 
-                  <p className="flex justify-between items-center mb-2">
+                  {/* Precio normal */}
+                  <p className="text-lg sm:text-xl font-bold text-gray-800 mb-2">
                     $
                     {(
                       product.price ||
@@ -136,9 +137,10 @@ const Home = ({ onProductClick, searchText }) => {
                       0
                     ).toLocaleString("es-AR")}
                   </p>
-                  <p className="text-xs sm:text-sm text-[#005f73] font-poppins mt-1">
+                  {/* Precio con transferencia */}
+                  <p className="text-base sm:text-lg text-[#005f73] font-poppins mt-1 font-semibold">
                     TRANSFERENCIA O EFECTIVO{" "}
-                    <span className="block font-semibold text-xs sm:text-sm text-[#005f73]">
+                    <span className="block font-bold text-lg sm:text-xl text-[#005f73]">
                       $
                       {Math.round(
                         (product.price ||
@@ -149,7 +151,7 @@ const Home = ({ onProductClick, searchText }) => {
                     </span>
                   </p>
                   {/* Texto aclaratorio con precio dinámico */}
-                  <p className="text-xs sm:text-sm text-gray-600 italic text-center">
+                  <p className="text-xs sm:text-sm text-gray-600  text-center">
                     $
                     {Math.round(
                       (product.price || product.Price || product.precio || 0) *
