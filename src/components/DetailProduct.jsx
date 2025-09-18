@@ -352,7 +352,6 @@ const DetailProduct = () => {
           {/* Descripción */}
           {description && (
             <div className="p-4 text-sm sm:text-base md:text-base text-gray-700 leading-relaxed">
-              <h3 className="font-semibold mb-2">Descripción:</h3>
               <p style={{ whiteSpace: "pre-line" }}>{description}</p>
             </div>
           )}
@@ -360,9 +359,9 @@ const DetailProduct = () => {
           {/* Especificaciones */}
           {Array.isArray(product?.caracteristicas) &&
             product.caracteristicas.length > 0 && (
-              <div className="p-4 mt-4 text-sm sm:text-base md:text-base text-gray-700 leading-relaxed">
+              <div className="p-4 mt-4 text-base sm:text-lg md:text-lg text-gray-700 leading-relaxed space-y-1">
                 {product.caracteristicas.map((spec, idx) => (
-                  <p key={idx} className="font-semibold">
+                  <p key={idx} className="font-semibold m-0">
                     {spec.trim()}
                   </p>
                 ))}
