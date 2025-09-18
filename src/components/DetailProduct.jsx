@@ -258,13 +258,6 @@ const DetailProduct = () => {
             </div>
           )}
 
-          {/* Descripción */}
-          {description && (
-            <p className="text-sm sm:text-base md:text-base text-gray-700 mb-6 leading-relaxed">
-              {description}
-            </p>
-          )}
-
           {/* Cantidad + Botón */}
           {stock > 0 ? (
             <div className="flex flex-col gap-3 mb-6">
@@ -347,6 +340,13 @@ const DetailProduct = () => {
                     </span>
                   </div>
                 ))}
+              </div>
+            )}
+            {/* Descripción */}
+            {description && (
+              <div className="text-sm sm:text-base md:text-base text-gray-700 mb-6 leading-relaxed">
+                <h3 className="font-semibold mb-2">Descripción:</h3>
+                <p style={{ whiteSpace: "pre-line" }}>{description}</p>
               </div>
             )}
           </div>
