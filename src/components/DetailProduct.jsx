@@ -401,29 +401,58 @@ const DetailProduct = () => {
         </h2>
         <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8">
           {relatedProducts.length > 0 ? (
-            relatedProducts.map((product) => {
-              const stock = product.stock ?? product.Stock ?? 0;
-              const sinStock = stock <= 0;
+            relatedProducts.map((rawProduct) => {
+              // Normalizamos el producto
+              const product = {
+                id: rawProduct.Id ?? rawProduct.id,
+                name:
+                  rawProduct.Nombre ??
+                  rawProduct.nombre ??
+                  rawProduct.Name ??
+                  rawProduct.name ??
+                  "",
+                price:
+                  rawProduct.Precio ??
+                  rawProduct.precio ??
+                  rawProduct.Price ??
+                  rawProduct.price ??
+                  0,
+                image:
+                  rawProduct.Imagen ??
+                  rawProduct.imagen ??
+                  rawProduct.Image ??
+                  rawProduct.image ??
+                  "/placeholder.png",
+                description:
+                  rawProduct.Descripcion ??
+                  rawProduct.descripcion ??
+                  rawProduct.Description ??
+                  rawProduct.description ??
+                  "",
+                color: rawProduct.Color ?? rawProduct.color ?? "",
+                stock: rawProduct.Stock ?? rawProduct.stock ?? 0,
+                brand:
+                  rawProduct.Marca ??
+                  rawProduct.marca ??
+                  rawProduct.Brand ??
+                  rawProduct.brand ??
+                  "",
+              };
+
+              const sinStock = product.stock <= 0;
 
               return (
                 <div
-                  key={product.id || product.Id}
+                  key={product.id}
                   className="relative bg-white rounded-lg shadow-md hover:shadow-lg transition overflow-hidden border cursor-pointer"
                   onClick={() =>
-                    navigate(`/producto/${product.id || product.Id}`, {
-                      state: product,
-                    })
+                    navigate(`/producto/${product.id}`, { state: product })
                   }
                 >
                   <div className="relative group aspect-square">
                     <img
-                      src={
-                        product.image ||
-                        product.Image ||
-                        product.imagen ||
-                        "/placeholder.png"
-                      }
-                      alt={getTitulo(product)}
+                      src={product.image}
+                      alt={product.name}
                       className="w-full h-full object-cover transform transition-transform duration-300 group-hover:scale-105"
                     />
                     {sinStock && (
@@ -435,7 +464,7 @@ const DetailProduct = () => {
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          addToCart(product.id || product.Id, 1);
+                          addToCart(product.id, 1);
                         }}
                         className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-white p-2 rounded-full shadow-lg hover:bg-gray-100 transition"
                         title="Agregar al carrito"
@@ -451,38 +480,23 @@ const DetailProduct = () => {
                         : product.name}
                     </h3>
                     <p className="text-lg sm:text-xl font-bold text-gray-800 mb-2">
-                      $
-                      {(
-                        product.price ||
-                        product.Price ||
-                        product.precio ||
-                        0
-                      ).toLocaleString("es-AR")}
+                      ${product.price.toLocaleString("es-AR")}
                     </p>
                     <p className="text-base sm:text-lg text-[#005f73] font-poppins mt-1 font-semibold">
                       TRANSFERENCIA O EFECTIVO{" "}
                       <span className="block font-bold text-lg sm:text-xl text-[#005f73]">
                         $
-                        {Math.round(
-                          (product.price ||
-                            product.Price ||
-                            product.precio ||
-                            0) * 0.8
-                        ).toLocaleString("es-AR")}
+                        {Math.round(product.price * 0.8).toLocaleString(
+                          "es-AR"
+                        )}
                       </span>
                     </p>
                     <p className="text-xs sm:text-sm text-gray-600 text-center">
-                      $
-                      {Math.round(
-                        (product.price ||
-                          product.Price ||
-                          product.precio ||
-                          0) * 0.8
-                      ).toLocaleString("es-AR")}{" "}
+                      ${Math.round(product.price * 0.8).toLocaleString("es-AR")}{" "}
                       pagando con Transferencia, depósito bancario o Efectivo
                     </p>
                     {sinStock && (
-                      <p className="text-[#005f73]  font-bold text-sm mt-2 p-2 rounded">
+                      <p className="text-[#005f73] font-bold text-sm mt-2 p-2 rounded">
                         Agotado
                       </p>
                     )}

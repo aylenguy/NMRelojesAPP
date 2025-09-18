@@ -220,20 +220,19 @@ const Productos = ({ searchText }) => {
 
               return (
                 <div
-                  key={product.id || product.Id}
+                  key={product.id}
                   className="relative bg-white rounded-lg shadow-md hover:shadow-lg transition overflow-hidden border"
                 >
+                  {/* Imagen */}
                   <div
                     className="relative cursor-pointer group aspect-square"
                     onClick={() =>
-                      navigate(`/producto/${product.id || product.Id}`, {
-                        state: product,
-                      })
+                      navigate(`/producto/${product.id}`, { state: product })
                     }
                   >
                     <img
-                      src={getImagen(product)}
-                      alt={getNombre(product)}
+                      src={product.image}
+                      alt={product.name}
                       className="w-full h-full object-cover transform transition-transform duration-300 group-hover:scale-105"
                     />
 
@@ -257,22 +256,36 @@ const Productos = ({ searchText }) => {
                     )}
                   </div>
 
+                  {/* Información del producto */}
                   <div className="p-3 sm:p-4 text-center">
-                    <h3 className="text-sm sm:text-base font-bold font-poppins mb-1 truncate">
-                      {getTitulo(product)}
+                    <h3 className="text-sm sm:text-base font-bold font-poppins mb-2 truncate">
+                      {product.brand
+                        ? `${product.brand} ${product.name}`
+                        : product.name}
                     </h3>
-                    <p className="text-sm sm:text-base text-gray-800 font-medium">
-                      ${getPrecio(product).toLocaleString("es-AR")}
+
+                    {/* Precio normal */}
+                    <p className="text-lg sm:text-xl font-bold text-gray-800 mb-2">
+                      ${product.price.toLocaleString("es-AR")}
                     </p>
-                    <p className="text-xs sm:text-sm text-[#005f73] font-poppins mt-1">
+
+                    {/* Precio con transferencia */}
+                    <p className="text-base sm:text-lg text-[#005f73] font-poppins mt-1 font-semibold">
                       TRANSFERENCIA O EFECTIVO{" "}
-                      <span className="block font-semibold text-xs sm:text-sm text-[#005f73]">
+                      <span className="block font-bold text-lg sm:text-xl text-[#005f73]">
                         $
-                        {Math.round(getPrecio(product) * 0.8).toLocaleString(
+                        {Math.round(product.price * 0.8).toLocaleString(
                           "es-AR"
                         )}
                       </span>
                     </p>
+
+                    {/* Texto aclaratorio */}
+                    <p className="text-xs sm:text-sm text-gray-600 text-center">
+                      ${Math.round(product.price * 0.8).toLocaleString("es-AR")}{" "}
+                      pagando con Transferencia, depósito bancario o Efectivo
+                    </p>
+
                     {sinStock && (
                       <p className="text-sm text-red-600 mt-2 font-bold">
                         Agotado
@@ -282,7 +295,8 @@ const Productos = ({ searchText }) => {
                 </div>
               );
             })}
-            {sorted.length === 0 && (
+
+            {filteredProducts.length === 0 && (
               <p className="text-center col-span-full text-gray-500">
                 No se encontraron productos.
               </p>
