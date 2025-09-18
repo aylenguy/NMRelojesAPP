@@ -19,12 +19,26 @@ const Productos = ({ searchText }) => {
   const navigate = useNavigate();
   const { addToCart } = useCart();
 
+  // --- Fetch y normalización de productos ---
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         setLoading(true);
         const res = await api.get("/Product/GetAllProducts");
-        setProductos(res.data);
+
+        // Normalizamos los productos
+        const productosNormalizados = res.data.map((p) => ({
+          id: p.id ?? p.Id,
+          name: p.name ?? p.Name ?? p.nombre ?? "Producto sin nombre",
+          price: p.price ?? p.Price ?? p.precio ?? 0,
+          brand: p.brand ?? p.Brand ?? p.marca ?? "Sin marca",
+          category: p.category ?? p.Category ?? p.categoria ?? "Sin categoría",
+          color: p.color ?? p.Color ?? "Sin color",
+          stock: p.stock ?? 0,
+          image: p.image ?? p.Image ?? p.imagen ?? "placeholder.png",
+        }));
+
+        setProductos(productosNormalizados);
       } catch {
         setError("No se pudieron cargar los productos. Intenta nuevamente.");
       } finally {
@@ -34,6 +48,7 @@ const Productos = ({ searchText }) => {
     fetchProducts();
   }, []);
 
+  // --- Funciones de filtro ---
   const triggerFilter = () => {
     setFiltering(true);
     setTimeout(() => setFiltering(false), 500);
@@ -62,55 +77,37 @@ const Productos = ({ searchText }) => {
     triggerFilter();
   };
 
-  const getPrecio = (p) => p.price ?? p.Price ?? p.precio ?? 0;
-  const getNombre = (p) =>
-    p.name ?? p.Name ?? p.nombre ?? "Producto sin nombre";
-  const getCategoria = (p) =>
-    p.category ?? p.Category ?? p.categoria ?? "Sin categoría";
-  const getColor = (p) => p.color ?? p.Color ?? "Sin color";
-  const getMarca = (p) =>
-    p.brand ?? p.Brand ?? p.marca ?? p.Marca ?? "Sin marca";
-  const getImagen = (p) => {
-    const path = p.image ?? p.Image ?? p.imagen ?? "placeholder.png";
-    if (path.startsWith("http")) return path;
-    return `${import.meta.env.VITE_API_URL}/uploads/${path}`;
-  };
-  const getTitulo = (p) => {
-    const nombre = getNombre(p);
-    const marca = getMarca(p);
-    return marca && marca !== "Sin marca" ? `${marca} ${nombre}` : nombre;
-  };
-
+  // --- Filtros aplicados ---
   const filtered = productos.filter((p) => {
-    const nombre = getNombre(p).toLowerCase();
-    const coincideBusqueda = nombre.includes(searchText?.toLowerCase() || "");
+    const coincideBusqueda = p.name
+      .toLowerCase()
+      .includes((searchText || "").toLowerCase());
     const coincideCategoria =
       categoriasSeleccionadas.length === 0 ||
-      categoriasSeleccionadas.includes(getCategoria(p));
+      categoriasSeleccionadas.includes(p.category);
     const coincideColor =
       coloresSeleccionados.length === 0 ||
-      coloresSeleccionados.includes(getColor(p));
+      coloresSeleccionados.includes(p.color);
     const coincideMarca =
-      marcasSeleccionadas.length === 0 ||
-      marcasSeleccionadas.includes(getMarca(p));
+      marcasSeleccionadas.length === 0 || marcasSeleccionadas.includes(p.brand);
     return (
       coincideBusqueda && coincideCategoria && coincideColor && coincideMarca
     );
   });
 
+  // --- Ordenamiento ---
   const sorted = [...filtered].sort((a, b) => {
-    if (sortOption === "precio-asc") return getPrecio(a) - getPrecio(b);
-    if (sortOption === "precio-desc") return getPrecio(b) - getPrecio(a);
-    if (sortOption === "nombre-asc")
-      return getNombre(a).localeCompare(getNombre(b));
-    if (sortOption === "nombre-desc")
-      return getNombre(b).localeCompare(getNombre(a));
+    if (sortOption === "precio-asc") return a.price - b.price;
+    if (sortOption === "precio-desc") return b.price - a.price;
+    if (sortOption === "nombre-asc") return a.name.localeCompare(b.name);
+    if (sortOption === "nombre-desc") return b.name.localeCompare(a.name);
     return 0;
   });
 
+  // --- Agregar al carrito ---
   const handleAddToCart = async (producto) => {
     try {
-      await addToCart(producto.id ?? producto.Id);
+      await addToCart(producto.id);
       setShowNotification(true);
       setTimeout(() => setShowNotification(false), 2000);
     } catch (err) {
@@ -118,6 +115,7 @@ const Productos = ({ searchText }) => {
     }
   };
 
+  // --- Loading y error ---
   if (loading)
     return (
       <div className="flex justify-center items-center min-h-screen">
@@ -130,9 +128,9 @@ const Productos = ({ searchText }) => {
       <div className="p-8 text-center text-red-500 font-semibold">{error}</div>
     );
 
-  const categoriasUnicas = [...new Set(productos.map(getCategoria))];
-  const coloresUnicos = [...new Set(productos.map(getColor))];
-  const marcasUnicas = [...new Set(productos.map(getMarca))];
+  const categoriasUnicas = [...new Set(productos.map((p) => p.category))];
+  const coloresUnicos = [...new Set(productos.map((p) => p.color))];
+  const marcasUnicas = [...new Set(productos.map((p) => p.brand))];
 
   return (
     <div className="min-h-screen p-4 sm:p-8">
@@ -215,8 +213,7 @@ const Productos = ({ searchText }) => {
         <div className="relative">
           <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
             {sorted.map((product) => {
-              const stock = product.stock ?? 0;
-              const sinStock = stock <= 0;
+              const sinStock = product.stock <= 0;
 
               return (
                 <div
@@ -231,7 +228,13 @@ const Productos = ({ searchText }) => {
                     }
                   >
                     <img
-                      src={product.image}
+                      src={
+                        product.image.startsWith("http")
+                          ? product.image
+                          : `${import.meta.env.VITE_API_URL}/uploads/${
+                              product.image
+                            }`
+                      }
                       alt={product.name}
                       className="w-full h-full object-cover transform transition-transform duration-300 group-hover:scale-105"
                     />
@@ -259,17 +262,15 @@ const Productos = ({ searchText }) => {
                   {/* Información del producto */}
                   <div className="p-3 sm:p-4 text-center">
                     <h3 className="text-sm sm:text-base font-bold font-poppins mb-2 truncate">
-                      {product.brand
+                      {product.brand !== "Sin marca"
                         ? `${product.brand} ${product.name}`
                         : product.name}
                     </h3>
 
-                    {/* Precio normal */}
                     <p className="text-lg sm:text-xl font-bold text-gray-800 mb-2">
                       ${product.price.toLocaleString("es-AR")}
                     </p>
 
-                    {/* Precio con transferencia */}
                     <p className="text-base sm:text-lg text-[#005f73] font-poppins mt-1 font-semibold">
                       TRANSFERENCIA O EFECTIVO{" "}
                       <span className="block font-bold text-lg sm:text-xl text-[#005f73]">
@@ -280,7 +281,6 @@ const Productos = ({ searchText }) => {
                       </span>
                     </p>
 
-                    {/* Texto aclaratorio */}
                     <p className="text-xs sm:text-sm text-gray-600 text-center">
                       ${Math.round(product.price * 0.8).toLocaleString("es-AR")}{" "}
                       pagando con Transferencia, depósito bancario o Efectivo
@@ -296,7 +296,7 @@ const Productos = ({ searchText }) => {
               );
             })}
 
-            {filteredProducts.length === 0 && (
+            {sorted.length === 0 && (
               <p className="text-center col-span-full text-gray-500">
                 No se encontraron productos.
               </p>
@@ -324,7 +324,6 @@ const Productos = ({ searchText }) => {
 
             <h2 className="text-lg font-bold mb-4 text-center">Filtros</h2>
 
-            {/* Ordenar por */}
             <div className="mb-4">
               <label className="block font-semibold mb-2">Ordenar por</label>
               <select
@@ -340,7 +339,6 @@ const Productos = ({ searchText }) => {
               </select>
             </div>
 
-            {/* Colores */}
             <h3 className="font-semibold mb-2">Color</h3>
             <div className="flex flex-col gap-2 mb-4">
               {coloresUnicos.map((color) => (
@@ -358,7 +356,6 @@ const Productos = ({ searchText }) => {
               ))}
             </div>
 
-            {/* Marcas */}
             <h3 className="font-semibold mb-2">Marca</h3>
             <div className="flex flex-col gap-2">
               {marcasUnicas.map((marca) => (
