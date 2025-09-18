@@ -1,6 +1,7 @@
 import { useLocation, useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { FaShoppingCart } from "react-icons/fa";
 import api from "../api/api";
 import { useCart } from "../context/CartContext";
 
@@ -25,6 +26,7 @@ const DetailProduct = () => {
   const [relatedProducts, setRelatedProducts] = useState([]);
   const [showDetails, setShowDetails] = useState(false);
 
+  // Funciones auxiliares
   const getMarca = (p) =>
     p.brand ?? p.Brand ?? p.marca ?? p.Marca ?? "Sin marca";
   const getNombre = (p) =>
@@ -40,10 +42,7 @@ const DetailProduct = () => {
     const productId = Number(id);
     window.scrollTo({ top: 0, behavior: "smooth" });
 
-    if (
-      productFromState &&
-      (productFromState.id || productFromState.Id) === productId
-    ) {
+    if ((productFromState?.id ?? productFromState?.Id) === productId) {
       setProduct(productFromState);
       setLoading(false);
     } else {
@@ -59,6 +58,7 @@ const DetailProduct = () => {
   // Cargar productos relacionados
   useEffect(() => {
     if (!product) return;
+
     const currentId = product.id || product.Id;
     const categoryId = product.categoryId || product.CategoryId;
 
@@ -113,9 +113,7 @@ const DetailProduct = () => {
     const existingItem = JSON.parse(localStorage.getItem("cart") || "[]").find(
       (item) => item.id === productId
     );
-
-    const currentInCart = existingItem ? existingItem.quantity : 0;
-    const totalRequested = currentInCart + quantity;
+    const totalRequested = (existingItem?.quantity || 0) + quantity;
 
     if (totalRequested > availableStock) {
       setError(
@@ -132,6 +130,7 @@ const DetailProduct = () => {
     setTimeout(() => setShowNotification(false), 2000);
   };
 
+  // Calcular envío
   const handleCalculateShipping = async () => {
     if (!postalCode.match(/^\d{4}$/)) {
       setError("Ingresá un código postal válido (4 dígitos).");
@@ -319,7 +318,7 @@ const DetailProduct = () => {
                   setPostalCode(e.target.value);
                   setError("");
                 }}
-                className={`w-full px-3 py-1.5 sm:px-4 sm:py-1.5 text-sm sm:text-base border rounded-xl focus:outline-none focus:ring-2 focus:ring-black transition`}
+                className="w-full px-3 py-1.5 sm:px-4 sm:py-1.5 text-sm sm:text-base border rounded-xl focus:outline-none focus:ring-2 focus:ring-black transition"
               />
               <button
                 onClick={handleCalculateShipping}
@@ -360,110 +359,97 @@ const DetailProduct = () => {
           También te puede interesar
         </h2>
         <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8">
-          {relatedProducts.map((product) => {
-            const stock = product.stock ?? product.Stock ?? 0;
-            const sinStock = stock <= 0;
+          {relatedProducts.length > 0 ? (
+            relatedProducts.map((product) => {
+              const stock = product.stock ?? product.Stock ?? 0;
+              const sinStock = stock <= 0;
 
-            return (
-              <div
-                key={product.id || product.Id}
-                className="relative bg-white rounded-lg shadow-md hover:shadow-lg transition overflow-hidden border cursor-pointer"
-                onClick={() =>
-                  navigate(`/producto/${product.id || product.Id}`, {
-                    state: product,
-                  })
-                }
-              >
-                {/* Imagen */}
-                <div className="relative group aspect-square">
-                  <img
-                    src={
-                      product.image ||
-                      product.Image ||
-                      product.imagen ||
-                      "/placeholder.png"
-                    }
-                    alt={getTitulo(product)}
-                    className="w-full h-full object-cover transform transition-transform duration-300 group-hover:scale-105"
-                  />
-
-                  {/* Etiqueta SIN STOCK */}
-                  {sinStock && (
-                    <span className="absolute top-2 left-2 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-md shadow-md">
-                      SIN STOCK
-                    </span>
-                  )}
-
-                  {/* Botón carrito */}
-                  {!sinStock && (
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        addToCart(product.id || product.Id, 1);
-                      }}
-                      className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-white p-2 rounded-full shadow-lg hover:bg-gray-100 transition"
-                      title="Agregar al carrito"
-                    >
-                      <FaShoppingCart className="text-gray-800 text-sm sm:text-lg" />
-                    </button>
-                  )}
-                </div>
-
-                {/* Información del producto */}
-                <div className="p-3 sm:p-4 text-center">
-                  <h3 className="text-sm sm:text-base font-bold font-poppins mb-2 truncate">
-                    {product.brand
-                      ? `${product.brand} ${product.name}`
-                      : product.name}
-                  </h3>
-
-                  {/* Precio normal */}
-                  <p className="text-lg sm:text-xl font-bold text-gray-800 mb-2">
-                    $
-                    {(
-                      product.price ||
-                      product.Price ||
-                      product.precio ||
-                      0
-                    ).toLocaleString("es-AR")}
-                  </p>
-
-                  {/* Precio con transferencia */}
-                  <p className="text-base sm:text-lg text-[#005f73] font-poppins mt-1 font-semibold">
-                    TRANSFERENCIA O EFECTIVO{" "}
-                    <span className="block font-bold text-lg sm:text-xl text-[#005f73]">
+              return (
+                <div
+                  key={product.id || product.Id}
+                  className="relative bg-white rounded-lg shadow-md hover:shadow-lg transition overflow-hidden border cursor-pointer"
+                  onClick={() =>
+                    navigate(`/producto/${product.id || product.Id}`, {
+                      state: product,
+                    })
+                  }
+                >
+                  <div className="relative group aspect-square">
+                    <img
+                      src={
+                        product.image ||
+                        product.Image ||
+                        product.imagen ||
+                        "/placeholder.png"
+                      }
+                      alt={getTitulo(product)}
+                      className="w-full h-full object-cover transform transition-transform duration-300 group-hover:scale-105"
+                    />
+                    {sinStock && (
+                      <span className="absolute top-2 left-2 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-md shadow-md">
+                        SIN STOCK
+                      </span>
+                    )}
+                    {!sinStock && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          addToCart(product.id || product.Id, 1);
+                        }}
+                        className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-white p-2 rounded-full shadow-lg hover:bg-gray-100 transition"
+                        title="Agregar al carrito"
+                      >
+                        <FaShoppingCart className="text-gray-800 text-sm sm:text-lg" />
+                      </button>
+                    )}
+                  </div>
+                  <div className="p-3 sm:p-4 text-center">
+                    <h3 className="text-sm sm:text-base font-bold font-poppins mb-2 truncate">
+                      {product.brand
+                        ? `${product.brand} ${product.name}`
+                        : product.name}
+                    </h3>
+                    <p className="text-lg sm:text-xl font-bold text-gray-800 mb-2">
+                      $
+                      {(
+                        product.price ||
+                        product.Price ||
+                        product.precio ||
+                        0
+                      ).toLocaleString("es-AR")}
+                    </p>
+                    <p className="text-base sm:text-lg text-[#005f73] font-poppins mt-1 font-semibold">
+                      TRANSFERENCIA O EFECTIVO{" "}
+                      <span className="block font-bold text-lg sm:text-xl text-[#005f73]">
+                        $
+                        {Math.round(
+                          (product.price ||
+                            product.Price ||
+                            product.precio ||
+                            0) * 0.8
+                        ).toLocaleString("es-AR")}
+                      </span>
+                    </p>
+                    <p className="text-xs sm:text-sm text-gray-600 text-center">
                       $
                       {Math.round(
                         (product.price ||
                           product.Price ||
                           product.precio ||
                           0) * 0.8
-                      ).toLocaleString("es-AR")}
-                    </span>
-                  </p>
-
-                  {/* Texto aclaratorio */}
-                  <p className="text-xs sm:text-sm text-gray-600 text-center">
-                    $
-                    {Math.round(
-                      (product.price || product.Price || product.precio || 0) *
-                        0.8
-                    ).toLocaleString("es-AR")}{" "}
-                    pagando con Transferencia, depósito bancario o Efectivo
-                  </p>
-
-                  {/* Solo mostrar "Agotado" si no hay stock */}
-                  {sinStock && (
-                    <p className="text-sm text-red-600 mt-2 font-bold">
-                      Agotado
+                      ).toLocaleString("es-AR")}{" "}
+                      pagando con Transferencia, depósito bancario o Efectivo
                     </p>
-                  )}
+                    {sinStock && (
+                      <p className="text-sm text-red-600 mt-2 font-bold">
+                        Agotado
+                      </p>
+                    )}
+                  </div>
                 </div>
-              </div>
-            );
-          })}
-
-          {relatedProducts.length === 0 && (
+              );
+            })
+          ) : (
             <p className="text-center col-span-full text-gray-500">
               No se encontraron productos relacionados.
             </p>
