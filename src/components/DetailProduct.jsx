@@ -327,14 +327,13 @@ const DetailProduct = () => {
             </div>
             {/* Link debajo */}
             <p className="mt-2 text-gray-600 text-xs sm:text-sm">
-              ¿No sabés tu código postal?{" "}
               <a
                 href="https://www.correoargentino.com.ar/formularios/cpa"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-600 hover:underline"
+                className="text-[#005f73] cursor-pointer  hover:text-[#003f4a] mb-4 sm:mb-6 text-sm sm:text-base"
               >
-                Consultalo acá
+                No sé mi codigo postal
               </a>
             </p>
 
@@ -379,7 +378,7 @@ const DetailProduct = () => {
           {/* Especificaciones */}
           {Array.isArray(product?.caracteristicas) &&
             product.caracteristicas.length > 0 && (
-              <div className="p-4 mt-2 text-base sm:text-lg md:text-lg text-gray-700 leading-relaxed space-y-1">
+              <div className="p-4 text-base sm:text-lg md:text-lg text-gray-700 leading-relaxed space-y-1">
                 {product.caracteristicas.map((spec, idx) => (
                   <p key={idx} className="font-semibold m-0">
                     {spec.trim()}
