@@ -305,7 +305,7 @@ const DetailProduct = () => {
           )}
 
           {/* Envío */}
-          <div className="border rounded-lg p-3 mb-6 text-sm sm:text-base">
+          <div className="p-3 mb-6 text-sm sm:text-base">
             <h3 className="font-medium mb-2 text-gray-800">Calculá tu envío</h3>
             <div className="flex gap-2 flex-col sm:flex-row">
               <input
@@ -351,19 +351,24 @@ const DetailProduct = () => {
 
           {/* Descripción */}
           {description && (
-            <div className="border rounded-lg p-4 text-sm sm:text-base md:text-base text-gray-700 leading-relaxed">
+            <div className="p-4 text-sm sm:text-base md:text-base text-gray-700 leading-relaxed">
               <h3 className="font-semibold mb-2">Descripción:</h3>
               <p style={{ whiteSpace: "pre-line" }}>{description}</p>
             </div>
           )}
 
           {/* Especificaciones */}
-          {Specs && (
-            <div className="border rounded-lg p-4 mt-4 text-sm sm:text-base md:text-base text-gray-700 leading-relaxed">
-              <h3 className="font-semibold mb-2">Especificaciones:</h3>
-              <p style={{ whiteSpace: "pre-line" }}>{Specs}</p>
-            </div>
-          )}
+          {Array.isArray(product?.caracteristicas) &&
+            product.caracteristicas.length > 0 && (
+              <div className="border rounded-lg p-4 mt-4 text-sm sm:text-base md:text-base text-gray-700 leading-relaxed">
+                <h3 className="font-semibold mb-2">Especificaciones:</h3>
+                <ul className="list-disc list-inside space-y-1">
+                  {product.caracteristicas.map((spec, idx) => (
+                    <li key={idx}>{spec.trim()}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
         </div>
       </div>
 
