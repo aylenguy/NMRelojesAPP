@@ -349,21 +349,22 @@ const DetailProduct = () => {
             )}
           </div>
 
-          {/* Descripción: fuera del bloque de envío */}
+          {/* Descripción */}
           {description && (
             <div className="border rounded-lg p-4 text-sm sm:text-base md:text-base text-gray-700 leading-relaxed">
               <h3 className="font-semibold mb-2">Descripción:</h3>
               <p style={{ whiteSpace: "pre-line" }}>{description}</p>
             </div>
           )}
-        </div>
 
-        {Specs && (
-          <div className="border rounded-lg p-4 text-sm sm:text-base md:text-base text-gray-700 leading-relaxed">
-            <h3 className="font-semibold mb-2">Especificaciones:</h3>
-            <p style={{ whiteSpace: "pre-line" }}>{Specs}</p>
-          </div>
-        )}
+          {/* Especificaciones */}
+          {Specs && (
+            <div className="border rounded-lg p-4 mt-4 text-sm sm:text-base md:text-base text-gray-700 leading-relaxed">
+              <h3 className="font-semibold mb-2">Especificaciones:</h3>
+              <p style={{ whiteSpace: "pre-line" }}>{Specs}</p>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Productos relacionados */}
