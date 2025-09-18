@@ -118,27 +118,26 @@ const Home = ({ onProductClick, searchText }) => {
                     </button>
                   )}
                 </div>
-
                 {/* Información del producto */}
-                <div className="p-3 sm:p-4 text-center">
-                  <h3 className="text-sm sm:text-base font-bold font-poppins mb-1 truncate">
+                <div className="p-3 sm:p-4">
+                  <h3 className="text-sm sm:text-base font-bold font-poppins mb-2 truncate text-center">
                     {product.brand
                       ? `${product.brand} ${product.name}`
                       : product.name}
                   </h3>
 
-                  <p className="text-sm sm:text-base text-gray-800 font-medium">
-                    $
-                    {(
-                      product.price ||
-                      product.Price ||
-                      product.precio ||
-                      0
-                    ).toLocaleString("es-AR")}
-                  </p>
-                  <p className="text-xs sm:text-sm text-[#005f73] font-poppins mt-1">
-                    TRANSFERENCIA O EFECTIVO{" "}
-                    <span className="block font-semibold text-xs sm:text-sm text-[#005f73]">
+                  {/* Precios */}
+                  <div className="flex justify-between items-center mb-2">
+                    <p className="text-lg sm:text-xl font-bold text-gray-800">
+                      $
+                      {(
+                        product.price ||
+                        product.Price ||
+                        product.precio ||
+                        0
+                      ).toLocaleString("es-AR")}
+                    </p>
+                    <p className="text-lg sm:text-xl font-bold text-[#005f73]">
                       $
                       {Math.round(
                         (product.price ||
@@ -146,12 +145,22 @@ const Home = ({ onProductClick, searchText }) => {
                           product.precio ||
                           0) * 0.8
                       ).toLocaleString("es-AR")}
-                    </span>
+                    </p>
+                  </div>
+
+                  {/* Texto aclaratorio con precio dinámico */}
+                  <p className="text-xs sm:text-sm text-gray-600 italic text-center">
+                    $
+                    {Math.round(
+                      (product.price || product.Price || product.precio || 0) *
+                        0.8
+                    ).toLocaleString("es-AR")}{" "}
+                    pagando con Transferencia, depósito bancario o Efectivo
                   </p>
 
                   {/* Solo mostrar "Agotado" si no hay stock */}
                   {sinStock && (
-                    <p className="text-sm text-red-600 mt-2 font-bold">
+                    <p className="text-sm text-red-600 mt-2 font-bold text-center">
                       Agotado
                     </p>
                   )}
