@@ -62,7 +62,7 @@ const Home = ({ onProductClick, searchText }) => {
       </section>
 
       {/* Productos */}
-      <section className="container mx-auto px-4 sm:px-6 max-w-6xl">
+      <section className="container mx-auto px-4 sm:px-6 max-w-7xl">
         <h2 className="md:text-3xl text-2xl font-bold text-center tracking-wide mb-6 font-poppins">
           Nuestros Productos
         </h2>

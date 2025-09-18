@@ -359,40 +359,115 @@ const DetailProduct = () => {
         <h2 className="text-xl sm:text-2xl font-bold mb-4">
           También te puede interesar
         </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
-          {relatedProducts
-            .filter((item) => (item.stock ?? item.Stock ?? 0) > 0)
-            .map((item) => (
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8">
+          {relatedProducts.map((product) => {
+            const stock = product.stock ?? product.Stock ?? 0;
+            const sinStock = stock <= 0;
+
+            return (
               <div
-                key={item.id || item.Id}
+                key={product.id || product.Id}
+                className="relative bg-white rounded-lg shadow-md hover:shadow-lg transition overflow-hidden border cursor-pointer"
                 onClick={() =>
-                  navigate(`/producto/${item.id || item.Id}`, { state: item })
+                  navigate(`/producto/${product.id || product.Id}`, {
+                    state: product,
+                  })
                 }
-                className="cursor-pointer border rounded-lg overflow-hidden shadow hover:shadow-lg transition"
               >
-                <img
-                  src={
-                    item.image ||
-                    item.Image ||
-                    item.imagen ||
-                    "/placeholder.png"
-                  }
-                  alt={item.name || item.Name || item.nombre}
-                  className="w-full h-40 sm:h-48 object-cover"
-                />
-                <div className="p-3 sm:p-4">
-                  <h3 className="font-semibold text-base sm:text-lg mb-1">
-                    {getTitulo(item)}
+                {/* Imagen */}
+                <div className="relative group aspect-square">
+                  <img
+                    src={
+                      product.image ||
+                      product.Image ||
+                      product.imagen ||
+                      "/placeholder.png"
+                    }
+                    alt={getTitulo(product)}
+                    className="w-full h-full object-cover transform transition-transform duration-300 group-hover:scale-105"
+                  />
+
+                  {/* Etiqueta SIN STOCK */}
+                  {sinStock && (
+                    <span className="absolute top-2 left-2 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-md shadow-md">
+                      SIN STOCK
+                    </span>
+                  )}
+
+                  {/* Botón carrito */}
+                  {!sinStock && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        addToCart(product.id || product.Id, 1);
+                      }}
+                      className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-white p-2 rounded-full shadow-lg hover:bg-gray-100 transition"
+                      title="Agregar al carrito"
+                    >
+                      <FaShoppingCart className="text-gray-800 text-sm sm:text-lg" />
+                    </button>
+                  )}
+                </div>
+
+                {/* Información del producto */}
+                <div className="p-3 sm:p-4 text-center">
+                  <h3 className="text-sm sm:text-base font-bold font-poppins mb-2 truncate">
+                    {product.brand
+                      ? `${product.brand} ${product.name}`
+                      : product.name}
                   </h3>
-                  <p className="text-[#005f73] font-bold text-base sm:text-lg">
+
+                  {/* Precio normal */}
+                  <p className="text-lg sm:text-xl font-bold text-gray-800 mb-2">
                     $
-                    {item.price?.toLocaleString("es-AR") ||
-                      item.Price?.toLocaleString("es-AR") ||
-                      item.precio?.toLocaleString("es-AR")}
+                    {(
+                      product.price ||
+                      product.Price ||
+                      product.precio ||
+                      0
+                    ).toLocaleString("es-AR")}
                   </p>
+
+                  {/* Precio con transferencia */}
+                  <p className="text-base sm:text-lg text-[#005f73] font-poppins mt-1 font-semibold">
+                    TRANSFERENCIA O EFECTIVO{" "}
+                    <span className="block font-bold text-lg sm:text-xl text-[#005f73]">
+                      $
+                      {Math.round(
+                        (product.price ||
+                          product.Price ||
+                          product.precio ||
+                          0) * 0.8
+                      ).toLocaleString("es-AR")}
+                    </span>
+                  </p>
+
+                  {/* Texto aclaratorio */}
+                  <p className="text-xs sm:text-sm text-gray-600 text-center">
+                    $
+                    {Math.round(
+                      (product.price || product.Price || product.precio || 0) *
+                        0.8
+                    ).toLocaleString("es-AR")}{" "}
+                    pagando con Transferencia, depósito bancario o Efectivo
+                  </p>
+
+                  {/* Solo mostrar "Agotado" si no hay stock */}
+                  {sinStock && (
+                    <p className="text-sm text-red-600 mt-2 font-bold">
+                      Agotado
+                    </p>
+                  )}
                 </div>
               </div>
-            ))}
+            );
+          })}
+
+          {relatedProducts.length === 0 && (
+            <p className="text-center col-span-full text-gray-500">
+              No se encontraron productos relacionados.
+            </p>
+          )}
         </div>
       </div>
 
