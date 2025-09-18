@@ -360,13 +360,12 @@ const DetailProduct = () => {
           {/* Especificaciones */}
           {Array.isArray(product?.caracteristicas) &&
             product.caracteristicas.length > 0 && (
-              <div className="border rounded-lg p-4 mt-4 text-sm sm:text-base md:text-base text-gray-700 leading-relaxed">
-                <h3 className="font-semibold mb-2">Especificaciones:</h3>
-                <ul className="list-disc list-inside space-y-1">
-                  {product.caracteristicas.map((spec, idx) => (
-                    <li key={idx}>{spec.trim()}</li>
-                  ))}
-                </ul>
+              <div className="p-4 mt-4 text-sm sm:text-base md:text-base text-gray-700 leading-relaxed">
+                {product.caracteristicas.map((spec, idx) => (
+                  <p key={idx} className="font-semibold">
+                    {spec.trim()}
+                  </p>
+                ))}
               </div>
             )}
         </div>
