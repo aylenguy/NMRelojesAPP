@@ -289,6 +289,17 @@ const CartSidebar = () => {
                   >
                     Calcular
                   </button>
+                  {/* Link debajo */}
+                  <p className="mt-2 text-gray-600 text-xs sm:text-sm">
+                    <a
+                      href="https://www.correoargentino.com.ar/formularios/cpa"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[#005f73] cursor-pointer hover:text-[#003f4a] mb-4 sm:mb-6 text-xs sm:text-sm font-semibold"
+                    >
+                      No sé mi codigo postal
+                    </a>
+                  </p>
                 </div>
                 {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
 

@@ -220,7 +220,7 @@ const DetailProduct = () => {
               Stock disponible: {stock} {stock === 1 ? "unidad" : "unidades"}
             </p>
           ) : (
-            <p className="text-red-600 font-medium mb-4 text-sm sm:text-base">
+            <p className="text-[#005f73] font-medium mb-4 text-sm sm:text-base">
               Sin stock disponible
             </p>
           )}
@@ -295,11 +295,16 @@ const DetailProduct = () => {
 
               {/* Mensaje de error */}
               {error && (
-                <p className="text-red-600 font-medium text-sm mt-1">{error}</p>
+                <p className="text-[#005f73] border border-[#005f73] font-medium text-sm mt-1 p-2 rounded">
+                  {error}
+                </p>
               )}
             </div>
           ) : (
-            <button disabled className="text-red-500 font-medium">
+            <button
+              disabled
+              className="text-[#005f73] border border-[#005f73] font-medium px-4 py-2 rounded cursor-not-allowed"
+            >
               SIN STOCK
             </button>
           )}
@@ -422,7 +427,7 @@ const DetailProduct = () => {
                       className="w-full h-full object-cover transform transition-transform duration-300 group-hover:scale-105"
                     />
                     {sinStock && (
-                      <span className="absolute top-2 left-2 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-md shadow-md">
+                      <span className="absolute top-2 left-2 bg-[#005f73] text-white text-xs font-bold px-2 py-1 rounded-md shadow-md">
                         SIN STOCK
                       </span>
                     )}
@@ -477,7 +482,7 @@ const DetailProduct = () => {
                       pagando con Transferencia, depósito bancario o Efectivo
                     </p>
                     {sinStock && (
-                      <p className="text-sm text-red-600 mt-2 font-bold">
+                      <p className="text-[#005f73] border border-[#005f73] font-bold text-sm mt-2 p-2 rounded">
                         Agotado
                       </p>
                     )}
