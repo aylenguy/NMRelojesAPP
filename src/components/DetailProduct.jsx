@@ -185,7 +185,6 @@ const DetailProduct = () => {
       </div>
     );
   }
-
   return (
     <div className="bg-white min-h-screen p-4 sm:p-6">
       <div className="max-w-6xl mx-auto flex flex-col md:flex-row gap-6 md:gap-12">
@@ -300,7 +299,7 @@ const DetailProduct = () => {
           )}
 
           {/* Envío */}
-          <div className="border rounded-lg p-3 mb-4 text-sm sm:text-base">
+          <div className="border rounded-lg p-3 mb-6 text-sm sm:text-base">
             <h3 className="font-medium mb-2 text-gray-800">Calculá tu envío</h3>
             <div className="flex gap-2 flex-col sm:flex-row">
               <input
@@ -342,15 +341,26 @@ const DetailProduct = () => {
                 ))}
               </div>
             )}
-            {/* Descripción */}
-            {description && (
-              <div className="text-sm sm:text-base md:text-base text-gray-700 mb-6 leading-relaxed">
-                <h3 className="font-semibold mb-2">Descripción:</h3>
-                <p style={{ whiteSpace: "pre-line" }}>{description}</p>
-              </div>
-            )}
           </div>
+
+          {/* Descripción: fuera del bloque de envío */}
+          {description && (
+            <div className="border rounded-lg p-4 text-sm sm:text-base md:text-base text-gray-700 leading-relaxed">
+              <h3 className="font-semibold mb-2">Descripción:</h3>
+              <p style={{ whiteSpace: "pre-line" }}>{description}</p>
+            </div>
+          )}
         </div>
+
+        {/* Specs */}
+        {Specs && (
+          <div className="border rounded-lg p-4 text-sm sm:text-base md:text-base text-gray-700 leading-relaxed">
+            <h3 className="font-semibold mb-2">Especificaciones:</h3>
+            <p style={{ whiteSpace: "pre-line" }}>
+              <span className="font-semibold">{Specs}</span>
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Productos relacionados */}
