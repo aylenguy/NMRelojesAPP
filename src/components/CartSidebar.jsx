@@ -291,7 +291,11 @@ const CartSidebar = () => {
                   </button>
                 </div>
 
-                {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
+                {error && (
+                  <p className="text-[#005f73]  font-bold text-sm mt-1 ">
+                    {error}
+                  </p>
+                )}
 
                 {/* Link debajo */}
                 <p className="mt-2 text-gray-600 text-xs sm:text-sm">

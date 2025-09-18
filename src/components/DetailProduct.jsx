@@ -482,7 +482,7 @@ const DetailProduct = () => {
                       pagando con Transferencia, depósito bancario o Efectivo
                     </p>
                     {sinStock && (
-                      <p className="text-[#005f73] border border-[#005f73] font-bold text-sm mt-2 p-2 rounded">
+                      <p className="text-[#005f73]  font-bold text-sm mt-2 p-2 rounded">
                         Agotado
                       </p>
                     )}
