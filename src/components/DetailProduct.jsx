@@ -295,7 +295,7 @@ const DetailProduct = () => {
 
               {/* Mensaje de error */}
               {error && (
-                <p className="text-[#005f73] border border-[#005f73] font-medium text-sm mt-1 p-2 rounded">
+                <p className="text-[#005f73] font-medium text-sm mt-1 p-2 rounded">
                   {error}
                 </p>
               )}
@@ -303,7 +303,7 @@ const DetailProduct = () => {
           ) : (
             <button
               disabled
-              className="text-[#005f73] border border-[#005f73] font-medium px-4 py-2 rounded cursor-not-allowed"
+              className="text-[#005f73] font-medium px-4 py-2 rounded cursor-not-allowed"
             >
               SIN STOCK
             </button>
