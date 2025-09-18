@@ -97,6 +97,9 @@ const DetailProduct = () => {
     product?.image || product?.Image || product?.imagen || "/placeholder.png";
   const description =
     product?.description || product?.Description || product?.descripcion || "";
+
+  const Specs =
+    product?.Specs || product?.specs || product?.Specifications || "";
   const color = product?.color || product?.Color || "";
   const totalPrice = price;
   const installmentCount = 6;
