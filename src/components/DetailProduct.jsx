@@ -325,6 +325,18 @@ const DetailProduct = () => {
                 Calcular
               </button>
             </div>
+            {/* Link debajo */}
+            <p className="mt-2 text-gray-600 text-xs sm:text-sm">
+              ¿No sabés tu código postal?{" "}
+              <a
+                href="https://www.correoargentino.com.ar/formularios/cpa"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:underline"
+              >
+                Consultalo acá
+              </a>
+            </p>
 
             {shippingOptions.length > 0 && (
               <div className="mt-3 space-y-2 text-sm sm:text-base">
@@ -352,14 +364,22 @@ const DetailProduct = () => {
           {/* Descripción */}
           {description && (
             <div className="p-4 text-sm sm:text-base md:text-base text-gray-700 leading-relaxed">
-              <p style={{ whiteSpace: "pre-line" }}>{description}</p>
+              <p
+                style={{ whiteSpace: "pre-line" }}
+                dangerouslySetInnerHTML={{
+                  __html: description.replace(
+                    "Otras características:",
+                    "<strong>Otras características:</strong>"
+                  ),
+                }}
+              />
             </div>
           )}
 
           {/* Especificaciones */}
           {Array.isArray(product?.caracteristicas) &&
             product.caracteristicas.length > 0 && (
-              <div className="p-4 mt-4 text-base sm:text-lg md:text-lg text-gray-700 leading-relaxed space-y-1">
+              <div className="p-4 mt-2 text-base sm:text-lg md:text-lg text-gray-700 leading-relaxed space-y-1">
                 {product.caracteristicas.map((spec, idx) => (
                   <p key={idx} className="font-semibold m-0">
                     {spec.trim()}
