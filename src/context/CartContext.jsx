@@ -129,24 +129,34 @@ export const CartProvider = ({ children }) => {
   };
 
   // 🔹 Actualizar cantidad (solo frontend)
-  const updateQuantity = async (cartItemId, productId, newQuantity) => {
+  // 🔹 Actualizar cantidad (con soporte backend)
+  const updateQuantity = async (cartItemId, newQuantity) => {
     try {
-      // Si newQuantity <= 0 → eliminar
       if (newQuantity <= 0) {
         return await removeFromCart(cartItemId);
       }
 
-      // Eliminar y volver a agregar con la cantidad nueva
-      await removeFromCart(cartItemId);
-      await addToCart(productId, newQuantity);
+      if (token) {
+        await axios.put(
+          `${API_URL}/item/${cartItemId}`,
+          { quantity: newQuantity },
+          { headers: getHeaders() }
+        );
+      } else {
+        await axios.put(
+          `${API_URL}/guest/item/${cartItemId}?guestId=${getGuestId()}`,
+          { quantity: newQuantity }
+        );
+      }
 
       return await fetchCart();
     } catch (err) {
       console.error("Error al actualizar cantidad:", err);
-      setError("No se pudo actualizar la cantidad");
+      setError(
+        err.response?.data?.message || "No se pudo actualizar la cantidad"
+      );
     }
   };
-
   // Cargar carrito al inicio o si cambia el token
   useEffect(() => {
     fetchCart();

@@ -76,13 +76,14 @@ const CartSidebar = () => {
   };
 
   // Modificar cantidades
-  const handleIncrease = async (item) => {
+  const handleIncrease = (item) => {
     const cantidad = getItemCantidad(item);
-    await updateQuantity(item.id, item.productId, cantidad + 1);
+    updateQuantity(item.id, cantidad + 1);
   };
-  const handleDecrease = async (item) => {
+
+  const handleDecrease = (item) => {
     const cantidad = getItemCantidad(item);
-    await updateQuantity(item.id, item.productId, cantidad - 1);
+    updateQuantity(item.id, cantidad - 1);
   };
 
   // Envío
