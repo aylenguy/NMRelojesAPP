@@ -423,12 +423,7 @@ const DetailProduct = () => {
                   rawProduct.Image ??
                   rawProduct.image ??
                   "/placeholder.png",
-                description:
-                  rawProduct.Descripcion ??
-                  rawProduct.descripcion ??
-                  rawProduct.Description ??
-                  rawProduct.description ??
-                  "",
+                description: rawProduct.descripcion ?? "",
                 color: rawProduct.Color ?? rawProduct.color ?? "",
                 stock: rawProduct.Stock ?? rawProduct.stock ?? 0,
                 brand:
