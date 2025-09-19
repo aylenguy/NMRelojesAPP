@@ -130,7 +130,7 @@ export const CartProvider = ({ children }) => {
 
   // 🔹 Actualizar cantidad (solo frontend)
   // 🔹 Actualizar cantidad (con soporte backend)
-  const updateQuantity = async (cartItemId, newQuantity) => {
+  const updateQuantity = async (cartItemId, productId, newQuantity) => {
     try {
       if (newQuantity <= 0) {
         return await removeFromCart(cartItemId);
@@ -145,7 +145,7 @@ export const CartProvider = ({ children }) => {
       } else {
         await axios.put(
           `${API_URL}/guest/item/${cartItemId}?guestId=${getGuestId()}`,
-          { quantity: newQuantity }
+          { quantity: newQuantity } // ⚠️ cambiar 'quantity' si el backend espera otro nombre
         );
       }
 
