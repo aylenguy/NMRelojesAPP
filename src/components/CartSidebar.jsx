@@ -75,7 +75,6 @@ const CartSidebar = () => {
     return brand ? `${brand} ${name}` : name;
   };
 
-  // Modificar cantidades
   const handleIncrease = (item) => {
     const cantidad = getItemCantidad(item);
     updateQuantity(item.id, cantidad + 1);

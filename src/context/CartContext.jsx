@@ -128,9 +128,7 @@ export const CartProvider = ({ children }) => {
     }
   };
 
-  // 🔹 Actualizar cantidad (solo frontend)
-  // 🔹 Actualizar cantidad (con soporte backend)
-  const updateQuantity = async (cartItemId, productId, newQuantity) => {
+  const updateQuantity = async (cartItemId, newQuantity) => {
     try {
       if (newQuantity <= 0) {
         return await removeFromCart(cartItemId);
@@ -145,7 +143,7 @@ export const CartProvider = ({ children }) => {
       } else {
         await axios.put(
           `${API_URL}/guest/item/${cartItemId}?guestId=${getGuestId()}`,
-          { quantity: newQuantity } // ⚠️ cambiar 'quantity' si el backend espera otro nombre
+          { quantity: newQuantity }
         );
       }
 
@@ -157,6 +155,7 @@ export const CartProvider = ({ children }) => {
       );
     }
   };
+
   // Cargar carrito al inicio o si cambia el token
   useEffect(() => {
     fetchCart();
