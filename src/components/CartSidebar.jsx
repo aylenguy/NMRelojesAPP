@@ -20,6 +20,7 @@ const CartSidebar = () => {
     setCartSidebarOpen,
     addToCart,
   } = useCart();
+  const { updateQuantity } = useCart();
 
   const [postalCode, setPostalCode] = useState("");
   const [error, setError] = useState("");
