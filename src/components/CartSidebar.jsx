@@ -75,9 +75,10 @@ const CartSidebar = () => {
     return brand ? `${brand} ${name}` : name;
   };
 
-  const handleIncrease = (item) => {
+  const handleIncrease = async (item) => {
     const cantidad = getItemCantidad(item);
-    updateQuantity(item.id, cantidad + 1);
+    const msg = await updateQuantity(item.id, cantidad + 1);
+    if (msg) setError(msg);
   };
 
   const handleDecrease = (item) => {

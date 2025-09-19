@@ -130,7 +130,8 @@ export const CartProvider = ({ children }) => {
   const updateQuantity = async (cartItemId, newQuantity) => {
     try {
       if (newQuantity <= 0) {
-        return await removeFromCart(cartItemId);
+        await removeFromCart(cartItemId);
+        return null;
       }
 
       if (token) {
@@ -146,19 +147,13 @@ export const CartProvider = ({ children }) => {
         );
       }
 
-      setError(""); // 🔹 Limpiar error si todo salió bien
-      return await fetchCart();
+      await fetchCart();
+      return null;
     } catch (err) {
       let msg = "No se pudo actualizar la cantidad";
-
-      if (err.response) {
-        if (err.response.data?.message) msg = err.response.data.message;
-        else if (typeof err.response.data === "string") msg = err.response.data;
-      } else if (err.message) {
-        msg = err.message;
-      }
-
-      setError(msg); // 🔹 Mostrar error en el carrito
+      if (err.response?.data?.message) msg = err.response.data.message;
+      setError(msg); // ya lo podés llamar si querés mantenerlo local
+      return msg; // 🔹 también lo devolvemos para el componente
     }
   };
 
