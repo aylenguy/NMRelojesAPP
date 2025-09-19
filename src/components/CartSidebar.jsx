@@ -79,12 +79,14 @@ const CartSidebar = () => {
     addToCart(item.productId, 1); // ✅ usar productId real
   };
 
-  const handleDecrease = (item) => {
+  const handleDecrease = async (item) => {
     const cantidad = getItemCantidad(item);
     if (cantidad > 1) {
-      addToCart(item.productId, -1); // ✅ usar productId
+      // en vez de mandar -1, recalculo la cantidad final
+      await removeFromCart(item.id);
+      await addToCart(item.productId, cantidad - 1);
     } else {
-      removeFromCart(item.id); // este sí usa el cartItemId
+      await removeFromCart(item.id);
     }
   };
   // Envío
