@@ -36,6 +36,8 @@ const Productos = ({ searchText }) => {
           color: p.color ?? p.Color ?? "Sin color",
           stock: p.stock ?? 0,
           image: p.image ?? p.Image ?? p.imagen ?? "placeholder.png",
+          caracteristicas: p.Caracteristicas ?? p.caracteristicas ?? [],
+          descripcion: p.Descripcion ?? p.descripcion ?? "",
         }));
 
         setProductos(productosNormalizados);

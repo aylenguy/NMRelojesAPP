@@ -34,6 +34,7 @@ const Home = ({ onProductClick, searchText }) => {
     color: p.Color ?? p.color ?? "",
     stock: p.Stock ?? p.stock ?? 0,
     brand: p.Marca ?? p.marca ?? p.Brand ?? p.brand ?? "",
+    caracteristicas: p.Caracteristicas ?? p.caracteristicas ?? [],
   });
 
   // Aplico el filtro de búsqueda
