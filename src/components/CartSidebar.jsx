@@ -213,6 +213,10 @@ const CartSidebar = () => {
             </div>
           ) : (
             <>
+              {error && (
+                <p className="text-[#ff0000] font-bold text-sm mb-2">{error}</p>
+              )}
+
               {cart.items.map((item) => (
                 <div
                   key={item.id}

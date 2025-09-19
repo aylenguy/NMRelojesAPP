@@ -127,7 +127,6 @@ export const CartProvider = ({ children }) => {
       setError(err.response?.data?.message || "No se pudo vaciar el carrito");
     }
   };
-
   const updateQuantity = async (cartItemId, newQuantity) => {
     try {
       if (newQuantity <= 0) {
@@ -147,12 +146,19 @@ export const CartProvider = ({ children }) => {
         );
       }
 
+      setError(""); // 🔹 Limpiar error si todo salió bien
       return await fetchCart();
     } catch (err) {
-      const msg =
-        err.response?.data?.message || "No se pudo actualizar la cantidad";
-      alert(msg); // Mostramos “Solo quedan X unidades disponibles”
-      setError(msg);
+      let msg = "No se pudo actualizar la cantidad";
+
+      if (err.response) {
+        if (err.response.data?.message) msg = err.response.data.message;
+        else if (typeof err.response.data === "string") msg = err.response.data;
+      } else if (err.message) {
+        msg = err.message;
+      }
+
+      setError(msg); // 🔹 Mostrar error en el carrito
     }
   };
 
