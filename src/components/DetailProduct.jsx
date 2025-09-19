@@ -98,11 +98,14 @@ const DetailProduct = () => {
   const description =
     product?.description || product?.Description || product?.descripcion || "";
 
-  const Specs = product?.caracteristicas
-    ? Array.isArray(product.caracteristicas)
-      ? product.caracteristicas.join("\n") // lo une en líneas
-      : product.caracteristicas
-    : "";
+  const Specs =
+    product?.Specs ||
+    product?.specs ||
+    (product?.caracteristicas
+      ? Array.isArray(product.caracteristicas)
+        ? product.caracteristicas.join("\n") // si viene array, lo unimos con saltos de línea
+        : product.caracteristicas
+      : "");
   const color = product?.color || product?.Color || "";
   const totalPrice = price;
   const installmentCount = 6;
@@ -381,16 +384,15 @@ const DetailProduct = () => {
           )}
 
           {/* Especificaciones */}
-          {Array.isArray(product?.caracteristicas) &&
-            product.caracteristicas.length > 0 && (
-              <div className="p-4 text-sm sm:text-base md:text-base text-gray-700 leading-relaxed space-y-1">
-                {product.caracteristicas.map((spec, idx) => (
-                  <p key={idx} className="font-semibold m-0">
-                    {spec.trim()}
-                  </p>
-                ))}
-              </div>
-            )}
+          {Specs && (
+            <div className="p-4 text-sm sm:text-base md:text-base text-gray-700 leading-relaxed space-y-1">
+              {Specs.split("\n").map((spec, idx) => (
+                <p key={idx} className="font-semibold m-0">
+                  {spec.trim()}
+                </p>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
