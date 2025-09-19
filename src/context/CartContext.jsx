@@ -136,23 +136,23 @@ export const CartProvider = ({ children }) => {
 
       if (token) {
         await axios.put(
-          `${API_URL}/item/${cartItemId}`,
+          `${API_URL}/Cart/item/${cartItemId}`,
           { quantity: newQuantity },
           { headers: getHeaders() }
         );
       } else {
         await axios.put(
-          `${API_URL}/guest/item/${cartItemId}?guestId=${getGuestId()}`,
+          `${API_URL}/Cart/guest/item/${cartItemId}?guestId=${getGuestId()}`,
           { quantity: newQuantity }
         );
       }
 
       return await fetchCart();
     } catch (err) {
-      console.error("Error al actualizar cantidad:", err);
-      setError(
-        err.response?.data?.message || "No se pudo actualizar la cantidad"
-      );
+      const msg =
+        err.response?.data?.message || "No se pudo actualizar la cantidad";
+      alert(msg); // Mostramos “Solo quedan X unidades disponibles”
+      setError(msg);
     }
   };
 
