@@ -75,10 +75,10 @@ const CartSidebar = () => {
   };
 
   // Modificar cantidades
-  const handleIncrease = (item) => {
-    addToCart(item.productId, 1); // ✅ usar productId real
+  const handleIncrease = async (item) => {
+    const cantidad = getItemCantidad(item);
+    await updateQuantity(item.id, item.productId, cantidad + 1);
   };
-
   const handleDecrease = async (item) => {
     const cantidad = getItemCantidad(item);
     await updateQuantity(item.id, item.productId, cantidad - 1);
