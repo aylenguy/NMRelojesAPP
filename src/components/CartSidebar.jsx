@@ -75,19 +75,18 @@ const CartSidebar = () => {
   };
 
   // Modificar cantidades
+  const handleIncrease = (item) => {
+    addToCart(item.productId, 1); // ✅ usar productId real
+  };
+
   const handleDecrease = (item) => {
     const cantidad = getItemCantidad(item);
     if (cantidad > 1) {
-      addToCart(item.id, -1); // decrementar 1
+      addToCart(item.productId, -1); // ✅ usar productId
     } else {
-      removeFromCart(item.id);
+      removeFromCart(item.id); // este sí usa el cartItemId
     }
   };
-
-  const handleIncrease = (item) => {
-    addToCart(item.id, 1); // aumentar 1
-  };
-
   // Envío
   const handleCalculateShipping = async () => {
     if (!postalCode.match(/^\d{4}$/)) {
