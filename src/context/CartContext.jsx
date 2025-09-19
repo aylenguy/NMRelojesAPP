@@ -128,6 +128,25 @@ export const CartProvider = ({ children }) => {
     }
   };
 
+  // 🔹 Actualizar cantidad (solo frontend)
+  const updateQuantity = async (cartItemId, productId, newQuantity) => {
+    try {
+      // Si newQuantity <= 0 → eliminar
+      if (newQuantity <= 0) {
+        return await removeFromCart(cartItemId);
+      }
+
+      // Eliminar y volver a agregar con la cantidad nueva
+      await removeFromCart(cartItemId);
+      await addToCart(productId, newQuantity);
+
+      return await fetchCart();
+    } catch (err) {
+      console.error("Error al actualizar cantidad:", err);
+      setError("No se pudo actualizar la cantidad");
+    }
+  };
+
   // Cargar carrito al inicio o si cambia el token
   useEffect(() => {
     fetchCart();
@@ -154,6 +173,7 @@ export const CartProvider = ({ children }) => {
         addToCart,
         removeFromCart,
         clearCart,
+        updateQuantity,
       }}
     >
       {children}

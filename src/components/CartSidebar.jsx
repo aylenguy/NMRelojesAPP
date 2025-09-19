@@ -81,14 +81,9 @@ const CartSidebar = () => {
 
   const handleDecrease = async (item) => {
     const cantidad = getItemCantidad(item);
-    if (cantidad > 1) {
-      // en vez de mandar -1, recalculo la cantidad final
-      await removeFromCart(item.id);
-      await addToCart(item.productId, cantidad - 1);
-    } else {
-      await removeFromCart(item.id);
-    }
+    await updateQuantity(item.id, item.productId, cantidad - 1);
   };
+
   // Envío
   const handleCalculateShipping = async () => {
     if (!postalCode.match(/^\d{4}$/)) {
