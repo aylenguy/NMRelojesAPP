@@ -24,12 +24,6 @@ const Home = ({ onProductClick, searchText }) => {
     await addToCart(product.id || product.Id, 1);
   };
 
-  const filteredProducts = products.filter((product) =>
-    (product.name || product.Name || product.nombre || "")
-      .toLowerCase()
-      .includes(searchText?.toLowerCase() || "")
-  );
-
   const normalizeServerProduct = (p) => ({
     id: p.Id ?? p.id,
     name: p.Nombre ?? p.nombre ?? p.Name ?? p.name,
@@ -41,6 +35,16 @@ const Home = ({ onProductClick, searchText }) => {
     stock: p.Stock ?? p.stock ?? 0,
     brand: p.Marca ?? p.marca ?? p.Brand ?? p.brand ?? "",
   });
+
+  // Aplico el filtro de búsqueda
+  const filteredProducts = products.filter((product) =>
+    (product.name || product.Name || product.nombre || "")
+      .toLowerCase()
+      .includes(searchText?.toLowerCase() || "")
+  );
+
+  // Limitar a los primeros 12 en Home
+  const limitedProducts = filteredProducts.slice(0, 12);
 
   return (
     <div className="min-h-screen relative">
@@ -67,7 +71,7 @@ const Home = ({ onProductClick, searchText }) => {
           Nuestros Productos
         </h2>
         <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8">
-          {filteredProducts.map((product) => {
+          {limitedProducts.map((product) => {
             const stock = product.stock ?? 0;
             const sinStock = stock <= 0;
 
@@ -129,34 +133,24 @@ const Home = ({ onProductClick, searchText }) => {
 
                   {/* Precio normal */}
                   <p className="text-lg sm:text-xl font-bold text-gray-800 mb-2">
-                    $
-                    {(
-                      product.price ||
-                      product.Price ||
-                      product.precio ||
-                      0
-                    ).toLocaleString("es-AR")}
+                    ${(product.price || 0).toLocaleString("es-AR")}
                   </p>
                   {/* Precio con transferencia */}
                   <p className="text-base sm:text-lg text-[#005f73] font-poppins mt-1 font-semibold">
                     TRANSFERENCIA O EFECTIVO{" "}
                     <span className="block font-bold text-lg sm:text-xl text-[#005f73]">
                       $
-                      {Math.round(
-                        (product.price ||
-                          product.Price ||
-                          product.precio ||
-                          0) * 0.8
-                      ).toLocaleString("es-AR")}
+                      {Math.round((product.price || 0) * 0.8).toLocaleString(
+                        "es-AR"
+                      )}
                     </span>
                   </p>
-                  {/* Texto aclaratorio con precio dinámico */}
+                  {/* Texto aclaratorio */}
                   <p className="text-xs sm:text-sm text-gray-600  text-center">
                     $
-                    {Math.round(
-                      (product.price || product.Price || product.precio || 0) *
-                        0.8
-                    ).toLocaleString("es-AR")}{" "}
+                    {Math.round((product.price || 0) * 0.8).toLocaleString(
+                      "es-AR"
+                    )}{" "}
                     pagando con Transferencia, depósito bancario o Efectivo
                   </p>
 
@@ -177,6 +171,18 @@ const Home = ({ onProductClick, searchText }) => {
             </p>
           )}
         </div>
+
+        {/* Botón "Ver todos los productos" */}
+        {filteredProducts.length > 12 && (
+          <div className="flex justify-center mt-10">
+            <button
+              onClick={() => navigate("/producto")}
+              className="py-2 px-6 bg-[#005f73] text-white rounded-2xl hover:bg-gray-800 shadow transition-all text-sm"
+            >
+              Ver todos los productos
+            </button>
+          </div>
+        )}
       </section>
     </div>
   );
