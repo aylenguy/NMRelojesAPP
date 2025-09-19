@@ -434,8 +434,10 @@ const DetailProduct = () => {
                   rawProduct.Brand ??
                   rawProduct.brand ??
                   "",
-                descripcion: p.descripcion ?? p.Descripcion ?? "",
-                caracteristicas: p.caracteristicas ?? p.Caracteristicas ?? [],
+                caracteristicas:
+                  rawProduct.caracteristicas ??
+                  rawProduct.Caracteristicas ??
+                  [],
               };
 
               const sinStock = product.stock <= 0;
