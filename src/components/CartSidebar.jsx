@@ -75,10 +75,9 @@ const CartSidebar = () => {
     return brand ? `${brand} ${name}` : name;
   };
 
-  const handleIncrease = async (item) => {
+  const handleIncrease = (item) => {
     const cantidad = getItemCantidad(item);
-    const msg = await updateQuantity(item.id, cantidad + 1);
-    if (msg) setError(msg);
+    updateQuantity(item.id, cantidad + 1);
   };
 
   const handleDecrease = (item) => {
@@ -214,10 +213,6 @@ const CartSidebar = () => {
             </div>
           ) : (
             <>
-              {error && (
-                <p className="text-[#ff0000] font-bold text-sm mb-2">{error}</p>
-              )}
-
               {cart.items.map((item) => (
                 <div
                   key={item.id}

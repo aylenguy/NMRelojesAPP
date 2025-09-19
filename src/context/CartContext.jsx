@@ -127,33 +127,32 @@ export const CartProvider = ({ children }) => {
       setError(err.response?.data?.message || "No se pudo vaciar el carrito");
     }
   };
+
   const updateQuantity = async (cartItemId, newQuantity) => {
     try {
       if (newQuantity <= 0) {
-        await removeFromCart(cartItemId);
-        return null;
+        return await removeFromCart(cartItemId);
       }
 
       if (token) {
         await axios.put(
-          `${API_URL}/Cart/item/${cartItemId}`,
+          `${API_URL}/item/${cartItemId}`,
           { quantity: newQuantity },
           { headers: getHeaders() }
         );
       } else {
         await axios.put(
-          `${API_URL}/Cart/guest/item/${cartItemId}?guestId=${getGuestId()}`,
+          `${API_URL}/guest/item/${cartItemId}?guestId=${getGuestId()}`,
           { quantity: newQuantity }
         );
       }
 
-      await fetchCart();
-      return null;
+      return await fetchCart();
     } catch (err) {
-      let msg = "No se pudo actualizar la cantidad";
-      if (err.response?.data?.message) msg = err.response.data.message;
-      setError(msg); // ya lo podés llamar si querés mantenerlo local
-      return msg; // 🔹 también lo devolvemos para el componente
+      console.error("Error al actualizar cantidad:", err);
+      setError(
+        err.response?.data?.message || "No se pudo actualizar la cantidad"
+      );
     }
   };
 
