@@ -269,9 +269,18 @@ const CartSidebar = () => {
                       </button>
                     </div>
 
-                    {/* 👇 Acá insertás el mensaje de error de stock */}
+                    {/* Info de stock */}
+                    <p className="text-sm mt-1 text-gray-600">
+                      {item.stock <= 0
+                        ? "Este producto no tiene stock disponible."
+                        : item.stock === 1
+                        ? "Queda 1 unidad disponible."
+                        : `Quedan ${item.stock} unidades disponibles.`}
+                    </p>
+
+                    {/* Error si se pasa */}
                     {cartErrors[item.id] && (
-                      <p className="text-[#005f73] text-sm mt-1 ">
+                      <p className="text-[#005f73] text-sm mt-1">
                         {cartErrors[item.id]}
                       </p>
                     )}
