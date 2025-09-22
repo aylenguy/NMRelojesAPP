@@ -94,7 +94,7 @@ const CartSidebar = () => {
       return;
     }
 
-    // Limpio error si se puede aumentar
+    // Si no hay error, limpio y aumento
     setCartErrors((prev) => {
       const newErrors = { ...prev };
       delete newErrors[item.id];
