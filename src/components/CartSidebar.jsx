@@ -29,6 +29,7 @@ const CartSidebar = () => {
   const [cartErrors, setCartErrors] = useState({});
 
   // Descuento del 20%
+
   const total = cart?.total ?? 0;
   const discountRate = 0.2;
   const totalWithShipping = total + (selectedShipping?.cost ?? 0);
@@ -76,38 +77,32 @@ const CartSidebar = () => {
     return brand ? `${brand} ${name}` : name;
   };
 
-  // 🔹 Nuevo helper para el stock
-  const getItemStock = (item) =>
-    item.stock ?? item.Stock ?? item.availableStock ?? 0;
-
   const handleIncrease = (item) => {
-    const availableStock = getItemStock(item);
-    const cantidadActual = getItemCantidad(item); // la cantidad que ya tiene en el carrito
-    const totalRequested = cantidadActual + 1; // lo que el usuario quiere al presionar "+"
+    const cantidad = getItemCantidad(item);
+    const stock = item.stock; // ahora viene del DTO
 
-    if (totalRequested > availableStock) {
+    if (cantidad + 1 > stock) {
       setCartErrors((prev) => ({
         ...prev,
         [item.id]:
-          availableStock === 0
+          stock === 0
             ? "Este producto no tiene stock disponible."
-            : availableStock === 1
+            : stock === 1
             ? "Solo queda 1 unidad disponible."
-            : `Solo quedan ${availableStock} unidades disponibles.`,
+            : `Solo quedan ${stock} unidades disponibles.`,
       }));
       return;
     }
 
-    // limpio error si ahora sí se puede aumentar
+    // Limpiar error si todo OK
     setCartErrors((prev) => {
       const newErrors = { ...prev };
       delete newErrors[item.id];
       return newErrors;
     });
 
-    updateQuantity(item.id, totalRequested);
+    updateQuantity(item.id, cantidad + 1);
   };
-
   const handleDecrease = (item) => {
     const cantidad = getItemCantidad(item);
     updateQuantity(item.id, cantidad - 1);
@@ -273,18 +268,9 @@ const CartSidebar = () => {
                       </button>
                     </div>
 
-                    {/* Info de stock */}
-                    <p className="text-sm mt-1 text-gray-600">
-                      {getItemStock(item) <= 0
-                        ? "Este producto no tiene stock disponible."
-                        : getItemStock(item) === 1
-                        ? "Queda 1 unidad disponible."
-                        : `Quedan ${getItemStock(item)} unidades disponibles.`}
-                    </p>
-
-                    {/* Error si se pasa */}
+                    {/* 👇 Acá insertás el mensaje de error de stock */}
                     {cartErrors[item.id] && (
-                      <p className="text-[#005f73] text-sm mt-1">
+                      <p className="text-[#005f73] text-sm mt-1 ">
                         {cartErrors[item.id]}
                       </p>
                     )}
