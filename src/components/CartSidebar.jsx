@@ -26,6 +26,8 @@ const CartSidebar = () => {
   const [error, setError] = useState("");
   const [shippingOptions, setShippingOptions] = useState([]);
   const [selectedShipping, setSelectedShipping] = useState(null);
+  const [cartErrors, setCartErrors] = useState({});
+
   // Descuento del 20%
 
   const total = cart?.total ?? 0;
@@ -77,6 +79,25 @@ const CartSidebar = () => {
 
   const handleIncrease = (item) => {
     const cantidad = getItemCantidad(item);
+    const stock = item.stock || item.Stock || 0;
+
+    if (cantidad + 1 > stock) {
+      setCartErrors((prev) => ({
+        ...prev,
+        [item.id]: `Solo quedan ${stock} ${
+          stock === 1 ? "unidad" : "unidades"
+        } disponibles.`,
+      }));
+      return;
+    }
+
+    // Limpio error si se puede aumentar
+    setCartErrors((prev) => {
+      const newErrors = { ...prev };
+      delete newErrors[item.id];
+      return newErrors;
+    });
+
     updateQuantity(item.id, cantidad + 1);
   };
 
@@ -244,6 +265,13 @@ const CartSidebar = () => {
                         +
                       </button>
                     </div>
+
+                    {/* 👇 Acá insertás el mensaje de error de stock */}
+                    {cartErrors[item.id] && (
+                      <p className="text-[#005f73] text-sm mt-1">
+                        {cartErrors[item.id]}
+                      </p>
+                    )}
                   </div>
                   <div className="flex flex-col items-end justify-end gap-1">
                     <p className="font-bold">
