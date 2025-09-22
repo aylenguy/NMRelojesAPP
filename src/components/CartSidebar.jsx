@@ -29,7 +29,6 @@ const CartSidebar = () => {
   const [cartErrors, setCartErrors] = useState({});
 
   // Descuento del 20%
-
   const total = cart?.total ?? 0;
   const discountRate = 0.2;
   const totalWithShipping = total + (selectedShipping?.cost ?? 0);
@@ -77,8 +76,12 @@ const CartSidebar = () => {
     return brand ? `${brand} ${name}` : name;
   };
 
+  // 🔹 Nuevo helper para el stock
+  const getItemStock = (item) =>
+    item.stock ?? item.Stock ?? item.availableStock ?? 0;
+
   const handleIncrease = (item) => {
-    const availableStock = item.stock ?? item.Stock ?? 0;
+    const availableStock = getItemStock(item);
     const cantidadActual = getItemCantidad(item); // la cantidad que ya tiene en el carrito
     const totalRequested = cantidadActual + 1; // lo que el usuario quiere al presionar "+"
 
@@ -104,6 +107,7 @@ const CartSidebar = () => {
 
     updateQuantity(item.id, totalRequested);
   };
+
   const handleDecrease = (item) => {
     const cantidad = getItemCantidad(item);
     updateQuantity(item.id, cantidad - 1);
@@ -271,11 +275,11 @@ const CartSidebar = () => {
 
                     {/* Info de stock */}
                     <p className="text-sm mt-1 text-gray-600">
-                      {item.stock <= 0
+                      {getItemStock(item) <= 0
                         ? "Este producto no tiene stock disponible."
-                        : item.stock === 1
+                        : getItemStock(item) === 1
                         ? "Queda 1 unidad disponible."
-                        : `Quedan ${item.stock} unidades disponibles.`}
+                        : `Quedan ${getItemStock(item)} unidades disponibles.`}
                     </p>
 
                     {/* Error si se pasa */}
