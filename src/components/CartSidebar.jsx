@@ -78,33 +78,32 @@ const CartSidebar = () => {
   };
 
   const handleIncrease = (item) => {
-    const availableStock = product.stock ?? product.Stock ?? 0;
-    const productId = product.id || product.Id;
-
-    const existingItem = JSON.parse(localStorage.getItem("cart") || "[]").find(
-      (item) => item.id === productId
-    );
-    const totalRequested = (existingItem?.quantity || 0) + quantity;
+    const availableStock = item.stock ?? item.Stock ?? 0;
+    const cantidadActual = getItemCantidad(item); // la cantidad que ya tiene en el carrito
+    const totalRequested = cantidadActual + 1; // lo que el usuario quiere al presionar "+"
 
     if (totalRequested > availableStock) {
-      setError(
-        `Solo quedan ${availableStock} ${
-          availableStock === 1 ? "unidad" : "unidades"
-        } disponibles.`
-      );
+      setCartErrors((prev) => ({
+        ...prev,
+        [item.id]:
+          availableStock === 0
+            ? "Este producto no tiene stock disponible."
+            : availableStock === 1
+            ? "Solo queda 1 unidad disponible."
+            : `Solo quedan ${availableStock} unidades disponibles.`,
+      }));
       return;
     }
 
-    // Si no hay error, limpio y aumento
+    // limpio error si ahora sí se puede aumentar
     setCartErrors((prev) => {
       const newErrors = { ...prev };
       delete newErrors[item.id];
       return newErrors;
     });
 
-    updateQuantity(item.id, cantidad + 1);
+    updateQuantity(item.id, totalRequested);
   };
-
   const handleDecrease = (item) => {
     const cantidad = getItemCantidad(item);
     updateQuantity(item.id, cantidad - 1);
