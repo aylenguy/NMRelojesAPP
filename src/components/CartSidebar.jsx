@@ -87,9 +87,9 @@ const CartSidebar = () => {
         [item.id]:
           stock === 0
             ? "Este producto no tiene stock disponible."
-            : `Solo quedan ${stock} ${
-                stock === 1 ? "unidad" : "unidades"
-              } disponibles.`,
+            : stock === 1
+            ? "Solo queda 1 unidad disponible."
+            : `Solo quedan ${stock} unidades disponibles.`,
       }));
       return;
     }
@@ -271,7 +271,7 @@ const CartSidebar = () => {
 
                     {/* 👇 Acá insertás el mensaje de error de stock */}
                     {cartErrors[item.id] && (
-                      <p className="text-[#005f73] text-sm mt-1 font-bold">
+                      <p className="text-[#005f73] text-sm mt-1 ">
                         {cartErrors[item.id]}
                       </p>
                     )}
