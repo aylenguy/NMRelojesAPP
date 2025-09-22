@@ -78,19 +78,20 @@ const CartSidebar = () => {
   };
 
   const handleIncrease = (item) => {
-    const cantidad = getItemCantidad(item);
-    const stock = item.stock || item.Stock || 0;
+    const availableStock = product.stock ?? product.Stock ?? 0;
+    const productId = product.id || product.Id;
 
-    if (cantidad + 1 > stock) {
-      setCartErrors((prev) => ({
-        ...prev,
-        [item.id]:
-          stock === 0
-            ? "Este producto no tiene stock disponible."
-            : stock === 1
-            ? "Solo queda 1 unidad disponible."
-            : `Solo quedan ${stock} unidades disponibles.`,
-      }));
+    const existingItem = JSON.parse(localStorage.getItem("cart") || "[]").find(
+      (item) => item.id === productId
+    );
+    const totalRequested = (existingItem?.quantity || 0) + quantity;
+
+    if (totalRequested > availableStock) {
+      setError(
+        `Solo quedan ${availableStock} ${
+          availableStock === 1 ? "unidad" : "unidades"
+        } disponibles.`
+      );
       return;
     }
 
