@@ -85,12 +85,14 @@ export default function CheckoutStep3() {
       let newVenta;
 
       if (paymentMethod === "mercadopago") {
-        const mpResponse = await api.post("/Payment/create-checkout", {
+        // 👇 Construimos el payload en una variable
+        const payload = {
           Description: "Compra en NM Relojes",
           PayerEmail: checkoutData.email || "sin-email@ejemplo.com",
           CurrencyId: "ARS",
           ExternalReference: externalReference,
           Items: currentCart.items.map((i) => ({
+            ProductId: i.productId || i.id, // 👈 AGREGAMOS ESTO
             Title: i.productName || i.name || "Producto",
             Quantity: i.quantity || 1,
             UnitPrice: i.unitPrice || 0,
@@ -102,7 +104,11 @@ export default function CheckoutStep3() {
           },
           NotificationUrl:
             "https://nmrelojesapi.onrender.com/api/Payment/webhook",
-        });
+        };
+
+        console.log("📤 Payload enviado a /Payment/create-checkout:", payload);
+
+        const mpResponse = await api.post("/Payment/create-checkout", payload);
 
         const mpData = mpResponse.data;
         if (mpData?.initPoint) {

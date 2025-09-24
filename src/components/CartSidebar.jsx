@@ -103,6 +103,7 @@ const CartSidebar = () => {
 
     updateQuantity(item.id, cantidad + 1);
   };
+
   const handleDecrease = (item) => {
     const cantidad = getItemCantidad(item);
     updateQuantity(item.id, cantidad - 1);
