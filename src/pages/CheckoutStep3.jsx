@@ -21,8 +21,6 @@ export default function CheckoutStep3() {
   const [orderNotes, setOrderNotes] = useState("");
 
   const API_BASE = import.meta.env.VITE_API_URL.replace("/api", "");
-  const [paymentMessage, setPaymentMessage] = useState("");
-  const [showNotification, setShowNotification] = useState(false);
 
   const handleConfirmOrder = async () => {
     try {
@@ -68,7 +66,7 @@ export default function CheckoutStep3() {
         street: checkoutData.street || "",
         number: checkoutData.number || "",
 
-        // Guardamos cupón y descuento en Notes
+        // 🔹 Guardamos cupón y descuento en Notes para no romper la entidad
         notes: `[CUPON:${
           checkoutData.couponCode || "NINGUNO"
         } - DESCUENTO:${couponDiscount}] ${orderNotes || ""}`,
@@ -81,70 +79,56 @@ export default function CheckoutStep3() {
         })),
 
         total: totalFinal,
-        paymentDiscount,
-        paymentStatus: "Pendiente", // 🔹 Siempre pendiente al crear
+        paymentDiscount, // este sí lo mandamos porque ya existe en tu backend
       };
 
-      // 🔹 Primero creamos la venta en DB, independientemente del método
       let newVenta;
+
+      if (paymentMethod === "mercadopago") {
+        // 👇 Construimos el payload en una variable
+        const payload = {
+          Description: "Compra en NM Relojes",
+          PayerEmail: checkoutData.email || "sin-email@ejemplo.com",
+          CurrencyId: "ARS",
+          ExternalReference: externalReference,
+          Items: currentCart.items.map((i) => ({
+            ProductId: i.productId || i.id, // 👈 AGREGAMOS ESTO
+            Title: i.productName || i.name || "Producto",
+            Quantity: i.quantity || 1,
+            UnitPrice: i.unitPrice || 0,
+          })),
+          BackUrls: {
+            Success:
+              "https://nm-relojes-bi8f2d4py-aylens-projects-7a096c01.vercel.app/checkout/success",
+            Failure:
+              "https://nm-relojes-bi8f2d4py-aylens-projects-7a096c01.vercel.app/checkout/failure",
+            Pending:
+              "https://nm-relojes-bi8f2d4py-aylens-projects-7a096c01.vercel.app/checkout/pending",
+          },
+          NotificationUrl:
+            "https://nmrelojesapi.onrender.com/api/Payment/webhook",
+        };
+
+        console.log("📤 Payload enviado a /Payment/create-checkout:", payload);
+
+        const mpResponse = await api.post("/Payment/create-checkout", payload);
+
+        const mpData = mpResponse.data;
+        if (mpData?.initPoint) {
+          localStorage.setItem("ventaPendiente", JSON.stringify(ventaPayload));
+          window.location.href = mpData.initPoint;
+          return;
+        } else {
+          throw new Error("No se pudo generar el checkout de Mercado Pago.");
+        }
+      }
+
       if (token) {
         newVenta = await createFromCart(ventaPayload, token);
       } else {
         newVenta = await addVenta(ventaPayload);
       }
 
-      // 🔹 Si el método es Mercado Pago, redirigimos al checkout
-      if (paymentMethod === "mercadopago") {
-        const mpPayload = {
-          Description: "Compra en NM Relojes",
-          PayerEmail: checkoutData.email || "sin-email@ejemplo.com",
-          CurrencyId: "ARS",
-          ExternalReference: newVenta.externalReference, // usamos el de la DB
-          Items: currentCart.items.map((i) => ({
-            ProductId: i.productId || i.id,
-            Title: i.productName || i.name || "Producto",
-            Quantity: i.quantity || 1,
-            UnitPrice: i.unitPrice || 0,
-          })),
-          BackUrls: {
-            Success: "https://tu-dominio.com/checkout/success",
-            Failure: "https://tu-dominio.com/checkout/failure",
-            Pending: "https://tu-dominio.com/checkout/pending",
-          },
-          NotificationUrl: "https://tu-backend.com/api/Payment/webhook",
-        };
-
-        console.log(
-          "📤 Payload enviado a /Payment/create-checkout:",
-          mpPayload
-        );
-
-        const mpResponse = await api.post(
-          "/Payment/create-checkout",
-          mpPayload
-        );
-        const mpData = mpResponse.data;
-
-        if (mpData?.initPoint) {
-          // Abrimos Mercado Pago en nueva ventana/popup
-          window.open(mpData.initPoint, "_blank");
-
-          // Mostramos mensaje flotante en la pantalla
-          setPaymentMessage(
-            "✅ Estamos procesando tu pago. Pronto te llegará un correo de confirmación."
-          );
-          setShowNotification(true);
-
-          // Opcional: ocultarlo después de 8 segundos
-          setTimeout(() => setShowNotification(false), 8000);
-
-          return; // No redirigimos
-        } else {
-          throw new Error("No se pudo generar el checkout de Mercado Pago.");
-        }
-      }
-
-      // 🔹 Transformamos la venta para mostrar en success
       const clientAddress = [
         newVenta.street,
         newVenta.number,
@@ -230,6 +214,7 @@ export default function CheckoutStep3() {
     },
     { id: "efectivo", title: "Efectivo", badge: "20% de descuento" },
   ];
+
   return (
     <div className="min-h-screen py-8 px-4 sm:px-6">
       <CheckoutProgress step={3} />
@@ -354,13 +339,6 @@ export default function CheckoutStep3() {
           </div>
         </div>
       </div>
-
-      {/* 🔹 Mensaje flotante para Mercado Pago */}
-      {showNotification && (
-        <div className="fixed top-4 right-4 bg-green-500 text-white px-6 py-4 rounded-lg shadow-lg z-50 animate-slideIn">
-          {paymentMessage}
-        </div>
-      )}
     </div>
   );
 }
