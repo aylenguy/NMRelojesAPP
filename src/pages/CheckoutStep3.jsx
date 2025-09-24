@@ -21,6 +21,8 @@ export default function CheckoutStep3() {
   const [orderNotes, setOrderNotes] = useState("");
 
   const API_BASE = import.meta.env.VITE_API_URL.replace("/api", "");
+  const [paymentMessage, setPaymentMessage] = useState("");
+  const [showNotification, setShowNotification] = useState(false);
 
   const handleConfirmOrder = async () => {
     try {
@@ -124,8 +126,19 @@ export default function CheckoutStep3() {
         const mpData = mpResponse.data;
 
         if (mpData?.initPoint) {
-          window.location.href = mpData.initPoint;
-          return;
+          // Abrimos Mercado Pago en nueva ventana/popup
+          window.open(mpData.initPoint, "_blank");
+
+          // Mostramos mensaje flotante en la pantalla
+          setPaymentMessage(
+            "✅ Estamos procesando tu pago. Pronto te llegará un correo de confirmación."
+          );
+          setShowNotification(true);
+
+          // Opcional: ocultarlo después de 8 segundos
+          setTimeout(() => setShowNotification(false), 8000);
+
+          return; // No redirigimos
         } else {
           throw new Error("No se pudo generar el checkout de Mercado Pago.");
         }
@@ -217,7 +230,6 @@ export default function CheckoutStep3() {
     },
     { id: "efectivo", title: "Efectivo", badge: "20% de descuento" },
   ];
-
   return (
     <div className="min-h-screen py-8 px-4 sm:px-6">
       <CheckoutProgress step={3} />
@@ -342,6 +354,13 @@ export default function CheckoutStep3() {
           </div>
         </div>
       </div>
+
+      {/* 🔹 Mensaje flotante para Mercado Pago */}
+      {showNotification && (
+        <div className="fixed top-4 right-4 bg-green-500 text-white px-6 py-4 rounded-lg shadow-lg z-50 animate-slideIn">
+          {paymentMessage}
+        </div>
+      )}
     </div>
   );
 }
