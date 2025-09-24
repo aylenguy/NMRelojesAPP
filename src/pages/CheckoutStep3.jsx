@@ -66,7 +66,7 @@ export default function CheckoutStep3() {
         street: checkoutData.street || "",
         number: checkoutData.number || "",
 
-        // 🔹 Guardamos cupón y descuento en Notes para no romper la entidad
+        // Guardamos cupón y descuento en Notes
         notes: `[CUPON:${
           checkoutData.couponCode || "NINGUNO"
         } - DESCUENTO:${couponDiscount}] ${orderNotes || ""}`,
@@ -79,40 +79,51 @@ export default function CheckoutStep3() {
         })),
 
         total: totalFinal,
-        paymentDiscount, // este sí lo mandamos porque ya existe en tu backend
+        paymentDiscount,
+        paymentStatus: "Pendiente", // 🔹 Siempre pendiente al crear
       };
 
+      // 🔹 Primero creamos la venta en DB, independientemente del método
       let newVenta;
+      if (token) {
+        newVenta = await createFromCart(ventaPayload, token);
+      } else {
+        newVenta = await addVenta(ventaPayload);
+      }
 
+      // 🔹 Si el método es Mercado Pago, redirigimos al checkout
       if (paymentMethod === "mercadopago") {
-        // 👇 Construimos el payload en una variable
-        const payload = {
+        const mpPayload = {
           Description: "Compra en NM Relojes",
           PayerEmail: checkoutData.email || "sin-email@ejemplo.com",
           CurrencyId: "ARS",
-          ExternalReference: externalReference,
+          ExternalReference: newVenta.externalReference, // usamos el de la DB
           Items: currentCart.items.map((i) => ({
-            ProductId: i.productId || i.id, // 👈 AGREGAMOS ESTO
+            ProductId: i.productId || i.id,
             Title: i.productName || i.name || "Producto",
             Quantity: i.quantity || 1,
             UnitPrice: i.unitPrice || 0,
           })),
           BackUrls: {
-            Success: "https://nm-relojes.vercel.app/checkout/success",
-            Failure: "https://nm-relojes.vercel.app/checkout/failure",
-            Pending: "https://nm-relojes.vercel.app/checkout/pending",
+            Success: "https://tu-dominio.com/checkout/success",
+            Failure: "https://tu-dominio.com/checkout/failure",
+            Pending: "https://tu-dominio.com/checkout/pending",
           },
-          NotificationUrl:
-            "https://nmrelojesapi.onrender.com/api/Payment/webhook",
+          NotificationUrl: "https://tu-backend.com/api/Payment/webhook",
         };
 
-        console.log("📤 Payload enviado a /Payment/create-checkout:", payload);
+        console.log(
+          "📤 Payload enviado a /Payment/create-checkout:",
+          mpPayload
+        );
 
-        const mpResponse = await api.post("/Payment/create-checkout", payload);
-
+        const mpResponse = await api.post(
+          "/Payment/create-checkout",
+          mpPayload
+        );
         const mpData = mpResponse.data;
+
         if (mpData?.initPoint) {
-          localStorage.setItem("ventaPendiente", JSON.stringify(ventaPayload));
           window.location.href = mpData.initPoint;
           return;
         } else {
@@ -120,12 +131,7 @@ export default function CheckoutStep3() {
         }
       }
 
-      if (token) {
-        newVenta = await createFromCart(ventaPayload, token);
-      } else {
-        newVenta = await addVenta(ventaPayload);
-      }
-
+      // 🔹 Transformamos la venta para mostrar en success
       const clientAddress = [
         newVenta.street,
         newVenta.number,
