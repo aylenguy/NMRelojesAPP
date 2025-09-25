@@ -51,13 +51,10 @@ const Home = ({ onProductClick, searchText }) => {
     <div className="min-h-screen relative">
       {/* Hero */}
       <section
-        className="relative h-[60vh] md:h-[450px] text-white flex items-center justify-center mb-16 bg-center bg-cover"
+        className="relative h-[60vh] md:h-[450px] text-white flex items-center justify-center mb-16 bg-cover bg-center md:bg-[center_top]"
         style={{ backgroundImage: `url(${NMrelojesImg})` }}
       >
-        {/* Overlay oscuro para mejorar contraste */}
         <div className="absolute inset-0 bg-black bg-opacity-40"></div>
-
-        {/* Contenido */}
         <div className="relative z-10 text-center px-4">
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-wide mb-4 font-mono">
             N&M Relojes
