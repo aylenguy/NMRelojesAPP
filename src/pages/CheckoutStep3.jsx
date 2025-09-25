@@ -90,43 +90,63 @@ export default function CheckoutStep3() {
       let newVenta;
 
       if (paymentMethod === "mercadopago") {
-        // 👇 Construimos el payload en una variable
-        const payload = {
-          Description: "Compra en NM Relojes",
-          PayerEmail: checkoutData.email || "sin-email@ejemplo.com",
-          CurrencyId: "ARS",
-          ExternalReference: externalReference,
-          Items: currentCart.items.map((i) => ({
-            ProductId: i.productId || i.id, // 👈 AGREGAMOS ESTO
-            Title: i.productName || i.name || "Producto",
-            Quantity: i.quantity || 1,
-            UnitPrice: i.unitPrice || 0,
-          })),
-          BackUrls: {
-            Success:
-              "https://nm-relojes-bi8f2d4py-aylens-projects-7a096c01.vercel.app/checkout/success",
-            Failure:
-              "https://nm-relojes-bi8f2d4py-aylens-projects-7a096c01.vercel.app/checkout/failure",
-            Pending:
-              "https://nm-relojes-bi8f2d4py-aylens-projects-7a096c01.vercel.app/checkout/pending",
-          },
-          NotificationUrl:
-            "https://nmrelojesapi.onrender.com/api/Payment/webhook",
-        };
+        try {
+          // 1️⃣ Guardar venta primero (pendiente) en tu backend
+          let newVenta;
+          if (token) {
+            newVenta = await createFromCart(ventaPayload, token);
+          } else {
+            newVenta = await addVenta(ventaPayload);
+          }
 
-        console.log("📤 Payload enviado a /Payment/create-checkout:", payload);
+          // 2️⃣ Construir payload de MercadoPago
+          const payload = {
+            Description: "Compra en NM Relojes",
+            PayerEmail: checkoutData.email || "sin-email@ejemplo.com",
+            CurrencyId: "ARS",
+            ExternalReference:
+              newVenta.externalReference || ventaPayload.externalReference,
+            Items: currentCart.items.map((i) => ({
+              ProductId: i.productId || i.id,
+              Title: i.productName || i.name || "Producto",
+              Quantity: i.quantity || 1,
+              UnitPrice: i.unitPrice || 0,
+            })),
+            BackUrls: {
+              Success:
+                "https://nm-relojes-bi8f2d4py-aylens-projects-7a096c01.vercel.app/checkout/success",
+              Failure:
+                "https://nm-relojes-bi8f2d4py-aylens-projects-7a096c01.vercel.app/checkout/failure",
+              Pending:
+                "https://nm-relojes-bi8f2d4py-aylens-projects-7a096c01.vercel.app/checkout/pending",
+            },
+            NotificationUrl:
+              "https://nmrelojesapi.onrender.com/api/Payment/webhook",
+          };
 
-        const mpResponse = await api.post("/Payment/create-checkout", payload);
+          console.log(
+            "📤 Payload enviado a /Payment/create-checkout:",
+            payload
+          );
 
-        console.log("📥 Respuesta MP (backend):", mpResponse.data);
+          // 3️⃣ Llamar a tu backend para generar preferencia en MP
+          const mpResponse = await api.post(
+            "/Payment/create-checkout",
+            payload
+          );
+          console.log("📥 Respuesta MP (backend):", mpResponse.data);
 
-        const mpData = mpResponse.data;
-        if (mpData?.initPoint) {
-          localStorage.setItem("ventaPendiente", JSON.stringify(ventaPayload));
-          window.location.href = mpData.initPoint; // usar la key correcta
-          return;
-        } else {
-          throw new Error("No se pudo generar el checkout de Mercado Pago.");
+          const mpData = mpResponse.data;
+          if (mpData?.initPoint) {
+            // Redirigir a MercadoPago
+            window.location.href = mpData.initPoint;
+            return;
+          } else {
+            throw new Error("No se pudo generar el checkout de Mercado Pago.");
+          }
+        } catch (error) {
+          console.error("❌ Error en checkout de MercadoPago:", error);
+          alert("Hubo un problema al iniciar el pago con Mercado Pago.");
         }
       }
 
