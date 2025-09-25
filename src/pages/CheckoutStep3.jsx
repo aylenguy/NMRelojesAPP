@@ -90,14 +90,21 @@ export default function CheckoutStep3() {
       let newVenta;
 
       if (paymentMethod === "mercadopago") {
-        // 👇 Construimos el payload en una variable
+        // 1️⃣ Guardamos la venta en el backend con estado Pendiente
+        if (token) {
+          newVenta = await createFromCart(ventaPayload, token);
+        } else {
+          newVenta = await addVenta(ventaPayload);
+        }
+
+        // 2️⃣ Armamos el payload para Mercado Pago
         const payload = {
           Description: "Compra en NM Relojes",
           PayerEmail: checkoutData.email || "sin-email@ejemplo.com",
           CurrencyId: "ARS",
-          ExternalReference: externalReference,
+          ExternalReference: newVenta.externalReference, // usamos el que guardó el backend
           Items: currentCart.items.map((i) => ({
-            ProductId: i.productId || i.id, // 👈 AGREGAMOS ESTO
+            ProductId: i.productId || i.id,
             Title: i.productName || i.name || "Producto",
             Quantity: i.quantity || 1,
             UnitPrice: i.unitPrice || 0,
@@ -117,13 +124,11 @@ export default function CheckoutStep3() {
         console.log("📤 Payload enviado a /Payment/create-checkout:", payload);
 
         const mpResponse = await api.post("/Payment/create-checkout", payload);
-
-        console.log("📥 Respuesta MP (backend):", mpResponse.data);
-
         const mpData = mpResponse.data;
+
         if (mpData?.initPoint) {
-          localStorage.setItem("ventaPendiente", JSON.stringify(ventaPayload));
-          window.location.href = mpData.initPoint; // usar la key correcta
+          localStorage.setItem("ventaPendiente", JSON.stringify(newVenta));
+          window.location.href = mpData.initPoint;
           return;
         } else {
           throw new Error("No se pudo generar el checkout de Mercado Pago.");
