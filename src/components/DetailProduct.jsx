@@ -93,8 +93,14 @@ const DetailProduct = () => {
   const name = product?.name || product?.Name || product?.nombre || "";
   const price = product?.price || product?.Price || product?.precio || 0;
   const stock = product?.stock || product?.Stock || 0;
-  const image =
-    product?.image || product?.Image || product?.imagen || "/placeholder.png";
+  const images = (product?.images || product?.Images || "")
+    .split(",")
+    .map((img) => img.trim())
+    .filter((img) => img) || ["/placeholder.png"];
+
+  const [selectedImage, setSelectedImage] = useState(
+    images[0] || "/placeholder.png"
+  );
   const description =
     product?.description || product?.Description || product?.descripcion || "";
 
@@ -103,7 +109,7 @@ const DetailProduct = () => {
     product?.specs ||
     (product?.caracteristicas
       ? Array.isArray(product.caracteristicas)
-        ? product.caracteristicas.join("\n") // si viene array, lo unimos con saltos de línea
+        ? product.caracteristicas.join("\n")
         : product.caracteristicas
       : "");
   const color = product?.color || product?.Color || "";
@@ -194,16 +200,31 @@ const DetailProduct = () => {
       </div>
     );
   }
+
   return (
     <div className="bg-white min-h-screen p-4 sm:p-6">
       <div className="max-w-6xl mx-auto flex flex-col md:flex-row gap-6 md:gap-12">
         {/* Imagen */}
-        <div className="w-full md:w-1/2 flex justify-center items-start">
+        <div className="w-full md:w-1/2 flex flex-col items-center">
           <img
-            src={image}
+            src={selectedImage}
             alt={name}
             className="rounded-lg w-full h-auto max-h-[650px] object-cover border border-gray-200 shadow"
           />
+          {/* Thumbnails */}
+          <div className="flex gap-2 mt-4 flex-wrap justify-center">
+            {images.map((img, idx) => (
+              <img
+                key={idx}
+                src={img}
+                alt={`thumb-${idx}`}
+                className={`w-20 h-20 object-cover rounded-md cursor-pointer border ${
+                  selectedImage === img ? "border-[#005f73]" : "border-gray-300"
+                }`}
+                onClick={() => setSelectedImage(img)}
+              />
+            ))}
+          </div>
         </div>
 
         {/* Info */}
