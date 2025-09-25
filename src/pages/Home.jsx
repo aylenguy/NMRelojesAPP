@@ -50,17 +50,19 @@ const Home = ({ onProductClick, searchText }) => {
   return (
     <div className="min-h-screen relative">
       {/* Hero */}
-      <section className="relative h-[450px] text-white flex items-center justify-center mb-16">
-        <img
-          src={NMrelojesImg}
-          alt="Hero"
-          className="absolute inset-0 w-full h-full object-cover brightness-50"
-        />
-        <div className="relative z-10 text-center">
-          <h1 className="text-5xl md:text-6xl font-bold tracking-wide mb-4 font-mono">
+      <section
+        className="relative h-[60vh] md:h-[450px] text-white flex items-center justify-center mb-16 bg-center bg-cover"
+        style={{ backgroundImage: `url(${NMrelojesImg})` }}
+      >
+        {/* Overlay oscuro para mejorar contraste */}
+        <div className="absolute inset-0 bg-black bg-opacity-40"></div>
+
+        {/* Contenido */}
+        <div className="relative z-10 text-center px-4">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-wide mb-4 font-mono">
             N&M Relojes
           </h1>
-          <p className="text-xl md:text-2xl font-light">
+          <p className="text-lg sm:text-xl md:text-2xl font-light">
             Elegancia, precisión y estilo en cada segundo.
           </p>
         </div>
