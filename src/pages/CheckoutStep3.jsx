@@ -82,6 +82,11 @@ export default function CheckoutStep3() {
         paymentDiscount, // este sí lo mandamos porque ya existe en tu backend
       };
 
+      console.log("🛒 currentCart:", currentCart);
+      console.log("📦 checkoutData:", checkoutData);
+      console.log("💳 Método de pago:", paymentMethod);
+      console.log("📝 Payload venta:", ventaPayload);
+
       let newVenta;
 
       if (paymentMethod === "mercadopago") {
@@ -112,6 +117,8 @@ export default function CheckoutStep3() {
         console.log("📤 Payload enviado a /Payment/create-checkout:", payload);
 
         const mpResponse = await api.post("/Payment/create-checkout", payload);
+
+        console.log("📥 Respuesta MP (backend):", mpResponse.data);
 
         const mpData = mpResponse.data;
         if (mpData?.InitPoint) {
@@ -171,7 +178,11 @@ export default function CheckoutStep3() {
 
       navigate("/checkout/success", { state: { venta: ventaTransformada } });
     } catch (err) {
-      console.error("Error al confirmar venta:", err);
+      console.error("❌ Error al confirmar venta:", err);
+      if (err.response) {
+        console.error("🔴 Error response data:", err.response.data);
+        console.error("🔴 Error response status:", err.response.status);
+      }
       alert(err.message || "Hubo un error al procesar tu pedido.");
     } finally {
       setLoading(false);
