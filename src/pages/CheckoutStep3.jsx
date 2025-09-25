@@ -112,11 +112,11 @@ export default function CheckoutStep3() {
         console.log("📤 Payload enviado a /Payment/create-checkout:", payload);
 
         const mpResponse = await api.post("/Payment/create-checkout", payload);
-        const mpData = mpResponse.data;
 
-        if (mpData?.preference?.init_point) {
+        const mpData = mpResponse.data;
+        if (mpData?.InitPoint) {
           localStorage.setItem("ventaPendiente", JSON.stringify(ventaPayload));
-          window.location.href = mpData.preference.init_point; // 👈 usar preference.init_point
+          window.location.href = mpData.InitPoint; // ✅ usar InitPoint directo
           return;
         } else {
           throw new Error("No se pudo generar el checkout de Mercado Pago.");
