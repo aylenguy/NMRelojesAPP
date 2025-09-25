@@ -88,10 +88,8 @@ export default function CheckoutStep3() {
       console.log("📝 Payload venta:", ventaPayload);
 
       let newVenta;
-
       if (paymentMethod === "mercadopago") {
         try {
-          // 1️⃣ Guardar venta primero (pendiente) en tu backend
           let newVenta;
           if (token) {
             newVenta = await createFromCart(ventaPayload, token);
@@ -99,7 +97,6 @@ export default function CheckoutStep3() {
             newVenta = await addVenta(ventaPayload);
           }
 
-          // 2️⃣ Construir payload de MercadoPago
           const payload = {
             Description: "Compra en NM Relojes",
             PayerEmail: checkoutData.email || "sin-email@ejemplo.com",
@@ -129,7 +126,6 @@ export default function CheckoutStep3() {
             payload
           );
 
-          // 3️⃣ Llamar a tu backend para generar preferencia en MP
           const mpResponse = await api.post(
             "/Payment/create-checkout",
             payload
@@ -138,15 +134,15 @@ export default function CheckoutStep3() {
 
           const mpData = mpResponse.data;
           if (mpData?.initPoint) {
-            // Redirigir a MercadoPago
             window.location.href = mpData.initPoint;
-            return;
+            return; // 👈 corta el flujo, no sigue abajo
           } else {
             throw new Error("No se pudo generar el checkout de Mercado Pago.");
           }
         } catch (error) {
           console.error("❌ Error en checkout de MercadoPago:", error);
           alert("Hubo un problema al iniciar el pago con Mercado Pago.");
+          return; // 👈 también corta si falla
         }
       }
 
