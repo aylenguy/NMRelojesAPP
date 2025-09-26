@@ -97,39 +97,20 @@ const DetailProduct = () => {
   const stock = product?.stock || product?.Stock || 0;
   let images = [];
 
-  // 👀 Debug
   console.log("🔍 Producto recibido:", product);
 
-  // Si es un objeto, mostrar las claves
-  if (product && typeof product === "object") {
-    console.log("🔍 Claves del producto:", Object.keys(product));
-  }
+  const imagenes = product?.imagenes || (product?.image ? [product.image] : []);
 
-  // Mostrar si tiene data dentro (caso Axios sin desestructurar)
-  if (product?.data) {
-    console.log("🔍 Dentro de data:", product.data);
-    console.log("🔍 Claves dentro de data:", Object.keys(product.data));
-  }
-
-  // Mostrar propiedad imagenes explícita
-  console.log("🔍 Propiedad imagenes en product:", product?.imagenes);
-  console.log(
-    "🔍 Propiedad imagenes en product.data:",
-    product?.data?.imagenes
-  );
-
-  if (product?.imagenes && product.imagenes.length > 0) {
-    images = product.imagenes.map((img) => {
+  if (imagenes.length > 0) {
+    images = imagenes.map((img) => {
       if (img.startsWith("http")) return img;
       return `${API_BASE_URL.replace(/\/$/, "")}/uploads/${img}`;
     });
   }
 
-  // Fallback si no hay imágenes
   if (images.length === 0) {
     images = ["https://nmrelojesapi.onrender.com/uploads/relojhombre.jpg"];
   }
-
   // Setear la imagen principal al cargar imágenes
   useEffect(() => {
     if (images.length > 0 && !selectedImage) {
