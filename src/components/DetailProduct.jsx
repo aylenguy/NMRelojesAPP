@@ -116,7 +116,7 @@ const DetailProduct = () => {
       mappedImages = rawImages;
     } else {
       // 👇 chequeás el producto específico
-      if (product.Nombre === "Aylen (chico)") {
+      if (product.nombre === "Aylen (chico)") {
         mappedImages = [
           "https://nmrelojesapi.onrender.com/uploads/KnockOutAylen.JPEG",
         ];
