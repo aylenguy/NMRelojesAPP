@@ -97,11 +97,13 @@ const DetailProduct = () => {
   const stock = product?.stock || product?.Stock || 0;
   let images = [];
 
+  // 👀 Debug
+  console.log("🔍 Producto recibido:", product);
+  console.log("🔍 Propiedad imagenes:", product?.imagenes);
+
   if (product?.imagenes && product.imagenes.length > 0) {
     images = product.imagenes.map((img) => {
-      // Si ya es una URL completa (ej: empieza con http), la dejamos igual
       if (img.startsWith("http")) return img;
-      // Si solo viene el nombre, armamos la URL con la base de tu backend
       return `${API_BASE_URL.replace(/\/$/, "")}/uploads/${img}`;
     });
   }
