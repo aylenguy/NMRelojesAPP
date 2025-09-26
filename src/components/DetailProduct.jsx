@@ -104,20 +104,17 @@ const DetailProduct = () => {
 
     // Tomamos las imágenes del backend
     const rawImages =
-      product.Images ||
-      product.Imagenes ||
-      product.images ||
-      product.imagenes ||
-      (product.image ? [product.image] : []);
+      product?.imagenes ||
+      product?.Imagenes ||
+      product?.images ||
+      product?.Images ||
+      (product?.image ? [product.image] : []);
 
-    // Convertimos a URLs absolutas
-    const mappedImages = (rawImages || [])
-      .filter((img) => typeof img === "string" && img) // solo strings no vacíos
-      .map((img) =>
-        img.startsWith("http")
-          ? img
-          : `https://nmrelojesapi.onrender.com/uploads/${img}`
-      );
+    const mappedImages = rawImages.map((img) =>
+      img.startsWith("http")
+        ? img
+        : `https://nmrelojesapi.onrender.com/uploads/${img}`
+    );
 
     // Fallback genérico si no hay imágenes
     const finalImages =
@@ -455,21 +452,17 @@ const DetailProduct = () => {
           {relatedProducts.length > 0 ? (
             relatedProducts.map((rawProduct) => {
               const rawImages =
-                rawProduct.Images ??
+                rawProduct.imagenes ??
                 rawProduct.Imagenes ??
                 rawProduct.images ??
-                rawProduct.imagenes ??
-                (rawProduct.Image ? [rawProduct.Image] : []) ??
-                [];
+                rawProduct.Images ??
+                (rawProduct.image ? [rawProduct.image] : []);
 
-              // Mapear a URLs completas
-              const mappedImages = rawImages
-                .filter((img) => typeof img === "string" && img)
-                .map((img) =>
-                  img.startsWith("http")
-                    ? img
-                    : `https://nmrelojesapi.onrender.com/uploads/${img}`
-                );
+              const mappedImages = rawImages.map((img) =>
+                img.startsWith("http")
+                  ? img
+                  : `https://nmrelojesapi.onrender.com/uploads/${img}`
+              );
               // Normalizamos el producto
               // Dentro del map de relatedProducts
               const product = {
