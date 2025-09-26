@@ -100,9 +100,9 @@ const DetailProduct = () => {
 
   const [selectedImage, setSelectedImage] = useState(
     product?.images
-      ? `${IMAGE_BASE_URL}${product.images[0]}`
+      ? `${IMAGE_BASE_URL}/uploads/${product.images[0]}`
       : product?.Images
-      ? `${IMAGE_BASE_URL}${product.Images[0]}`
+      ? `${IMAGE_BASE_URL}/uploads/${product.Images[0]}`
       : "/placeholder.png"
   );
 
