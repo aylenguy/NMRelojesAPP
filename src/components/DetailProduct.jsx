@@ -96,35 +96,32 @@ const DetailProduct = () => {
   const price = product?.price || product?.Price || product?.precio || 0;
   const stock = product?.stock || product?.Stock || 0;
   // Preparar imágenes
-  let images = [];
+  // Estado para las imágenes
+  const [images, setImages] = useState([]);
 
-  // 👀 Debug
-  console.log("🔍 Producto recibido:", product);
-
-  // Normalizamos la propiedad de imágenes
-  const rawImages =
-    product?.Images ||
-    product?.imagenes ||
-    (product?.image ? [product.image] : []);
-
-  if (rawImages.length > 0) {
-    images = rawImages.map((img) => {
-      if (img.startsWith("http")) return img;
-      return `${API_BASE_URL.replace(/\/$/, "")}/uploads/${img}`;
-    });
-  }
-
-  // Fallback si no hay imágenes
-  if (images.length === 0) {
-    images = ["https://nmrelojesapi.onrender.com/uploads/relojhombre.jpg"];
-  }
-
-  // Setear la imagen principal al cargar imágenes
   useEffect(() => {
-    if (images.length > 0 && !selectedImage) {
-      setSelectedImage(images[0]);
-    }
-  }, [images]);
+    if (!product) return;
+
+    console.log("🔍 Producto recibido:", product);
+
+    const rawImages =
+      product.Images || // C# backend
+      product.imagenes || // si viene en español
+      (product.image ? [product.image] : []); // fallback de una sola imagen
+
+    const mappedImages =
+      rawImages.length > 0
+        ? rawImages.map((img) =>
+            img.startsWith("http")
+              ? img
+              : `${API_BASE_URL.replace(/\/$/, "")}/uploads/${img}`
+          )
+        : ["https://nmrelojesapi.onrender.com/uploads/relojhombre.jpg"];
+
+    setImages(mappedImages);
+    setSelectedImage(mappedImages[0]); // setear principal al cargar
+  }, [product]);
+
   const description =
     product?.descripcion || product?.Description || product?.description || "";
 
