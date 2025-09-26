@@ -113,11 +113,13 @@ const DetailProduct = () => {
       (product.image ? [product.image] : []);
 
     // Convertimos a URLs absolutas
-    let mappedImages = (rawImages || []).map((img) =>
-      img.startsWith("http")
-        ? img
-        : `https://nmrelojesapi.onrender.com/uploads/${img}`
-    );
+    let mappedImages = (rawImages || [])
+      .filter((img) => typeof img === "string" && img) // filtramos solo strings no vacíos
+      .map((img) =>
+        img.startsWith("http")
+          ? img
+          : `https://nmrelojesapi.onrender.com/uploads/${img}`
+      );
 
     // Si no hay imágenes, usar fallback por producto
     if (mappedImages.length === 0) {
