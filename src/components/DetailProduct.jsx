@@ -471,7 +471,24 @@ const DetailProduct = () => {
         <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8">
           {relatedProducts.length > 0 ? (
             relatedProducts.map((rawProduct) => {
+              const rawImages =
+                rawProduct.Images ??
+                rawProduct.Imagenes ??
+                rawProduct.images ??
+                rawProduct.imagenes ??
+                (rawProduct.Image ? [rawProduct.Image] : []) ??
+                [];
+
+              // Mapear a URLs completas
+              const mappedImages = rawImages
+                .filter((img) => typeof img === "string" && img)
+                .map((img) =>
+                  img.startsWith("http")
+                    ? img
+                    : `https://nmrelojesapi.onrender.com/uploads/${img}`
+                );
               // Normalizamos el producto
+              // Dentro del map de relatedProducts
               const product = {
                 id: rawProduct.Id ?? rawProduct.id,
                 nombre:
@@ -493,15 +510,8 @@ const DetailProduct = () => {
                   rawProduct.price ??
                   0,
                 image:
-                  rawProduct.Imagen ??
-                  rawProduct.Imagenes ??
-                  rawProduct.Images ??
-                  rawProduct.imagenes ??
-                  rawProduct.images ??
-                  rawProduct.imagen ??
-                  rawProduct.Image ??
-                  rawProduct.image ??
-                  "https://nmrelojesapi.onrender.com/uploads/relojhombre.jpg",
+                  mappedImages[0] ||
+                  "https://nmrelojesapi.onrender.com/uploads/relojhombre.jpg", // <-- usa mappedImages
                 description: rawProduct.descripcion ?? "",
                 color: rawProduct.Color ?? rawProduct.color ?? "",
                 stock: rawProduct.Stock ?? rawProduct.stock ?? 0,
