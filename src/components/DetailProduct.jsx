@@ -104,18 +104,24 @@ const DetailProduct = () => {
 
     console.log("🔍 Producto recibido:", product);
 
+    // Tomamos las imágenes del backend
     const rawImages =
-      product.Imagenes || // lo que devuelve tu backend
+      product.Imagenes ||
       product.Images ||
       product.imagenes ||
       (product.image ? [product.image] : []);
 
+    // 🔧 Normalizamos las URLs: reemplazamos localhost por tu dominio real
+    const fixedImages = rawImages.map((img) =>
+      img.replace("https://localhost:7247", "https://nmrelojesapi.onrender.com")
+    );
+
     let mappedImages;
 
-    if (rawImages.length > 0) {
-      mappedImages = rawImages;
+    if (fixedImages.length > 0) {
+      mappedImages = fixedImages;
     } else {
-      // 👇 chequeás el producto específico
+      // 👇 Si no tiene imágenes, aplicamos excepciones
       if (product.nombre === "Aylen (chico)") {
         mappedImages = [
           "https://nmrelojesapi.onrender.com/uploads/KnockOutAylen.JPEG",
