@@ -121,20 +121,22 @@ const DetailProduct = () => {
         )
       );
 
+    // Normalizamos el nombre del producto
+    const productName = getNombre(product);
+
     let mappedImages;
     if (fixedImages.length > 0) {
       mappedImages = fixedImages;
     } else {
-      // 👇 Si no tiene imágenes, aplicamos excepciones
-      if (product.nombre === "Aylen (chico)") {
+      if (productName === "Aylen (chico)") {
         mappedImages = [
           "https://nmrelojesapi.onrender.com/uploads/KnockOutAylen.JPEG",
         ];
-      } else if (product.nombre === "Mica") {
+      } else if (productName === "Mica") {
         mappedImages = [
           "https://nmrelojesapi.onrender.com/uploads/KosiukoMica.JPEG",
         ];
-      } else if (product.nombre === "Génova") {
+      } else if (productName === "Génova") {
         mappedImages = [
           "https://nmrelojesapi.onrender.com/uploads/KosiukoGenova.JPG",
         ];
@@ -144,6 +146,8 @@ const DetailProduct = () => {
         ];
       }
     }
+
+    // Guardamos el estado
     setImages(mappedImages);
     setSelectedImage(mappedImages[0]);
   }, [product]);
