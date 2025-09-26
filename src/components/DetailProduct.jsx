@@ -93,12 +93,17 @@ const DetailProduct = () => {
   const name = product?.name || product?.Name || product?.nombre || "";
   const price = product?.price || product?.Price || product?.precio || 0;
   const stock = product?.stock || product?.Stock || 0;
-  const images = product?.images || product?.Images || ["/placeholder.png"];
+  const images = (
+    product?.images ||
+    product?.Images || ["/placeholder.png"]
+  ).map((img) => `${API_BASE_URL}${img}`);
 
   const [selectedImage, setSelectedImage] = useState(
-    (product?.images && product.images[0]) ||
-      (product?.Images && product.Images[0]) ||
-      "/placeholder.png"
+    product?.images
+      ? `${API_BASE_URL}${product.images[0]}`
+      : product?.Images
+      ? `${API_BASE_URL}${product.Images[0]}`
+      : "/placeholder.png"
   );
 
   const description =
