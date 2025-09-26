@@ -93,26 +93,22 @@ const DetailProduct = () => {
   const name = product?.name || product?.Name || product?.nombre || "";
   const price = product?.price || product?.Price || product?.precio || 0;
   const stock = product?.stock || product?.Stock || 0;
-  let rawImages = product?.images || product?.Images || [];
-  let images = [];
+  let images = product?.imagenes || product?.Images || [];
 
-  if (typeof rawImages === "string") {
-    images = rawImages.split(",").map((img) => img.trim());
-  } else if (Array.isArray(rawImages)) {
-    images = rawImages;
+  // Si es string, lo convertimos a array
+  if (typeof images === "string") {
+    images = images.split(",").map((img) => img.trim());
   }
 
-  // 🔹 agregar el dominio/host del backend a cada imagen
-  images = images.map((img) => `${API_BASE_URL}/uploads/${img}`);
-
-  // si no hay ninguna imagen, ahí sí usás un fallback (por ejemplo un logo que ya tenés en /uploads/)
+  // Si no hay imágenes, fallback
   if (images.length === 0) {
-    images = [`${API_BASE_URL}/uploads/relojhombre.jpg`];
+    images = ["https://nmrelojesapi.onrender.com/uploads/relojhombre.jpg"];
   }
 
   const [selectedImage, setSelectedImage] = useState(images[0]);
+
   const description =
-    product?.description || product?.Description || product?.descripcion || "";
+    product?.descripcion || product?.Description || product?.description || "";
 
   const Specs =
     product?.Specs ||
