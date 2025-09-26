@@ -111,7 +111,15 @@ const DetailProduct = () => {
   if (images.length === 0) {
     images = ["https://nmrelojesapi.onrender.com/uploads/relojhombre.jpg"];
   }
-  const [selectedImage, setSelectedImage] = useState(images[0]);
+
+  const [selectedImage, setSelectedImage] = useState(null);
+
+  // 🔑 Cuando cambien las imágenes del producto, actualizamos selectedImage
+  useEffect(() => {
+    if (images.length > 0) {
+      setSelectedImage(images[0]);
+    }
+  }, [images]);
 
   const description =
     product?.descripcion || product?.Description || product?.description || "";
