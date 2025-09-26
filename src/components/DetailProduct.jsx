@@ -110,10 +110,22 @@ const DetailProduct = () => {
       product.imagenes ||
       (product.image ? [product.image] : []);
 
-    const mappedImages =
-      rawImages.length > 0
-        ? rawImages
-        : ["https://nmrelojesapi.onrender.com/uploads/relojhombre.jpg"];
+    let mappedImages;
+
+    if (rawImages.length > 0) {
+      mappedImages = rawImages;
+    } else {
+      // 👇 chequeás el producto específico
+      if (product.Nombre === "KnockOut Aylen") {
+        mappedImages = [
+          "https://nmrelojesapi.onrender.com/uploads/KnockOutAylen.JPEG",
+        ];
+      } else {
+        mappedImages = [
+          "https://nmrelojesapi.onrender.com/uploads/relojhombre.jpg",
+        ];
+      }
+    }
 
     setImages(mappedImages);
     setSelectedImage(mappedImages[0]);
