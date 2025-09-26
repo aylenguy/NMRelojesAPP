@@ -14,6 +14,8 @@ const DetailProduct = () => {
   const { addToCart } = useCart();
 
   const [product, setProduct] = useState(productFromState || null);
+  const [selectedImage, setSelectedImage] = useState(null);
+
   const [loading, setLoading] = useState(!productFromState);
   const [showNotification, setShowNotification] = useState(false);
   const [quantity, setQuantity] = useState(1);
@@ -95,23 +97,27 @@ const DetailProduct = () => {
   const stock = product?.stock || product?.Stock || 0;
   let images = [];
 
-  // Si product tiene imágenes
   if (product?.imagenes && product.imagenes.length > 0) {
-    images = product.imagenes;
+    images = product.imagenes.map((img) => {
+      // Si ya es una URL completa (ej: empieza con http), la dejamos igual
+      if (img.startsWith("http")) return img;
+      // Si solo viene el nombre, armamos la URL con la base de tu backend
+      return `${API_BASE_URL.replace(/\/$/, "")}/uploads/${img}`;
+    });
   }
 
-  // Si no hay imágenes, usar fallback
+  // Fallback si no hay imágenes
   if (images.length === 0) {
     images = ["https://nmrelojesapi.onrender.com/uploads/relojhombre.jpg"];
   }
 
-  const [selectedImage, setSelectedImage] = useState(images[0]);
-
+  // Setear la imagen principal al cargar imágenes
   useEffect(() => {
-    if (images.length > 0) {
+    if (images.length > 0 && !selectedImage) {
       setSelectedImage(images[0]);
     }
-  }, [images]);
+  }, [images, selectedImage]);
+
   const description =
     product?.descripcion || product?.Description || product?.description || "";
 
