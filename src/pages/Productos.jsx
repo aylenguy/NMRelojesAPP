@@ -27,18 +27,38 @@ const Productos = ({ searchText }) => {
         const res = await api.get("/Product/GetAllProducts");
 
         // Normalizamos los productos
-        const productosNormalizados = res.data.map((p) => ({
-          id: p.id ?? p.Id,
-          name: p.name ?? p.Name ?? p.nombre ?? "Producto sin nombre",
-          price: p.price ?? p.Price ?? p.precio ?? 0,
-          brand: p.brand ?? p.Brand ?? p.marca ?? "Sin marca",
-          category: p.category ?? p.Category ?? p.categoria ?? "Sin categoría",
-          color: p.color ?? p.Color ?? "Sin color",
-          stock: p.stock ?? 0,
-          image: p.image ?? p.Image ?? p.imagen ?? "placeholder.png",
-          caracteristicas: p.Caracteristicas ?? p.caracteristicas ?? [],
-          descripcion: p.Descripcion ?? p.descripcion ?? "",
-        }));
+        // Normalizamos los productos
+        const productosNormalizados = res.data.map((p) => {
+          // Obtener todas las imágenes posibles
+          const rawImages =
+            p.Images ??
+            p.Imagenes ??
+            p.images ??
+            p.imagenes ??
+            (p.Image || p.image ? [p.Image || p.image] : []);
+
+          // Tomar la primera imagen y convertir a URL absoluta
+          const image =
+            rawImages && rawImages.length > 0
+              ? rawImages[0].startsWith("http")
+                ? rawImages[0]
+                : `${import.meta.env.VITE_API_URL}/uploads/${rawImages[0]}`
+              : "https://nmrelojesapi.onrender.com/uploads/relojhombre.jpg"; // fallback
+
+          return {
+            id: p.id ?? p.Id,
+            name: p.name ?? p.Name ?? p.nombre ?? "Producto sin nombre",
+            price: p.price ?? p.Price ?? p.precio ?? 0,
+            brand: p.brand ?? p.Brand ?? p.marca ?? "Sin marca",
+            category:
+              p.category ?? p.Category ?? p.categoria ?? "Sin categoría",
+            color: p.color ?? p.Color ?? "Sin color",
+            stock: p.stock ?? 0,
+            image, // ya mapeada correctamente
+            caracteristicas: p.Caracteristicas ?? p.caracteristicas ?? [],
+            descripcion: p.Descripcion ?? p.descripcion ?? "",
+          };
+        });
 
         setProductos(productosNormalizados);
       } catch {
