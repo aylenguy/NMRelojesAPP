@@ -112,9 +112,14 @@ const DetailProduct = () => {
       (product.image ? [product.image] : []);
 
     // 🔧 Normalizamos las URLs: reemplazamos localhost por tu dominio real
-    const fixedImages = rawImages.map((img) =>
-      img.replace("https://localhost:7247", "https://nmrelojesapi.onrender.com")
-    );
+    const fixedImages = (rawImages || [])
+      .filter((img) => typeof img === "string")
+      .map((img) =>
+        img.replace(
+          "https://localhost:7247",
+          "https://nmrelojesapi.onrender.com"
+        )
+      );
 
     let mappedImages;
 
@@ -125,6 +130,16 @@ const DetailProduct = () => {
       if (product.nombre === "Aylen (chico)") {
         mappedImages = [
           "https://nmrelojesapi.onrender.com/uploads/KnockOutAylen.JPEG",
+        ];
+      }
+      if (product.nombre === "Mica") {
+        mappedImages = [
+          "https://nmrelojesapi.onrender.com/uploads/KosiukoMica.JPEG",
+        ];
+      }
+      if (product.nombre === "Génova") {
+        mappedImages = [
+          "https://nmrelojesapi.onrender.com/uploads/KosiukoGenova.JPG",
         ];
       } else {
         mappedImages = [
