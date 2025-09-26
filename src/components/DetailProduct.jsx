@@ -464,6 +464,12 @@ const DetailProduct = () => {
               // Normalizamos el producto
               const product = {
                 id: rawProduct.Id ?? rawProduct.id,
+                nombre:
+                  rawProduct.Nombre ??
+                  rawProduct.nombre ??
+                  rawProduct.Name ??
+                  rawProduct.name ??
+                  "",
                 name:
                   rawProduct.Nombre ??
                   rawProduct.nombre ??
@@ -500,7 +506,6 @@ const DetailProduct = () => {
                   rawProduct.Caracteristicas ??
                   [],
               };
-
               const sinStock = product.stock <= 0;
 
               return (
