@@ -6,6 +6,7 @@ import api from "../api/api";
 import { useCart } from "../context/CartContext";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
+const IMAGE_BASE_URL = "https://nmrelojesapi.onrender.com";
 
 const DetailProduct = () => {
   const { state: productFromState } = useLocation();
@@ -96,13 +97,13 @@ const DetailProduct = () => {
   const images = (
     product?.images ||
     product?.Images || ["/placeholder.png"]
-  ).map((img) => `${API_BASE_URL}${img}`);
+  ).map((img) => `${IMAGE_BASE_URL}${img}`);
 
   const [selectedImage, setSelectedImage] = useState(
     product?.images
-      ? `${API_BASE_URL}${product.images[0]}`
+      ? `${IMAGE_BASE_URL}${product.images[0]}`
       : product?.Images
-      ? `${API_BASE_URL}${product.Images[0]}`
+      ? `${IMAGE_BASE_URL}${product.Images[0]}`
       : "/placeholder.png"
   );
 
