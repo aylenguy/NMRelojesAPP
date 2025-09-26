@@ -93,14 +93,14 @@ const DetailProduct = () => {
   const name = product?.name || product?.Name || product?.nombre || "";
   const price = product?.price || product?.Price || product?.precio || 0;
   const stock = product?.stock || product?.Stock || 0;
-  const images = (product?.images || product?.Images || "")
-    .split(",")
-    .map((img) => img.trim())
-    .filter((img) => img) || ["/placeholder.png"];
+  const images = product?.images || product?.Images || ["/placeholder.png"];
 
   const [selectedImage, setSelectedImage] = useState(
-    images[0] || "/placeholder.png"
+    (product?.images && product.images[0]) ||
+      (product?.Images && product.Images[0]) ||
+      "/placeholder.png"
   );
+
   const description =
     product?.description || product?.Description || product?.descripcion || "";
 
