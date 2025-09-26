@@ -102,32 +102,25 @@ const DetailProduct = () => {
   useEffect(() => {
     if (!product) return;
 
-    console.log("🔍 Producto recibido:", product);
+    const productName = getNombre(product);
 
     // Tomamos las imágenes del backend
     const rawImages =
-      product.Imagenes ||
       product.Images ||
+      product.Imagenes ||
+      product.images ||
       product.imagenes ||
       (product.image ? [product.image] : []);
 
-    // 🔧 Normalizamos las URLs: reemplazamos localhost por tu dominio real
-    const fixedImages = (rawImages || [])
-      .filter((img) => typeof img === "string")
-      .map((img) =>
-        img.replace(
-          "https://localhost:7247",
-          "https://nmrelojesapi.onrender.com"
-        )
-      );
+    // Convertimos a URLs absolutas
+    let mappedImages = (rawImages || []).map((img) =>
+      img.startsWith("http")
+        ? img
+        : `https://nmrelojesapi.onrender.com/uploads/${img}`
+    );
 
-    // Normalizamos el nombre del producto
-    const productName = getNombre(product);
-
-    let mappedImages;
-    if (fixedImages.length > 0) {
-      mappedImages = fixedImages;
-    } else {
+    // Si no hay imágenes, usar fallback por producto
+    if (mappedImages.length === 0) {
       if (productName === "Aylen (chico)") {
         mappedImages = [
           "https://nmrelojesapi.onrender.com/uploads/KnockOutAylen.JPEG",
