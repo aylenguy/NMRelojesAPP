@@ -93,23 +93,16 @@ const DetailProduct = () => {
   const name = product?.name || product?.Name || product?.nombre || "";
   const price = product?.price || product?.Price || product?.precio || 0;
   const stock = product?.stock || product?.Stock || 0;
-  let images = product?.imagenes || product?.Images || [];
+  let images = product?.imagenes || [];
 
   // Si es string, lo convertimos a array
   if (typeof images === "string") {
     images = images.split(",").map((img) => img.trim());
   }
 
-  // Convertimos cada imagen a URL absoluta
-  images = images.map((img) =>
-    img.startsWith("http")
-      ? img
-      : `https://nmrelojesapi.onrender.com/uploads/${img}`
-  );
-
   // Si no hay imágenes, fallback
   if (images.length === 0) {
-    images = ["https://nmrelojesapi.onrender.com/uploads/KnockOutAylen.JPEG"];
+    images = ["https://nmrelojesapi.onrender.com/uploads/relojhombre.jpg"];
   }
 
   const [selectedImage, setSelectedImage] = useState(null);
