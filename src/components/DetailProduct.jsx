@@ -6,7 +6,6 @@ import api from "../api/api";
 import { useCart } from "../context/CartContext";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
-const IMAGE_BASE_URL = "https://nmrelojesapi.onrender.com";
 
 const DetailProduct = () => {
   const { state: productFromState } = useLocation();
@@ -94,18 +93,14 @@ const DetailProduct = () => {
   const name = product?.name || product?.Name || product?.nombre || "";
   const price = product?.price || product?.Price || product?.precio || 0;
   const stock = product?.stock || product?.Stock || 0;
-  const images = product.images.map(
-    (img) => `${IMAGE_BASE_URL}/uploads/${img}`
-  );
+  const images = (product?.images || product?.Images || "")
+    .split(",")
+    .map((img) => img.trim())
+    .filter((img) => img) || ["/placeholder.png"];
 
   const [selectedImage, setSelectedImage] = useState(
-    product?.images
-      ? `${IMAGE_BASE_URL}/uploads/${product.images[0]}`
-      : product?.Images
-      ? `${IMAGE_BASE_URL}/uploads/${product.Images[0]}`
-      : "/placeholder.png"
+    images[0] || "/placeholder.png"
   );
-
   const description =
     product?.description || product?.Description || product?.descripcion || "";
 
