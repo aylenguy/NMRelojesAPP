@@ -93,6 +93,7 @@ const DetailProduct = () => {
   const name = product?.name || product?.Name || product?.nombre || "";
   const price = product?.price || product?.Price || product?.precio || 0;
   const stock = product?.stock || product?.Stock || 0;
+  // 🔹 Normalizamos las imágenes
   let images = product?.imagenes || product?.Images || [];
 
   // Si es string, lo convertimos a array
@@ -111,8 +112,16 @@ const DetailProduct = () => {
   if (images.length === 0) {
     images = ["https://nmrelojesapi.onrender.com/uploads/relojhombre.jpg"];
   }
-  const [selectedImage, setSelectedImage] = useState(images[0]);
 
+  // 🔹 Estado de imagen seleccionada (arranca en null)
+  const [selectedImage, setSelectedImage] = useState(null);
+
+  // 🔹 Cada vez que cambie "images", actualizamos selectedImage
+  useEffect(() => {
+    if (images.length > 0) {
+      setSelectedImage(images[0]);
+    }
+  }, [images]);
   const description =
     product?.descripcion || product?.Description || product?.description || "";
 
