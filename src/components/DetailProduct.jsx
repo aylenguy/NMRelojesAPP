@@ -110,11 +110,13 @@ const DetailProduct = () => {
       product?.Images ||
       (product?.image ? [product.image] : []);
 
-    const mappedImages = rawImages.map((img) =>
-      img.startsWith("http")
-        ? img
-        : `https://nmrelojesapi.onrender.com/uploads/${img}`
-    );
+    const mappedImages = rawImages.map((img) => {
+      // Si ya viene con http o https (ej: localhost o onrender) → la dejamos igual
+      if (img.startsWith("http")) return img;
+
+      // Si viene solo el nombre del archivo → armamos la URL con tu dominio online
+      return `https://nmrelojesapi.onrender.com/uploads/${img}`;
+    });
 
     // Fallback genérico si no hay imágenes
     const finalImages =
@@ -458,11 +460,14 @@ const DetailProduct = () => {
                 rawProduct.Images ??
                 (rawProduct.image ? [rawProduct.image] : []);
 
-              const mappedImages = rawImages.map((img) =>
-                img.startsWith("http")
-                  ? img
-                  : `https://nmrelojesapi.onrender.com/uploads/${img}`
-              );
+              const mappedImages = rawImages.map((img) => {
+                // Si ya viene con http o https (ej: localhost o onrender) → la dejamos igual
+                if (img.startsWith("http")) return img;
+
+                // Si viene solo el nombre del archivo → armamos la URL con tu dominio online
+                return `https://nmrelojesapi.onrender.com/uploads/${img}`;
+              });
+
               // Normalizamos el producto
               // Dentro del map de relatedProducts
               const product = {
