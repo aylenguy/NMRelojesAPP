@@ -105,22 +105,18 @@ const DetailProduct = () => {
     console.log("🔍 Producto recibido:", product);
 
     const rawImages =
-      product.Images || // C# backend
-      product.imagenes || // si viene en español
-      product.Imagenes ||
-      (product.image ? [product.image] : []); // fallback de una sola imagen
+      product.Imagenes || // lo que devuelve tu backend
+      product.Images ||
+      product.imagenes ||
+      (product.image ? [product.image] : []);
 
     const mappedImages =
       rawImages.length > 0
-        ? rawImages.map((img) =>
-            img.startsWith("http")
-              ? img
-              : `${API_BASE_URL.replace(/\/$/, "")}/uploads/${img}`
-          )
+        ? rawImages
         : ["https://nmrelojesapi.onrender.com/uploads/relojhombre.jpg"];
 
     setImages(mappedImages);
-    setSelectedImage(mappedImages[0]); // setear principal al cargar
+    setSelectedImage(mappedImages[0]);
   }, [product]);
 
   const description =
