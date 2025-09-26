@@ -94,10 +94,9 @@ const DetailProduct = () => {
   const name = product?.name || product?.Name || product?.nombre || "";
   const price = product?.price || product?.Price || product?.precio || 0;
   const stock = product?.stock || product?.Stock || 0;
-  const images = (
-    product?.images ||
-    product?.Images || ["/placeholder.png"]
-  ).map((img) => `${IMAGE_BASE_URL}${img}`);
+  const images = product.images.map(
+    (img) => `${IMAGE_BASE_URL}/uploads/${img}`
+  );
 
   const [selectedImage, setSelectedImage] = useState(
     product?.images
