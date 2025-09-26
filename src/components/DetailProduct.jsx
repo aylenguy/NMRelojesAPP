@@ -96,18 +96,18 @@ const DetailProduct = () => {
   let rawImages = product?.images || product?.Images || [];
   let images = [];
 
-  // Si es string (caso viejo con comas), dividirlo
   if (typeof rawImages === "string") {
     images = rawImages.split(",").map((img) => img.trim());
-  }
-  // Si ya es array, usarlo directo
-  else if (Array.isArray(rawImages)) {
+  } else if (Array.isArray(rawImages)) {
     images = rawImages;
   }
 
-  // Placeholder si no hay imágenes
+  // 🔹 agregar el dominio/host del backend a cada imagen
+  images = images.map((img) => `${API_BASE_URL}/uploads/${img}`);
+
+  // si no hay ninguna imagen, ahí sí usás un fallback (por ejemplo un logo que ya tenés en /uploads/)
   if (images.length === 0) {
-    images = ["/placeholder.png"];
+    images = [`${API_BASE_URL}/uploads/relojhombre.jpg`];
   }
 
   const [selectedImage, setSelectedImage] = useState(images[0]);
