@@ -100,11 +100,17 @@ const DetailProduct = () => {
     images = images.split(",").map((img) => img.trim());
   }
 
+  // Convertimos cada imagen a URL absoluta
+  images = images.map((img) =>
+    img.startsWith("http")
+      ? img
+      : `https://nmrelojesapi.onrender.com/uploads/${img}`
+  );
+
   // Si no hay imágenes, fallback
   if (images.length === 0) {
     images = ["https://nmrelojesapi.onrender.com/uploads/relojhombre.jpg"];
   }
-
   const [selectedImage, setSelectedImage] = useState(images[0]);
 
   const description =
