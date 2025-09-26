@@ -24,18 +24,36 @@ const Home = ({ onProductClick, searchText }) => {
     await addToCart(product.id || product.Id, 1);
   };
 
-  const normalizeServerProduct = (p) => ({
-    id: p.Id ?? p.id,
-    name: p.Nombre ?? p.nombre ?? p.Name ?? p.name,
-    price: p.Precio ?? p.precio ?? p.Price ?? p.price ?? 0,
-    image: p.Imagen ?? p.imagen ?? p.Image ?? p.image,
-    description:
-      p.Descripcion ?? p.descripcion ?? p.Description ?? p.description ?? "",
-    color: p.Color ?? p.color ?? "",
-    stock: p.Stock ?? p.stock ?? 0,
-    brand: p.Marca ?? p.marca ?? p.Brand ?? p.brand ?? "",
-    caracteristicas: p.Caracteristicas ?? p.caracteristicas ?? [],
-  });
+  const normalizeServerProduct = (p) => {
+    // Obtener todas las imágenes posibles
+    const rawImages =
+      p.Images ??
+      p.Imagenes ??
+      p.images ??
+      p.imagenes ??
+      (p.Image || p.image ? [p.Image || p.image] : []);
+
+    // Tomar la primera imagen y convertir a URL absoluta
+    const image =
+      rawImages && rawImages.length > 0
+        ? rawImages[0].startsWith("http")
+          ? rawImages[0]
+          : `https://nmrelojesapi.onrender.com/uploads/${rawImages[0]}`
+        : "https://nmrelojesapi.onrender.com/uploads/relojhombre.jpg"; // fallback
+
+    return {
+      id: p.Id ?? p.id,
+      name: p.Nombre ?? p.nombre ?? p.Name ?? p.name ?? "",
+      price: p.Precio ?? p.precio ?? p.Price ?? p.price ?? 0,
+      image, // ya mapeada a URL completa
+      description:
+        p.Descripcion ?? p.descripcion ?? p.Description ?? p.description ?? "",
+      color: p.Color ?? p.color ?? "",
+      stock: p.Stock ?? p.stock ?? 0,
+      brand: p.Marca ?? p.marca ?? p.Brand ?? p.brand ?? "",
+      caracteristicas: p.Caracteristicas ?? p.caracteristicas ?? [],
+    };
+  };
 
   // Aplico el filtro de búsqueda
   const filteredProducts = products.filter((product) =>
@@ -91,12 +109,7 @@ const Home = ({ onProductClick, searchText }) => {
                   }}
                 >
                   <img
-                    src={
-                      product.image ||
-                      product.Image ||
-                      product.imagen ||
-                      "/placeholder.png"
-                    }
+                    src={product.image}
                     alt={product.name || product.Name || product.nombre}
                     className="w-full h-full object-cover transform transition-transform duration-300 group-hover:scale-105"
                   />
