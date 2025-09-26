@@ -102,8 +102,6 @@ const DetailProduct = () => {
   useEffect(() => {
     if (!product) return;
 
-    const productName = getNombre(product);
-
     // Tomamos las imágenes del backend
     const rawImages =
       product.Images ||
@@ -113,38 +111,23 @@ const DetailProduct = () => {
       (product.image ? [product.image] : []);
 
     // Convertimos a URLs absolutas
-    let mappedImages = (rawImages || [])
-      .filter((img) => typeof img === "string" && img) // filtramos solo strings no vacíos
+    const mappedImages = (rawImages || [])
+      .filter((img) => typeof img === "string" && img) // solo strings no vacíos
       .map((img) =>
         img.startsWith("http")
           ? img
           : `https://nmrelojesapi.onrender.com/uploads/${img}`
       );
 
-    // Si no hay imágenes, usar fallback por producto
-    if (mappedImages.length === 0) {
-      if (productName === "Aylen (chico)") {
-        mappedImages = [
-          "https://nmrelojesapi.onrender.com/uploads/KnockOutAylen.JPEG",
-        ];
-      } else if (productName === "Mica") {
-        mappedImages = [
-          "https://nmrelojesapi.onrender.com/uploads/KosiukoMica.JPEG",
-        ];
-      } else if (productName === "Génova") {
-        mappedImages = [
-          "https://nmrelojesapi.onrender.com/uploads/KosiukoGenova.JPG",
-        ];
-      } else {
-        mappedImages = [
-          "https://nmrelojesapi.onrender.com/uploads/relojhombre.jpg",
-        ];
-      }
-    }
+    // Fallback genérico si no hay imágenes
+    const finalImages =
+      mappedImages.length > 0
+        ? mappedImages
+        : ["https://nmrelojesapi.onrender.com/uploads/relojhombre.jpg"];
 
-    // Guardamos el estado
-    setImages(mappedImages);
-    setSelectedImage(mappedImages[0]);
+    // Guardamos en el estado
+    setImages(finalImages);
+    setSelectedImage(finalImages[0]);
   }, [product]);
 
   const description =
