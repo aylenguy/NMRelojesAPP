@@ -107,6 +107,7 @@ const DetailProduct = () => {
     const rawImages =
       product.Images || // C# backend
       product.imagenes || // si viene en español
+      product.Imagenes ||
       (product.image ? [product.image] : []); // fallback de una sola imagen
 
     const mappedImages =
