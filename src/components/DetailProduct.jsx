@@ -95,29 +95,36 @@ const DetailProduct = () => {
   const name = product?.name || product?.Name || product?.nombre || "";
   const price = product?.price || product?.Price || product?.precio || 0;
   const stock = product?.stock || product?.Stock || 0;
+  // Preparar imágenes
   let images = [];
 
+  // 👀 Debug
   console.log("🔍 Producto recibido:", product);
 
-  const imagenes = product?.imagenes || (product?.image ? [product.image] : []);
+  // Normalizamos la propiedad de imágenes
+  const rawImages =
+    product?.Images ||
+    product?.imagenes ||
+    (product?.image ? [product.image] : []);
 
-  if (imagenes.length > 0) {
-    images = imagenes.map((img) => {
+  if (rawImages.length > 0) {
+    images = rawImages.map((img) => {
       if (img.startsWith("http")) return img;
       return `${API_BASE_URL.replace(/\/$/, "")}/uploads/${img}`;
     });
   }
 
+  // Fallback si no hay imágenes
   if (images.length === 0) {
     images = ["https://nmrelojesapi.onrender.com/uploads/relojhombre.jpg"];
   }
+
   // Setear la imagen principal al cargar imágenes
   useEffect(() => {
     if (images.length > 0 && !selectedImage) {
       setSelectedImage(images[0]);
     }
-  }, [images, selectedImage]);
-
+  }, [images]);
   const description =
     product?.descripcion || product?.Description || product?.description || "";
 
