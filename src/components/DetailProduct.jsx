@@ -93,14 +93,24 @@ const DetailProduct = () => {
   const name = product?.name || product?.Name || product?.nombre || "";
   const price = product?.price || product?.Price || product?.precio || 0;
   const stock = product?.stock || product?.Stock || 0;
-  const images = (product?.images || product?.Images || "")
-    .split(",")
-    .map((img) => img.trim())
-    .filter((img) => img) || ["/placeholder.png"];
+  let rawImages = product?.images || product?.Images || [];
+  let images = [];
 
-  const [selectedImage, setSelectedImage] = useState(
-    images[0] || "/placeholder.png"
-  );
+  // Si es string (caso viejo con comas), dividirlo
+  if (typeof rawImages === "string") {
+    images = rawImages.split(",").map((img) => img.trim());
+  }
+  // Si ya es array, usarlo directo
+  else if (Array.isArray(rawImages)) {
+    images = rawImages;
+  }
+
+  // Placeholder si no hay imágenes
+  if (images.length === 0) {
+    images = ["/placeholder.png"];
+  }
+
+  const [selectedImage, setSelectedImage] = useState(images[0]);
   const description =
     product?.description || product?.Description || product?.descripcion || "";
 
