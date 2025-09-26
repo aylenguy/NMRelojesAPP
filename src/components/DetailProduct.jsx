@@ -99,7 +99,24 @@ const DetailProduct = () => {
 
   // 👀 Debug
   console.log("🔍 Producto recibido:", product);
-  console.log("🔍 Propiedad imagenes:", product?.imagenes);
+
+  // Si es un objeto, mostrar las claves
+  if (product && typeof product === "object") {
+    console.log("🔍 Claves del producto:", Object.keys(product));
+  }
+
+  // Mostrar si tiene data dentro (caso Axios sin desestructurar)
+  if (product?.data) {
+    console.log("🔍 Dentro de data:", product.data);
+    console.log("🔍 Claves dentro de data:", Object.keys(product.data));
+  }
+
+  // Mostrar propiedad imagenes explícita
+  console.log("🔍 Propiedad imagenes en product:", product?.imagenes);
+  console.log(
+    "🔍 Propiedad imagenes en product.data:",
+    product?.data?.imagenes
+  );
 
   if (product?.imagenes && product.imagenes.length > 0) {
     images = product.imagenes.map((img) => {
