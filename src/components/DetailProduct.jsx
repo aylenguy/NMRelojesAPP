@@ -109,7 +109,7 @@ const DetailProduct = () => {
 
   // Si no hay imágenes, fallback
   if (images.length === 0) {
-    images = ["https://nmrelojesapi.onrender.com/uploads/relojhombre.jpg"];
+    images = ["https://nmrelojesapi.onrender.com/uploads/KnockOutAylen.JPEG"];
   }
 
   const [selectedImage, setSelectedImage] = useState(null);
