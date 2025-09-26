@@ -478,10 +478,14 @@ const DetailProduct = () => {
                   0,
                 image:
                   rawProduct.Imagen ??
+                  rawProduct.Imagenes ??
+                  rawProduct.Images ??
+                  rawProduct.imagenes ??
+                  rawProduct.images ??
                   rawProduct.imagen ??
                   rawProduct.Image ??
                   rawProduct.image ??
-                  "/placeholder.png",
+                  "https://nmrelojesapi.onrender.com/uploads/relojhombre.jpg",
                 description: rawProduct.descripcion ?? "",
                 color: rawProduct.Color ?? rawProduct.color ?? "",
                 stock: rawProduct.Stock ?? rawProduct.stock ?? 0,
