@@ -102,7 +102,8 @@ const DetailProduct = () => {
   useEffect(() => {
     if (!product) return;
 
-    // Tomamos las imágenes del backend
+    console.log("📦 Producto recibido en DetailProduct:", product);
+
     const rawImages =
       product?.imagenes ||
       product?.Imagenes ||
@@ -110,21 +111,32 @@ const DetailProduct = () => {
       product?.Images ||
       (product?.image ? [product.image] : []);
 
-    const mappedImages = rawImages.map((img) => {
-      // Si ya viene con http o https (ej: localhost o onrender) → la dejamos igual
-      if (img.startsWith("http")) return img;
+    console.log(
+      "🔍 rawImages detectadas:",
+      rawImages,
+      "tipo:",
+      typeof rawImages
+    );
 
-      // Si viene solo el nombre del archivo → armamos la URL con tu dominio online
-      return `https://nmrelojesapi.onrender.com/uploads/${img}`;
-    });
+    const mappedImages = Array.isArray(rawImages)
+      ? rawImages.map((img) => {
+          if (typeof img !== "string") {
+            console.warn("⚠️ Imagen no es string:", img);
+            return "";
+          }
+          return img.startsWith("http")
+            ? img
+            : `https://nmrelojesapi.onrender.com/uploads/${img}`;
+        })
+      : [];
 
-    // Fallback genérico si no hay imágenes
+    console.log("🖼 mappedImages final:", mappedImages);
+
     const finalImages =
       mappedImages.length > 0
         ? mappedImages
         : ["https://nmrelojesapi.onrender.com/uploads/relojhombre.jpg"];
 
-    // Guardamos en el estado
     setImages(finalImages);
     setSelectedImage(finalImages[0]);
   }, [product]);
