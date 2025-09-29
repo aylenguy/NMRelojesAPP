@@ -1,5 +1,5 @@
 import { useLocation, useParams, useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { FaShoppingCart } from "react-icons/fa";
 import api from "../api/api";
@@ -16,21 +16,15 @@ const normalizeImages = (product) => {
     product?.Images ??
     (product?.image ? [product.image] : []);
 
-  console.log("🔍 rawImages detectadas:", rawImages);
-
   const mappedImages = Array.isArray(rawImages)
-    ? rawImages.map((img) => {
-        if (typeof img !== "string") {
-          console.warn("⚠️ Imagen no es string:", img);
-          return "";
-        }
-        return img.startsWith("http")
-          ? img
-          : `https://nmrelojesapi.onrender.com/uploads/${img}`;
-      })
+    ? rawImages.map((img) =>
+        typeof img === "string"
+          ? img.startsWith("http")
+            ? img
+            : `https://nmrelojesapi.onrender.com/uploads/${img}`
+          : ""
+      )
     : [];
-
-  console.log("🖼 mappedImages final:", mappedImages);
 
   return mappedImages.length > 0
     ? mappedImages
@@ -45,6 +39,8 @@ const DetailProduct = () => {
 
   const [product, setProduct] = useState(productFromState || null);
   const [selectedImage, setSelectedImage] = useState(null);
+  const [images, setImages] = useState([]);
+  const thumbContainerRef = useRef(null);
 
   const [loading, setLoading] = useState(!productFromState);
   const [showNotification, setShowNotification] = useState(false);
@@ -57,7 +53,6 @@ const DetailProduct = () => {
 
   const [relatedProducts, setRelatedProducts] = useState([]);
   const [showDetails, setShowDetails] = useState(false);
-  const [images, setImages] = useState([]);
 
   // Helpers para nombre/marca
   const getMarca = (p) =>
@@ -70,23 +65,33 @@ const DetailProduct = () => {
     return marca && marca !== "Sin marca" ? `${marca} ${nombre}` : nombre;
   };
 
+  // 🔹 Scroll thumbnails
+  const scrollThumbnails = (offset) => {
+    if (thumbContainerRef.current) {
+      const container = thumbContainerRef.current;
+      const maxScroll = container.scrollWidth - container.clientWidth;
+      let newScroll = container.scrollLeft + offset;
+
+      if (newScroll > maxScroll) newScroll = 0;
+      if (newScroll < 0) newScroll = maxScroll;
+
+      container.scrollTo({ left: newScroll, behavior: "smooth" });
+    }
+  };
+
   // 🔹 Cargar producto
   useEffect(() => {
     const productId = Number(id);
     window.scrollTo({ top: 0, behavior: "smooth" });
 
     if ((productFromState?.id ?? productFromState?.Id) === productId) {
-      console.log("✅ Producto recibido desde state:", productFromState);
       setProduct(productFromState);
       setLoading(false);
     } else {
       setLoading(true);
       api
         .get(`/Product/GetById/${productId}`)
-        .then((res) => {
-          console.log("📥 Producto recibido desde API:", res.data);
-          setProduct(res.data);
-        })
+        .then((res) => setProduct(res.data))
         .catch((err) => console.error("❌ Error cargando producto:", err))
         .finally(() => setLoading(false));
     }
@@ -255,19 +260,46 @@ const DetailProduct = () => {
             alt={name}
             className="rounded-lg w-full h-auto max-h-[650px] object-cover border border-gray-200 shadow"
           />
-          {/* Thumbnails */}
-          <div className="flex gap-2 mt-4 flex-wrap justify-center">
-            {images.map((img, idx) => (
-              <img
-                key={idx}
-                src={img}
-                alt={`thumb-${idx}`}
-                className={`w-20 h-20 object-cover rounded-md cursor-pointer border ${
-                  selectedImage === img ? "border-[#005f73]" : "border-gray-300"
-                }`}
-                onClick={() => setSelectedImage(img)}
-              />
-            ))}
+          <div className="relative mt-4 w-full">
+            {/* Flecha izquierda */}
+            <button
+              onClick={() => scrollThumbnails(-150)}
+              className="absolute left-0 top-1/2 -translate-y-1/2 bg-white shadow-md p-2 rounded-full z-10 hover:bg-gray-100 transition"
+            >
+              ◀
+            </button>
+
+            {/* Contenedor scrollable */}
+            <div
+              ref={thumbContainerRef}
+              className="flex gap-3 overflow-x-auto scroll-smooth scrollbar-none py-1"
+            >
+              {images.map((img, idx) => (
+                <div
+                  key={idx}
+                  className={`flex-shrink-0 w-20 h-20 rounded-md border-2 cursor-pointer transition-all duration-200 ${
+                    selectedImage === img
+                      ? "border-[#005f73] scale-105"
+                      : "border-gray-300 hover:border-gray-500"
+                  }`}
+                  onClick={() => setSelectedImage(img)}
+                >
+                  <img
+                    src={img}
+                    alt={`thumb-${idx}`}
+                    className="w-full h-full object-cover rounded-md"
+                  />
+                </div>
+              ))}
+            </div>
+
+            {/* Flecha derecha */}
+            <button
+              onClick={() => scrollThumbnails(150)}
+              className="absolute right-0 top-1/2 -translate-y-1/2 bg-white shadow-md p-2 rounded-full z-10 hover:bg-gray-100 transition"
+            >
+              ▶
+            </button>
           </div>
         </div>
 
