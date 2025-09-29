@@ -7,6 +7,36 @@ import { useCart } from "../context/CartContext";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
+// 🔹 Helper para normalizar imágenes
+const normalizeImages = (product) => {
+  const rawImages =
+    product?.imagenes ??
+    product?.Imagenes ??
+    product?.images ??
+    product?.Images ??
+    (product?.image ? [product.image] : []);
+
+  console.log("🔍 rawImages detectadas:", rawImages);
+
+  const mappedImages = Array.isArray(rawImages)
+    ? rawImages.map((img) => {
+        if (typeof img !== "string") {
+          console.warn("⚠️ Imagen no es string:", img);
+          return "";
+        }
+        return img.startsWith("http")
+          ? img
+          : `https://nmrelojesapi.onrender.com/uploads/${img}`;
+      })
+    : [];
+
+  console.log("🖼 mappedImages final:", mappedImages);
+
+  return mappedImages.length > 0
+    ? mappedImages
+    : ["https://nmrelojesapi.onrender.com/uploads/relojhombre.jpg"];
+};
+
 const DetailProduct = () => {
   const { state: productFromState } = useLocation();
   const { id } = useParams();
@@ -15,7 +45,6 @@ const DetailProduct = () => {
 
   const [product, setProduct] = useState(productFromState || null);
   const [selectedImage, setSelectedImage] = useState(null);
-  const [images, setImages] = useState([]);
 
   const [loading, setLoading] = useState(!productFromState);
   const [showNotification, setShowNotification] = useState(false);
@@ -28,8 +57,9 @@ const DetailProduct = () => {
 
   const [relatedProducts, setRelatedProducts] = useState([]);
   const [showDetails, setShowDetails] = useState(false);
+  const [images, setImages] = useState([]);
 
-  // Helpers para nombre y marca
+  // Helpers para nombre/marca
   const getMarca = (p) =>
     p.brand ?? p.Brand ?? p.marca ?? p.Marca ?? "Sin marca";
   const getNombre = (p) =>
@@ -40,25 +70,29 @@ const DetailProduct = () => {
     return marca && marca !== "Sin marca" ? `${marca} ${nombre}` : nombre;
   };
 
-  // Cargar producto
+  // 🔹 Cargar producto
   useEffect(() => {
     const productId = Number(id);
     window.scrollTo({ top: 0, behavior: "smooth" });
 
     if ((productFromState?.id ?? productFromState?.Id) === productId) {
+      console.log("✅ Producto recibido desde state:", productFromState);
       setProduct(productFromState);
       setLoading(false);
     } else {
       setLoading(true);
       api
         .get(`/Product/GetById/${productId}`)
-        .then((res) => setProduct(res.data))
-        .catch((err) => console.error("Error cargando producto:", err))
+        .then((res) => {
+          console.log("📥 Producto recibido desde API:", res.data);
+          setProduct(res.data);
+        })
+        .catch((err) => console.error("❌ Error cargando producto:", err))
         .finally(() => setLoading(false));
     }
   }, [id, productFromState]);
 
-  // Cargar productos relacionados
+  // 🔹 Cargar productos relacionados
   useEffect(() => {
     if (!product) return;
 
@@ -74,6 +108,7 @@ const DetailProduct = () => {
         );
       });
       const shuffled = [...unique].sort(() => 0.5 - Math.random());
+      console.log("🎯 Productos relacionados filtrados:", shuffled);
       setRelatedProducts(shuffled.slice(0, 4));
     };
 
@@ -81,44 +116,23 @@ const DetailProduct = () => {
       api
         .get(`/Product/GetByCategory/${categoryId}`)
         .then((res) => processProducts(res.data))
-        .catch((err) => console.error("Error cargando relacionados:", err));
+        .catch((err) => console.error("❌ Error cargando relacionados:", err));
     } else {
       api
         .get("/Product/GetAllProducts")
         .then((res) => processProducts(res.data))
         .catch((err) =>
-          console.error("Error cargando productos aleatorios:", err)
+          console.error("❌ Error cargando productos aleatorios:", err)
         );
     }
   }, [product]);
 
-  // Preparar imágenes
+  // 🔹 Procesar imágenes cuando cambia el producto
   useEffect(() => {
     if (!product) return;
+    console.log("📦 Producto recibido en DetailProduct:", product);
 
-    const rawImages =
-      product?.imagenes ??
-      product?.Imagenes ??
-      product?.images ??
-      product?.Images ??
-      (product?.image ? [product.image] : []);
-
-    const mappedImages = Array.isArray(rawImages)
-      ? rawImages
-          .map((img) => {
-            if (typeof img !== "string") return "";
-            return img.startsWith("http")
-              ? img
-              : `https://nmrelojesapi.onrender.com/uploads/${img}`;
-          })
-          .filter(Boolean)
-      : [];
-
-    const finalImages =
-      mappedImages.length > 0
-        ? mappedImages
-        : ["https://nmrelojesapi.onrender.com/uploads/relojhombre.jpg"];
-
+    const finalImages = normalizeImages(product);
     setImages(finalImages);
     setSelectedImage(finalImages[0]);
   }, [product]);
@@ -140,13 +154,12 @@ const DetailProduct = () => {
         : product.caracteristicas
       : "");
   const color = product?.color || product?.Color || "";
-
   const totalPrice = price;
   const installmentCount = 6;
   const installmentValue = totalPrice / installmentCount;
   const discountPrice = totalPrice * 0.8;
 
-  // Agregar al carrito
+  // 🔹 Agregar al carrito
   const handleAddToCart = () => {
     if (!product) return;
 
@@ -159,6 +172,7 @@ const DetailProduct = () => {
     const totalRequested = (existingItem?.quantity || 0) + quantity;
 
     if (totalRequested > availableStock) {
+      console.warn("⚠️ Stock insuficiente:", availableStock);
       setError(
         `Solo quedan ${availableStock} ${
           availableStock === 1 ? "unidad" : "unidades"
@@ -167,13 +181,14 @@ const DetailProduct = () => {
       return;
     }
 
+    console.log("🛒 Agregando al carrito:", { productId, quantity });
     addToCart(productId, quantity);
     setShowNotification(true);
     setError("");
     setTimeout(() => setShowNotification(false), 2000);
   };
 
-  // Calcular envío
+  // 🔹 Calcular envío
   const handleCalculateShipping = async () => {
     if (!postalCode.match(/^\d{4}$/)) {
       setError("Ingresá un código postal válido (4 dígitos).");
@@ -198,6 +213,7 @@ const DetailProduct = () => {
       }
 
       const data = Array.isArray(res.data) ? res.data : [res.data];
+      console.log("🚚 Opciones de envío recibidas:", data);
 
       if (data.length > 0) {
         setShippingOptions(data);
@@ -209,7 +225,7 @@ const DetailProduct = () => {
       }
     } catch (err) {
       setError("Error al calcular envío. Intenta de nuevo.");
-      console.error(err);
+      console.error("❌ Error calculando envío:", err);
     }
   };
 
@@ -329,7 +345,7 @@ const DetailProduct = () => {
                   </button>
                   <span className="px-5 text-base sm:text-lg">{quantity}</span>
                   <button
-                    onClick={() => setQuantity((q) => q + 1)}
+                    onClick={() => setQuantity((q) => Math.min(stock, q + 1))}
                     className="px-3 py-1 bg-gray-200 hover:bg-gray-300 text-sm sm:text-base"
                   >
                     +
@@ -382,6 +398,7 @@ const DetailProduct = () => {
                 Calcular
               </button>
             </div>
+            {/* Link debajo */}
             <p className="mt-2 text-gray-600 text-xs sm:text-sm">
               <a
                 href="https://www.correoargentino.com.ar/formularios/cpa"
@@ -459,16 +476,16 @@ const DetailProduct = () => {
                 rawProduct.Images ??
                 (rawProduct.image ? [rawProduct.image] : []);
 
-              const mappedImages = Array.isArray(rawImages)
-                ? rawImages
-                    .map((img) =>
-                      typeof img === "string" && img.startsWith("http")
-                        ? img
-                        : `https://nmrelojesapi.onrender.com/uploads/${img}`
-                    )
-                    .filter(Boolean)
-                : [];
+              const mappedImages = rawImages.map((img) => {
+                // Si ya viene con http o https (ej: localhost o onrender) → la dejamos igual
+                if (img.startsWith("http")) return img;
 
+                // Si viene solo el nombre del archivo → armamos la URL con tu dominio online
+                return `https://nmrelojesapi.onrender.com/uploads/${img}`;
+              });
+
+              // Normalizamos el producto
+              // Dentro del map de relatedProducts
               const product = {
                 id: rawProduct.Id ?? rawProduct.id,
                 nombre:
@@ -491,7 +508,7 @@ const DetailProduct = () => {
                   0,
                 image:
                   mappedImages[0] ||
-                  "https://nmrelojesapi.onrender.com/uploads/relojhombre.jpg",
+                  "https://nmrelojesapi.onrender.com/uploads/relojhombre.jpg", // <-- usa mappedImages
                 description: rawProduct.descripcion ?? "",
                 color: rawProduct.Color ?? rawProduct.color ?? "",
                 stock: rawProduct.Stock ?? rawProduct.stock ?? 0,
