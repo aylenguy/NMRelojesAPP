@@ -15,6 +15,7 @@ const DetailProduct = () => {
 
   const [product, setProduct] = useState(productFromState || null);
   const [selectedImage, setSelectedImage] = useState(null);
+  const [images, setImages] = useState([]);
 
   const [loading, setLoading] = useState(!productFromState);
   const [showNotification, setShowNotification] = useState(false);
@@ -28,7 +29,7 @@ const DetailProduct = () => {
   const [relatedProducts, setRelatedProducts] = useState([]);
   const [showDetails, setShowDetails] = useState(false);
 
-  // Funciones auxiliares
+  // Helpers para nombre y marca
   const getMarca = (p) =>
     p.brand ?? p.Brand ?? p.marca ?? p.Marca ?? "Sin marca";
   const getNombre = (p) =>
@@ -91,46 +92,27 @@ const DetailProduct = () => {
     }
   }, [product]);
 
-  // Datos del producto
-  const name = product?.name || product?.Name || product?.nombre || "";
-  const price = product?.price || product?.Price || product?.precio || 0;
-  const stock = product?.stock || product?.Stock || 0;
   // Preparar imágenes
-  // Estado para las imágenes
-  const [images, setImages] = useState([]);
-
   useEffect(() => {
     if (!product) return;
 
-    console.log("📦 Producto recibido en DetailProduct:", product);
-
     const rawImages =
-      product?.imagenes ||
-      product?.Imagenes ||
-      product?.images ||
-      product?.Images ||
+      product?.imagenes ??
+      product?.Imagenes ??
+      product?.images ??
+      product?.Images ??
       (product?.image ? [product.image] : []);
 
-    console.log(
-      "🔍 rawImages detectadas:",
-      rawImages,
-      "tipo:",
-      typeof rawImages
-    );
-
     const mappedImages = Array.isArray(rawImages)
-      ? rawImages.map((img) => {
-          if (typeof img !== "string") {
-            console.warn("⚠️ Imagen no es string:", img);
-            return "";
-          }
-          return img.startsWith("http")
-            ? img
-            : `https://nmrelojesapi.onrender.com/uploads/${img}`;
-        })
+      ? rawImages
+          .map((img) => {
+            if (typeof img !== "string") return "";
+            return img.startsWith("http")
+              ? img
+              : `https://nmrelojesapi.onrender.com/uploads/${img}`;
+          })
+          .filter(Boolean)
       : [];
-
-    console.log("🖼 mappedImages final:", mappedImages);
 
     const finalImages =
       mappedImages.length > 0
@@ -140,6 +122,11 @@ const DetailProduct = () => {
     setImages(finalImages);
     setSelectedImage(finalImages[0]);
   }, [product]);
+
+  // Datos del producto
+  const name = product?.name || product?.Name || product?.nombre || "";
+  const price = product?.price || product?.Price || product?.precio || 0;
+  const stock = product?.stock || product?.Stock || 0;
 
   const description =
     product?.descripcion || product?.Description || product?.description || "";
@@ -153,6 +140,7 @@ const DetailProduct = () => {
         : product.caracteristicas
       : "");
   const color = product?.color || product?.Color || "";
+
   const totalPrice = price;
   const installmentCount = 6;
   const installmentValue = totalPrice / installmentCount;
@@ -394,7 +382,6 @@ const DetailProduct = () => {
                 Calcular
               </button>
             </div>
-            {/* Link debajo */}
             <p className="mt-2 text-gray-600 text-xs sm:text-sm">
               <a
                 href="https://www.correoargentino.com.ar/formularios/cpa"
@@ -472,16 +459,16 @@ const DetailProduct = () => {
                 rawProduct.Images ??
                 (rawProduct.image ? [rawProduct.image] : []);
 
-              const mappedImages = rawImages.map((img) => {
-                // Si ya viene con http o https (ej: localhost o onrender) → la dejamos igual
-                if (img.startsWith("http")) return img;
+              const mappedImages = Array.isArray(rawImages)
+                ? rawImages
+                    .map((img) =>
+                      typeof img === "string" && img.startsWith("http")
+                        ? img
+                        : `https://nmrelojesapi.onrender.com/uploads/${img}`
+                    )
+                    .filter(Boolean)
+                : [];
 
-                // Si viene solo el nombre del archivo → armamos la URL con tu dominio online
-                return `https://nmrelojesapi.onrender.com/uploads/${img}`;
-              });
-
-              // Normalizamos el producto
-              // Dentro del map de relatedProducts
               const product = {
                 id: rawProduct.Id ?? rawProduct.id,
                 nombre:
@@ -504,7 +491,7 @@ const DetailProduct = () => {
                   0,
                 image:
                   mappedImages[0] ||
-                  "https://nmrelojesapi.onrender.com/uploads/relojhombre.jpg", // <-- usa mappedImages
+                  "https://nmrelojesapi.onrender.com/uploads/relojhombre.jpg",
                 description: rawProduct.descripcion ?? "",
                 color: rawProduct.Color ?? rawProduct.color ?? "",
                 stock: rawProduct.Stock ?? rawProduct.stock ?? 0,
