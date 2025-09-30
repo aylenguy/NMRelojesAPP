@@ -33,19 +33,22 @@ const Home = ({ onProductClick, searchText }) => {
       p.imagenes ??
       (p.Image || p.image ? [p.Image || p.image] : []);
 
-    // Tomar la primera imagen y convertir a URL absoluta
-    const image =
+    // Convertir todas a URL absolutas
+    const mappedImages =
       rawImages && rawImages.length > 0
-        ? rawImages[0].startsWith("http")
-          ? rawImages[0]
-          : `https://nmrelojesapi.onrender.com/uploads/${rawImages[0]}`
-        : "https://nmrelojesapi.onrender.com/uploads/relojhombre.jpg"; // fallback
+        ? rawImages.map((img) =>
+            img.startsWith("http")
+              ? img
+              : `https://nmrelojesapi.onrender.com/uploads/${img}`
+          )
+        : ["https://nmrelojesapi.onrender.com/uploads/relojhombre.jpg"]; // fallback
 
     return {
       id: p.Id ?? p.id,
       name: p.Nombre ?? p.nombre ?? p.Name ?? p.name ?? "",
       price: p.Precio ?? p.precio ?? p.Price ?? p.price ?? 0,
-      image, // ya mapeada a URL completa
+      image: mappedImages[0], // ✅ primera para las cards
+      images: mappedImages, // ✅ todas para el DetailProduct
       description:
         p.Descripcion ?? p.descripcion ?? p.Description ?? p.description ?? "",
       color: p.Color ?? p.color ?? "",

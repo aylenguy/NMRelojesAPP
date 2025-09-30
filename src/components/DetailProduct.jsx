@@ -520,12 +520,6 @@ const DetailProduct = () => {
               // Dentro del map de relatedProducts
               const product = {
                 id: rawProduct.Id ?? rawProduct.id,
-                nombre:
-                  rawProduct.Nombre ??
-                  rawProduct.nombre ??
-                  rawProduct.Name ??
-                  rawProduct.name ??
-                  "",
                 name:
                   rawProduct.Nombre ??
                   rawProduct.nombre ??
@@ -538,9 +532,15 @@ const DetailProduct = () => {
                   rawProduct.Price ??
                   rawProduct.price ??
                   0,
+                images:
+                  mappedImages.length > 0
+                    ? mappedImages
+                    : [
+                        "https://nmrelojesapi.onrender.com/uploads/relojhombre.jpg",
+                      ], // ✅ acá le paso todas
                 image:
                   mappedImages[0] ||
-                  "https://nmrelojesapi.onrender.com/uploads/relojhombre.jpg", // <-- usa mappedImages
+                  "https://nmrelojesapi.onrender.com/uploads/relojhombre.jpg", // la primera para el grid
                 description: rawProduct.descripcion ?? "",
                 color: rawProduct.Color ?? rawProduct.color ?? "",
                 stock: rawProduct.Stock ?? rawProduct.stock ?? 0,
@@ -555,6 +555,7 @@ const DetailProduct = () => {
                   rawProduct.Caracteristicas ??
                   [],
               };
+
               const sinStock = product.stock <= 0;
 
               return (
