@@ -20,7 +20,10 @@ export default function CheckoutStep3() {
   const [loading, setLoading] = useState(false);
   const [orderNotes, setOrderNotes] = useState("");
 
-  const API_BASE = import.meta.env.VITE_API_URL.replace("/api", "");
+  // 🔹 Fetch del carrito si es usuario logueado
+  useEffect(() => {
+    if (token) fetchCart();
+  }, [token, fetchCart]);
 
   const handleConfirmOrder = async () => {
     try {
@@ -66,7 +69,7 @@ export default function CheckoutStep3() {
         street: checkoutData.street || "",
         number: checkoutData.number || "",
 
-        // 🔹 Guardamos cupón y descuento en Notes para no romper la entidad
+        // 🔹 Guardamos cupón y descuento en Notes
         notes: `[CUPON:${
           checkoutData.couponCode || "NINGUNO"
         } - DESCUENTO:${couponDiscount}] ${orderNotes || ""}`,
@@ -79,30 +82,25 @@ export default function CheckoutStep3() {
         })),
 
         total: totalFinal,
-        paymentDiscount, // este sí lo mandamos porque ya existe en tu backend
+        paymentDiscount,
       };
-
-      console.log("🛒 currentCart:", currentCart);
-      console.log("📦 checkoutData:", checkoutData);
-      console.log("💳 Método de pago:", paymentMethod);
-      console.log("📝 Payload venta:", ventaPayload);
 
       let newVenta;
 
       if (paymentMethod === "mercadopago") {
-        // 1️⃣ Guardamos la venta en el backend con estado Pendiente
+        // 1️⃣ Guardamos la venta en backend como Pendiente
         if (token) {
           newVenta = await createFromCart(ventaPayload, token);
         } else {
           newVenta = await addVenta(ventaPayload);
         }
 
-        // 2️⃣ Armamos el payload para Mercado Pago
+        // 2️⃣ Payload a MP
         const payload = {
           Description: "Compra en NM Relojes",
           PayerEmail: checkoutData.email || "sin-email@ejemplo.com",
           CurrencyId: "ARS",
-          ExternalReference: newVenta.externalReference, // usamos el que guardó el backend
+          ExternalReference: newVenta.externalReference,
           Items: currentCart.items.map((i) => ({
             ProductId: i.productId || i.id,
             Title: i.productName || i.name || "Producto",
@@ -120,8 +118,6 @@ export default function CheckoutStep3() {
           NotificationUrl:
             "https://nmrelojesapi.onrender.com/api/Payment/webhook",
         };
-
-        console.log("📤 Payload enviado a /Payment/create-checkout:", payload);
 
         const mpResponse = await api.post("/Payment/create-checkout", payload);
         const mpData = mpResponse.data;
@@ -288,40 +284,41 @@ export default function CheckoutStep3() {
         <div className="bg-white p-4 sm:p-6 md:p-8 rounded-2xl shadow-sm border-2 border-gray-300 transition-all duration-300 hover:shadow-lg hover:bg-gray-50 h-fit">
           <h3 className="text-xl font-bold mb-4">Mi pedido</h3>
           {currentCart?.items?.length > 0 ? (
-            currentCart.items.map((item) => (
-              <div
-                key={item.productId || item.id}
-                className="flex justify-between border-b pb-2 mb-2 text-sm"
-              >
-                <img
-                  src={
-                    item.image ||
-                    item.Image ||
-                    item.imageUrl ||
-                    item.imagen ||
-                    item.Imagen ||
-                    `${API_BASE}/uploads/placeholder.png`
-                  }
-                  alt={item.name || item.productName || "Producto"}
-                  className="w-12 h-12 object-cover rounded"
-                />
-                <span className="font-medium">
-                  {(item.brand || item.Brand || "") +
-                    " " +
-                    (item.productName || item.name || "Producto")}{" "}
-                  x {item.quantity || 1}
-                </span>
-                <span>
-                  $
-                  {(
-                    item.subtotal ?? item.quantity * item.unitPrice
-                  ).toLocaleString("es-AR")}
-                </span>
-              </div>
-            ))
+            currentCart.items.map((item, idx) => {
+              const images = normalizeImages(item);
+              const mainImage = images[0];
+
+              return (
+                <div
+                  key={idx}
+                  className="flex items-center gap-4 border-b py-3"
+                >
+                  <img
+                    src={mainImage}
+                    alt={item.productName || item.name}
+                    className="w-12 h-12 object-cover rounded border"
+                  />
+                  <div className="flex-1">
+                    <p className="font-medium">
+                      {item.productName || item.name}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      Cantidad: {item.quantity} × ${item.unitPrice}
+                    </p>
+                  </div>
+                  <p className="font-bold">
+                    $
+                    {(
+                      item.subtotal ?? item.quantity * item.unitPrice
+                    ).toLocaleString("es-AR")}
+                  </p>
+                </div>
+              );
+            })
           ) : (
             <p className="text-gray-500">El carrito está vacío</p>
           )}
+
           {couponDiscount > 0 && (
             <div className="flex justify-between text-sm text-[#006d77] mt-2">
               <span>Descuento por cupón</span>
@@ -358,3 +355,27 @@ export default function CheckoutStep3() {
     </div>
   );
 }
+
+// 🔹 Helper para normalizar imágenes (igual que en Step2/DetailProduct)
+const normalizeImages = (product) => {
+  const rawImages =
+    product?.imagenes ??
+    product?.Imagenes ??
+    product?.images ??
+    product?.Images ??
+    (product?.image ? [product.image] : []);
+
+  const mappedImages = Array.isArray(rawImages)
+    ? rawImages.map((img) =>
+        typeof img === "string"
+          ? img.startsWith("http")
+            ? img
+            : `https://nmrelojesapi.onrender.com/uploads/${img}`
+          : ""
+      )
+    : [];
+
+  return mappedImages.length > 0
+    ? mappedImages
+    : ["https://nmrelojesapi.onrender.com/uploads/relojhombre.jpg"];
+};

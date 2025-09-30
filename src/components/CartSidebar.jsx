@@ -49,8 +49,18 @@ const CartSidebar = () => {
   // Helpers
   const getItemImagen = (item) => {
     if (!item) return `${BASE_URL}/uploads/placeholder.png`;
-    const img = item.imageUrl || item.ImageUrl;
+
+    // Unificamos todas las posibles keys
+    const img =
+      item.image ||
+      item.Image ||
+      item.imageUrl ||
+      item.ImageUrl ||
+      item.images?.[0] ||
+      item.Images?.[0];
+
     if (!img) return `${BASE_URL}/uploads/placeholder.png`;
+
     return img.startsWith("http") ? img : `${BASE_URL}/uploads/${img}`;
   };
 

@@ -226,10 +226,19 @@ export default function CheckoutStep1() {
               >
                 <div className="flex items-center gap-2 sm:gap-4">
                   <img
-                    src={item.imageUrl || "/placeholder.jpg"}
-                    alt={item.productName || item.name}
+                    src={
+                      item.image ||
+                      item.Image ||
+                      item.imageUrl ||
+                      item.ImageUrl ||
+                      item.images?.[0] ||
+                      item.Images?.[0] ||
+                      "/placeholder.jpg"
+                    }
+                    alt={item.productName || item.name || "Producto"}
                     className="w-12 h-12 sm:w-16 sm:h-16 object-cover rounded-lg border"
                   />
+
                   <div>
                     <p className="font-semibold text-sm sm:text-base text-gray-900">
                       {getItemFullName(item)}

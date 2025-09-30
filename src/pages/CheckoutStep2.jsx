@@ -202,9 +202,22 @@ export default function CheckoutStep2() {
 
   const getItemImagen = (item) => {
     if (!item) return `${API_BASE}/uploads/placeholder.png`;
+
+    // Si ya viene como URL absoluta
+    if (item.image?.startsWith("http")) return item.image;
     if (item.imageUrl?.startsWith("http")) return item.imageUrl;
+
+    // Si viene array de imágenes
+    if (Array.isArray(item.images) && item.images.length > 0) {
+      return item.images[0].startsWith("http")
+        ? item.images[0]
+        : `${API_BASE}/uploads/${item.images[0]}`;
+    }
+
+    // Versiones con diferentes keys
     const img =
       item.image || item.Image || item.imageUrl || item.imagen || item.Imagen;
+
     return img
       ? `${API_BASE}/uploads/${img}`
       : `${API_BASE}/uploads/placeholder.png`;
