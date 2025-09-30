@@ -26,8 +26,6 @@ const Productos = ({ searchText }) => {
         setLoading(true);
         const res = await api.get("/Product/GetAllProducts");
 
-        // Normalizamos los productos
-        // Normalizamos los productos
         const productosNormalizados = res.data.map((p) => {
           // Obtener todas las imágenes posibles
           const rawImages =
@@ -37,13 +35,15 @@ const Productos = ({ searchText }) => {
             p.imagenes ??
             (p.Image || p.image ? [p.Image || p.image] : []);
 
-          // Tomar la primera imagen y convertir a URL absoluta
-          const image =
+          // Convertir todas a URL absolutas
+          const mappedImages =
             rawImages && rawImages.length > 0
-              ? rawImages[0].startsWith("http")
-                ? rawImages[0]
-                : `${import.meta.env.VITE_API_URL}/uploads/${rawImages[0]}`
-              : "https://nmrelojesapi.onrender.com/uploads/relojhombre.jpg"; // fallback
+              ? rawImages.map((img) =>
+                  img.startsWith("http")
+                    ? img
+                    : `${import.meta.env.VITE_API_URL}/uploads/${img}`
+                )
+              : ["https://nmrelojesapi.onrender.com/uploads/relojhombre.jpg"]; // fallback
 
           return {
             id: p.id ?? p.Id,
@@ -54,7 +54,8 @@ const Productos = ({ searchText }) => {
               p.category ?? p.Category ?? p.categoria ?? "Sin categoría",
             color: p.color ?? p.Color ?? "Sin color",
             stock: p.stock ?? 0,
-            image, // ya mapeada correctamente
+            image: mappedImages[0], // ✅ primera para la card
+            images: mappedImages, // ✅ todas para el detail
             caracteristicas: p.Caracteristicas ?? p.caracteristicas ?? [],
             descripcion: p.Descripcion ?? p.descripcion ?? "",
           };
@@ -69,7 +70,6 @@ const Productos = ({ searchText }) => {
     };
     fetchProducts();
   }, []);
-
   // --- Funciones de filtro ---
   const triggerFilter = () => {
     setFiltering(true);

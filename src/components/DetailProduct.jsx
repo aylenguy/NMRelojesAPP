@@ -261,15 +261,7 @@ const DetailProduct = () => {
             className="rounded-lg w-full h-auto max-h-[650px] object-cover border border-gray-200 shadow"
           />
           <div className="relative mt-4 w-full">
-            {/* Flecha izquierda */}
-            <button
-              onClick={() => scrollThumbnails(-150)}
-              className="absolute left-0 top-1/2 -translate-y-1/2 bg-white shadow-md p-2 rounded-full z-10 hover:bg-gray-100 transition"
-            >
-              ◀
-            </button>
-
-            {/* Contenedor scrollable */}
+            {/* Contenedor scrollable sin flechas */}
             <div
               ref={thumbContainerRef}
               className="flex gap-3 overflow-x-auto scroll-smooth scrollbar-none py-1"
@@ -292,14 +284,6 @@ const DetailProduct = () => {
                 </div>
               ))}
             </div>
-
-            {/* Flecha derecha */}
-            <button
-              onClick={() => scrollThumbnails(150)}
-              className="absolute right-0 top-1/2 -translate-y-1/2 bg-white shadow-md p-2 rounded-full z-10 hover:bg-gray-100 transition"
-            >
-              ▶
-            </button>
           </div>
         </div>
 
