@@ -68,19 +68,15 @@ export default function CheckoutStep3() {
         description: checkoutData.description || "",
         street: checkoutData.street || "",
         number: checkoutData.number || "",
-
-        // 🔹 Guardamos cupón y descuento en Notes
         notes: `[CUPON:${
           checkoutData.couponCode || "NINGUNO"
         } - DESCUENTO:${couponDiscount}] ${orderNotes || ""}`,
-
         items: currentCart.items.map((i) => ({
           productId: i.productId || i.id,
           quantity: i.quantity || 1,
           unitPrice: i.unitPrice || 0,
           subtotal: i.subtotal ?? i.quantity * i.unitPrice,
         })),
-
         total: totalFinal,
         paymentDiscount,
       };
@@ -88,19 +84,12 @@ export default function CheckoutStep3() {
       let newVenta;
 
       if (paymentMethod === "mercadopago") {
-        // 1️⃣ Guardamos la venta en backend como Pendiente
-        if (token) {
-          newVenta = await createFromCart(ventaPayload, token);
-        } else {
-          newVenta = await addVenta(ventaPayload);
-        }
-
-        // 2️⃣ Payload a MP
-        const payload = {
+        // 🔹 Paralelizamos la creación de la venta y la preferencia de MP
+        const mpPayload = {
           Description: "Compra en NM Relojes",
           PayerEmail: checkoutData.email || "sin-email@ejemplo.com",
           CurrencyId: "ARS",
-          ExternalReference: newVenta.externalReference,
+          ExternalReference: externalReference,
           Items: currentCart.items.map((i) => ({
             ProductId: i.productId || i.id,
             Title: i.productName || i.name || "Producto",
@@ -119,7 +108,12 @@ export default function CheckoutStep3() {
             "https://nmrelojesapi.onrender.com/api/Payment/webhook",
         };
 
-        const mpResponse = await api.post("/Payment/create-checkout", payload);
+        const [ventaResult, mpResponse] = await Promise.all([
+          token ? createFromCart(ventaPayload, token) : addVenta(ventaPayload),
+          api.post("/Payment/create-checkout", mpPayload),
+        ]);
+
+        newVenta = ventaResult;
         const mpData = mpResponse.data;
 
         if (mpData?.initPoint) {
@@ -131,11 +125,10 @@ export default function CheckoutStep3() {
         }
       }
 
-      if (token) {
-        newVenta = await createFromCart(ventaPayload, token);
-      } else {
-        newVenta = await addVenta(ventaPayload);
-      }
+      // 🔹 Métodos de pago normales
+      newVenta = token
+        ? await createFromCart(ventaPayload, token)
+        : await addVenta(ventaPayload);
 
       const clientAddress = [
         newVenta.street,
